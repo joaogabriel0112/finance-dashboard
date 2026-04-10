@@ -42,7 +42,7 @@ var BANK_PRESETS = {
 var BANK_OPTIONS = Object.keys(BANK_PRESETS).map(function(k){ return {v:k, l:BANK_PRESETS[k].label}; });
 function inferBankKey(name) {
   var t = String(name||"").toLowerCase();
-  if (t.indexOf("santander") >= 0) return "santander";
+  if (t.indexOf("santander") >= 0 || t.indexOf("aadvantage") >= 0) return "santander";
   if (t.indexOf("itau") >= 0 || t.indexOf("itaú") >= 0) return "itau";
   if (t.indexOf("bradesco") >= 0) return "bradesco";
   if (t.indexOf("nubank") >= 0 || t === "nu") return "nubank";
@@ -222,7 +222,7 @@ function f$(v) { return "R$ " + Number(v||0).toLocaleString("pt-BR",{minimumFrac
 function fK(v) { var n = Number(v||0); return n >= 1000 ? "R$ "+(n/1000).toFixed(1)+"k" : f$(v); }
 function pct(v) { return (v||0).toFixed(1)+"%"; }
 function fD(d) { try { return new Date(d+"T12:00:00").toLocaleDateString("pt-BR"); } catch(e) { return ""; } }
-function hj() { return new Date().toISOString().slice(0,10); }
+function hj() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
 function dAt(d) { return Math.max(0, Math.ceil((new Date(d) - new Date()) / 86400000)); }
 function gMA(d) { var dt = new Date((d||hj())+"T12:00:00"); return { mes: dt.getMonth()+1, ano: dt.getFullYear() }; }
 
@@ -1060,8 +1060,29 @@ function doLoad() {
 function norm(r) {
   if (!r || typeof r !== "object") return null;
   var d = Object.assign({}, DEF, r);
+  var oldVer = r.v || 0;
   d.v = VER;
   
+  // Migration v12→v13: force update card definitions
+  if (oldVer < 13) {
+    d.cartoes = DEF.cartoes;
+    d.contas = DEF.contas;
+    d.dividas = DEF.dividas;
+    d.investimentos = DEF.investimentos;
+    d.investimentoFixo = DEF.investimentoFixo;
+  }
+  
+  // === MIGRAÇÃO v12 → v13: forçar atualização dos cartões ===
+  if (!r._migratedV13) {
+    d.cartoes = DEF.cartoes;
+    d._migratedV13 = true;
+  }
+  // === Forçar dividas do DEF se ainda não migrou ===
+  if (!r._migratedDiv13) {
+    d.dividas = DEF.dividas;
+    d._migratedDiv13 = true;
+  }
+
   var savedCats = r.categorias || [];
   d.categorias = CATS.map(function(cat) {
     var saved = null;
@@ -1075,7 +1096,7 @@ function norm(r) {
     if (!l.mes) { var x = gMA(l.data); l.mes = x.mes; l.ano = x.ano; }
     var out = {id:l.id||uid(), data:l.data||hj(), mes:l.mes, ano:l.ano, tipo:l.tipo||"despesa", cat:l.cat||l.categoria||"c8", desc:l.desc||l.descricao||"", valor:l.valor||0, totalCompra:l.totalCompra||0, status:l.status||"pago", cartaoId:l.cartaoId||"", pg:l.pg||(l.cartaoId?"cartao":"pix"), rec:!!l.rec, pT:l.pT||l.parcTotal||0, pA:l.pA||l.parcAtual||0};
     var descL = (out.desc||"").toLowerCase();
-    var pixForce = ["acordo serasa","empr. barbara","unip"];
+    var pixForce = ["acordo serasa","empr. barbara","unip","empr. bradesco","emprestimo bradesco","parcelas itau"];
     var isPix = false;
     for (var pf = 0; pf < pixForce.length; pf++) { if (descL.indexOf(pixForce[pf]) >= 0) { isPix = true; break; } }
     if (isPix) { out.pg = "pix"; out.cartaoId = ""; }
@@ -1089,7 +1110,6 @@ function norm(r) {
     if (descL.indexOf("anuidade brb") >= 0) out.rec = false;
     return out;
   });
-  d.lancamentos = d.lancamentos.filter(function(l){return (l.desc||"").indexOf("Empr. Bradesco") < 0});
   d.lancamentos.forEach(function(l){
     if (l.desc === "Claude" && l.rec) l.valor = 689;
     if (l.desc === "Santander Select" && l.rec) l.valor = 50;
@@ -1422,7 +1442,7 @@ export default function App() {
       display: "standalone",
       background_color: "#020208",
       theme_color: "#00E5FF",
-      icons: [{src:"data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"#020208\"/><text x=\"50\" y=\"62\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"40\" font-weight=\"900\" fill=\"#00E5FF\">F</text></svg>'),sizes:"192x192",type:"image/svg+xml"}]
+      icons: [{src:"data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"#020208\"/><text x=\"50\" y=\"62\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"40\" font-weight=\"900\" fill=\"#00E5FF\">CV</text></svg>'),sizes:"192x192",type:"image/svg+xml"}]
     }));
     document.head.appendChild(link);
     return function() {
