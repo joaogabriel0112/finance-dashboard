@@ -1031,6 +1031,8 @@ function getWeekKey() {
 }
 
 
+var SUPA_URL = "https://vcxastdcsbzdsfcdbtan.supabase.co/functions/v1/findash-proxy";
+
 function getStorageSafe() {
   try {
     if (typeof window !== "undefined" && window.localStorage) return window.localStorage;
@@ -1056,6 +1058,25 @@ function doLoad() {
     if (l) return JSON.parse(l);
   } catch (e) {}
   return null;
+}
+
+function supaSync(data) {
+  try {
+    var j = typeof data === "string" ? data : JSON.stringify(data);
+    fetch(SUPA_URL, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({data: j})
+    }).catch(function(){});
+  } catch(e) {}
+}
+
+function supaLoad(cb) {
+  fetch(SUPA_URL).then(function(r){return r.json()}).then(function(res){
+    if (res && res.data) {
+      try { cb(JSON.parse(res.data)); } catch(e) { cb(null); }
+    } else { cb(null); }
+  }).catch(function(){ cb(null); });
 }
 
 function norm(r) {
@@ -1411,9 +1432,34 @@ export default function App() {
   function flash(m) { setSt(m); setTimeout(function(){setSt(null)}, 2200); }
 
   useEffect(function() {
-    var r = doLoad();
-    if (r) { var n = norm(r); if (n) { setDB(n); flash("Dados restaurados!"); } }
+    var localData = doLoad();
+    supaLoad(function(supaData) {
+      var data = supaData || localData;
+      if (data) {
+        var n = norm(data);
+        if (n) { setDB(n); doSave(n); flash("Dados restaurados!"); }
+      }
+    });
   }, []);
+
+  useEffect(function() {
+    var timer = setInterval(function() {
+      supaSync(db);
+    }, 10000);
+    return function() { clearInterval(timer); };
+  }, [db]);
+
+  useEffect(function() {
+    var handleUnload = function() {
+      doSave(db);
+      try {
+        var j = JSON.stringify({data: JSON.stringify(db)});
+        navigator.sendBeacon(SUPA_URL, new Blob([j], {type: "application/json"}));
+      } catch(e) {}
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return function() { window.removeEventListener("beforeunload", handleUnload); };
+  }, [db]);
 
   useEffect(function() {
     var meta = document.createElement("meta");
@@ -1445,7 +1491,7 @@ export default function App() {
     };
   }, []);
 
-  function sv(nd) { setDB(nd); doSave(nd); setSt("Salvo \u2713"); setTimeout(function(){setSt(null)}, 1500); }
+  function sv(nd) { setDB(nd); doSave(nd); supaSync(nd); setSt("Salvo \u2713"); setTimeout(function(){setSt(null)}, 1500); }
 
   function ups(key, item) {
     var list = db[key] || [];
