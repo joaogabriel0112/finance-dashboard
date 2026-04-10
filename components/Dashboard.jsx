@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle, PiggyBank, Wallet, BarChart3, ArrowUpRight, ArrowDownRight, Edit3, Check, Bell, Shield, Activity, Landmark, RotateCcw, CheckCircle, Download, Plus, Trash2, X, Search, Calendar, Filter, ChevronLeft, ChevronRight, ChevronDown, Copy, Upload, Sun, Moon, Heart, Repeat, Zap } from "lucide-react";
-import { supabase } from '../lib/supabase';
 
 var T_DARK = { bg:"#020208", surface:"#080814", card:"#0A0A1A", cardAlt:"#0F0F22", border:"rgba(0,229,255,0.10)", text:"#E8F0FF", muted:"#7B8DA6", dim:"#4A5A72", green:"#00FF88", greenL:"#39FFAD", gold:"#FFD000", amber:"#FF9F0A", red:"#FF2E5B", ruby:"#FF1A4A", blue:"#00AAFF", bluePremium:"#00C6FF", purple:"#B84DFF", cyan:"#00E5FF", pink:"#FF3CA0", orange:"#FF7A00", sky:"#00D4FF", steel:"#6A7A90", emerald:"#00FF88", whiteA:"rgba(0,229,255,0.04)", whiteB:"rgba(0,229,255,0.08)", glass:"rgba(0,229,255,0.03)", shadow:"0 0 40px rgba(0,229,255,0.08)" };
 var T_LIGHT = { bg:"#F4F6FA", surface:"#FFFFFF", card:"#FFFFFF", cardAlt:"#F0F2F8", border:"rgba(0,0,0,0.08)", text:"#1A1A2E", muted:"#5A6478", dim:"#9AA0B0", green:"#00B864", greenL:"#00D474", gold:"#E6A800", amber:"#E68A00", red:"#E02040", ruby:"#D01040", blue:"#0088DD", bluePremium:"#009EF0", purple:"#8838EE", cyan:"#00A8CC", pink:"#E0308A", orange:"#E06800", sky:"#00A8CC", steel:"#8A94A6", emerald:"#00B864", whiteA:"rgba(0,0,0,0.02)", whiteB:"rgba(0,0,0,0.04)", glass:"rgba(0,0,0,0.02)", shadow:"0 2px 12px rgba(0,0,0,0.08)" };
@@ -9,7 +8,7 @@ var T = T_DARK;
 var PC = [T.green,T.blue,T.gold,T.purple,T.cyan,T.pink,T.orange,"#FF6B6B",T.greenL,"#00AAFF"];
 var MS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 var MSF = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-var VER = 12;
+var VER = 13;
 var SK = "findash8";
 var FRASES = ["Cada real investido hoje e liberdade amanha.","Disciplina financeira constroi tranquilidade.","Pequenos aportes consistentes constroem fortunas.","O melhor momento para investir e agora.","Sua liberdade financeira esta perto.","Juros compostos trabalham por voce."];
 
@@ -267,22 +266,22 @@ function mkL() {
   a("2026-04-01","despesa","c13","Plano Pos Barbara",66,"pendente",true);
   a("2026-04-01","despesa","c6","Barbeiro",55,"pendente",true);
   a("2026-04-01","despesa","c7","Lavagem Carro",50,"pendente",true);
-  a("2026-04-01","despesa","c3","Clube Curtai",44.90,"pendente",true,0,0,"cartao","cd13");
+  a("2026-04-01","despesa","c3","Clube Curtai",44.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Pos Graduacao",98,"pendente",true);
   a("2026-04-01","despesa","c11","Spike",250,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c12","TotalPass",139.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","TotalPass Barbara",119.90,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c3","Streaming",55.21,"pendente",true,0,0,"cartao","cd13");
-  a("2026-04-01","despesa","c3","Cinemark",32.90,"pendente",true,0,0,"cartao","cd13");
+  a("2026-04-01","despesa","c3","Streaming",55.21,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","Cinemark",32.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c5","Ritalina+Venvanse",296,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c5","Medicamentos",84.04,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Legis. Destacada",57.61,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Tec Concursos",44.90,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c3","ChatGPT",100,"pendente",true,0,0,"cartao","cd13");
-  a("2026-04-01","despesa","c3","iCloud+",19.90,"pendente",true,0,0,"cartao","cd13");
-  a("2026-04-01","despesa","c3","Spotify",17.66,"pendente",true,0,0,"cartao","cd13");
-  a("2026-04-01","despesa","c3","Claude",689,"pendente",true,0,0,"cartao","cd13");
-  a("2026-04-01","despesa","c3","Santander Select",50,"pendente",true,0,0,"cartao","cd13");
+  a("2026-04-01","despesa","c3","ChatGPT",100,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","iCloud+",19.90,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","Spotify",17.66,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","Claude",689,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","Santander Select",50,"pendente",true);
   a("2026-04-01","despesa","c3","Revolut Ultra",199.99,"pendente",true);
   a("2026-04-01","despesa","c3","Anuidade BRB",91,"pendente",false,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Faculdade Barbara",764,"pendente",true,0,0,"cartao","cd1");
@@ -339,11 +338,10 @@ var DEF = {
   contas: [{id:"ct1",nome:"Itau Conta Corrente",saldo:0},{id:"ct2",nome:"Santander Conta Corrente",saldo:0},{id:"ct3",nome:"Bradesco Conta Corrente",saldo:0},{id:"ct4",nome:"Revolut Ultra",saldo:0}],
   lancamentos: mkL(),
   cartoes: [
-    {id:"cd1",nome:"BRB Visa Infinite",band:"Visa Infinite",bankKey:"brb",emoji:"🔷",limite:15000,venc:10,fecha:3,cor:"#0057B8",cor2:"#0F2E5F",visual:"executive",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
+    {id:"cd1",nome:"AAdvantage Platinum",band:"Mastercard Platinum",bankKey:"santander",emoji:"✈️",limite:11343,venc:27,fecha:3,cor:"#E11931",cor2:"#8B0000",visual:"executive",statusEstr:"concentrar_gastos",logoUrl:"",obs:"Cartao principal Santander",titular:"joao"},
     {id:"cd2",nome:"Revolut Ultra",band:"Visa Infinite",bankKey:"revolut",emoji:"⚡",limite:999999,venc:0,fecha:0,cor:"#0075EB",cor2:"#001A3A",visual:"fintech",statusEstr:"manter_estavel",logoUrl:"",obs:"Sem limite definido",titular:"joao"},
-    {id:"cd3",nome:"Itau Visa Platinum",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:18500,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
-    {id:"cd4",nome:"Bradesco Elo Nanquim",band:"Elo Nanquim",bankKey:"bradesco",emoji:"🔺",limite:5000,venc:10,fecha:3,cor:"#CC092F",cor2:"#4C0A17",visual:"black",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
-    {id:"cd13",nome:"Santander Aadvantage Platinum",band:"Visa Platinum",bankKey:"santander",emoji:"🔴",limite:11443,venc:10,fecha:3,cor:"#E11931",cor2:"#6B0F1B",visual:"executive",statusEstr:"foco_mes",logoUrl:"",obs:"Caminho para o Unlimited",titular:"joao"},
+    {id:"cd3",nome:"Itau Visa Platinum",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:18500,venc:27,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
+    {id:"cd4",nome:"Bradesco Elo Nanquim",band:"Elo Nanquim",bankKey:"bradesco",emoji:"🔺",limite:5000,venc:27,fecha:3,cor:"#CC092F",cor2:"#4C0A17",visual:"black",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
     {id:"cd5",nome:"Nubank",band:"Mastercard",bankKey:"nubank",emoji:"🟣",limite:5000,venc:10,fecha:3,cor:"#8A05BE",cor2:"#1A0030",visual:"fintech",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
     {id:"cd6",nome:"Mercado Pago",band:"Visa",bankKey:"mercadopago",emoji:"🤝",limite:3000,venc:10,fecha:3,cor:"#00B1EA",cor2:"#003A6B",visual:"fintech",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
     {id:"cd7",nome:"Will Bank",band:"Visa",bankKey:"will",emoji:"🟡",limite:2000,venc:10,fecha:3,cor:"#FFD200",cor2:"#8B7300",visual:"classic",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
@@ -1031,7 +1029,6 @@ function getWeekKey() {
   return "wk" + String(mon.getMonth()+1).padStart(2,"0") + String(mon.getDate()).padStart(2,"0");
 }
 
-var USER_ID = "default";
 
 function getStorageSafe() {
   try {
@@ -1045,8 +1042,6 @@ function doSave(d) {
     var j = JSON.stringify(d);
     var s = getStorageSafe();
     if (s) s.setItem(SK, j);
-    // async save to supabase
-    supabase.from("finance_state").upsert({ user_id: USER_ID, data: j, updated_at: new Date().toISOString() }).then(function(){}).catch(function(){});
     return true;
   } catch (e) {
     return false;
@@ -1060,13 +1055,6 @@ function doLoad() {
     if (l) return JSON.parse(l);
   } catch (e) {}
   return null;
-}
-
-function doLoadCloud() {
-  return supabase.from("finance_state").select("data").eq("user_id", USER_ID).single().then(function(res) {
-    if (res.data && res.data.data) return JSON.parse(res.data.data);
-    return null;
-  }).catch(function() { return null; });
 }
 
 function norm(r) {
@@ -1106,14 +1094,6 @@ function norm(r) {
     if (l.desc === "Claude" && l.rec) l.valor = 689;
     if (l.desc === "Santander Select" && l.rec) l.valor = 50;
   });
-  // Route expenses to Santander card (cd13) for Unlimited strategy
-  var santanderFixas = ["claude","chatgpt","spotify","icloud","streaming","cinemark","clube curtai","curtai","santander select"];
-  d.lancamentos.forEach(function(l){
-    var descL = (l.desc||"").toLowerCase();
-    for (var sf = 0; sf < santanderFixas.length; sf++) {
-      if (descL.indexOf(santanderFixas[sf]) >= 0) { l.pg = "cartao"; l.cartaoId = "cd13"; break; }
-    }
-  });
   var novasParc = [
     {desc:"Rack",valor:81.77,pT:12,data:"2026-05-01"},
     {desc:"SSD PS5",valor:97.91,pT:12,data:"2026-05-01"},
@@ -1128,19 +1108,7 @@ function norm(r) {
   });
   if (!Array.isArray(d.contas) || !d.contas.length) d.contas = DEF.contas;
   if (!Array.isArray(d.cartoes)) d.cartoes = DEF.cartoes;
-  // Ensure all DEF cards exist in saved data
-  DEF.cartoes.forEach(function(defCard) {
-    if (!d.cartoes.some(function(c){return c.id === defCard.id})) {
-      d.cartoes.push(Object.assign({}, defCard));
-    }
-  });
   d.cartoes = d.cartoes.map(function(c){ return Object.assign({obs:"", bankKey: inferBankKey(c.nome), logoUrl:"", emoji:"", cor2:"", visual:"black", statusEstr:"manter_estavel", titular:"joao"}, c, { bankKey:(c.bankKey||inferBankKey(c.nome||c.band)), logoUrl:c.logoUrl||"", emoji:c.emoji||"", cor2:c.cor2||"", visual:c.visual||"black", statusEstr:c.statusEstr||"manter_estavel", titular:c.titular||"joao" }); });
-  // Update Itau Platinum limit and status
-  d.cartoes = d.cartoes.map(function(c){
-    if (c.id === "cd3") return Object.assign({}, c, {limite: 18500, statusEstr: "manter_estavel"});
-    if (c.id === "cd13") return Object.assign({}, c, {limite: 11443, statusEstr: "foco_mes"});
-    return c;
-  });
   if (!d.ratingMensal || typeof d.ratingMensal !== "object") d.ratingMensal = {};
   if (!d.salarioDia) d.salarioDia = 25;
   if (!d.faturasManuais || typeof d.faturasManuais !== "object") d.faturasManuais = {};
@@ -1313,7 +1281,7 @@ var TABS = [
   {id:"cal",lb:"Calend.",ic:Calendar},
   {id:"lanc",lb:"Lanc.",ic:Filter},
   {id:"cards",lb:"Cards",ic:CreditCard},
-  {id:"rating",lb:"Rating",ic:Shield},
+  {id:"rating",lb:"Coaching",ic:Shield},
   {id:"orc",lb:"Orc.",ic:DollarSign},
   {id:"parc",lb:"Parcelas",ic:Landmark},
   {id:"metas",lb:"Metas",ic:Target},
@@ -1400,6 +1368,12 @@ export default function App() {
   var _calDay = useState(0); var calDay = _calDay[0]; var setCalDay = _calDay[1];
   var _quickInput = useState(""); var quickInput = _quickInput[0]; var setQuickInput = _quickInput[1];
   var _quickShow = useState(false); var quickShow = _quickShow[0]; var setQuickShow = _quickShow[1];
+  var _coachSub = useState("plano"); var coachSub = _coachSub[0]; var setCoachSub = _coachSub[1];
+  var _txCount = useState(0); var txCount = _txCount[0]; var setTxCount = _txCount[1];
+  var _scoreInput = useState(763); var scoreInput = _scoreInput[0]; var setScoreInput = _scoreInput[1];
+  var _patrimInput = useState(25000); var patrimInput = _patrimInput[0]; var setPatrimInput = _patrimInput[1];
+  var _cardSpend = useState({sant:0,itau:0,brad:0}); var cardSpend = _cardSpend[0]; var setCardSpend = _cardSpend[1];
+  var _cardLimits = useState({sant:11343,itau:18500,brad:5000}); var cardLimits = _cardLimits[0]; var setCardLimits = _cardLimits[1];
   T = darkMode ? T_DARK : T_LIGHT;
   var fr = useRef(null);
   var touchStart = useRef(null);
@@ -1423,11 +1397,7 @@ export default function App() {
 
   useEffect(function() {
     var r = doLoad();
-    if (r) { var n = norm(r); if (n) { setDB(n); } }
-    doLoadCloud().then(function(cloud) {
-      if (cloud) { var n = norm(cloud); if (n) { setDB(n); flash("Dados sincronizados!"); } }
-      else if (r) { flash("Dados restaurados!"); }
-    });
+    if (r) { var n = norm(r); if (n) { setDB(n); flash("Dados restaurados!"); } }
   }, []);
 
   useEffect(function() {
@@ -1446,8 +1416,8 @@ export default function App() {
     var link = document.createElement("link");
     link.rel = "manifest";
     link.href = "data:application/json;base64," + btoa(JSON.stringify({
-      name: "Finance Dashboard",
-      short_name: "Finance",
+      name: "COJUR Vault",
+      short_name: "COJUR Vault",
       start_url: ".",
       display: "standalone",
       background_color: "#020208",
@@ -1711,7 +1681,7 @@ export default function App() {
     "\nTop 5 despesas do mes: " + lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&l.tipo!=="receita"}).sort(function(a,b){return b.valor-a.valor}).slice(0,5).map(function(l){return l.desc+" "+f$(l.valor)}).join(", ");
   }
 
-  var aiSysPrompt = "Voce e um consultor financeiro pessoal integrado ao app Finance Dashboard. Responda em portugues brasileiro, de forma direta e pratica. Use os dados reais fornecidos. Nunca use travessoes dentro de paragrafos. Seja conciso (max 200 palavras). Formate com paragrafos curtos.";
+  var aiSysPrompt = "Voce e um consultor financeiro pessoal integrado ao app COJUR Vault. Responda em portugues brasileiro, de forma direta e pratica. Use os dados reais fornecidos. Nunca use travessoes dentro de paragrafos. Seja conciso (max 200 palavras). Formate com paragrafos curtos.";
 
   function sendAiMsg() {
     if (!aiInput.trim() || aiLoading) return;
@@ -2103,11 +2073,11 @@ export default function App() {
     var report = aiReport;
     if (!report) { flash("Gere o relatorio na aba IA primeiro"); return; }
     var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatorio ' + MSF[mes-1] + ' ' + ano + '</title><style>body{font-family:Inter,Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;color:#1a1a2e;line-height:1.7;font-size:13px}h1{color:#0088DD;border-bottom:3px solid #0088DD;padding-bottom:12px;font-size:22px}h2{color:#00B864;font-size:16px;margin-top:24px}.meta{color:#666;font-size:11px;margin-bottom:20px}.content{white-space:pre-wrap;background:#f8f9fc;padding:20px;border-radius:12px;border:1px solid #e0e4ec}.footer{margin-top:30px;text-align:center;color:#999;font-size:10px;border-top:1px solid #eee;padding-top:12px}</style></head><body>';
-    html += '<h1>Finance Dashboard</h1>';
+    html += '<h1>COJUR Vault</h1>';
     html += '<div class="meta">Relatorio de ' + MSF[mes-1] + ' ' + ano + ' | Gerado em ' + new Date().toLocaleDateString("pt-BR") + '</div>';
     html += '<h2>Resumo financeiro</h2>';
     html += '<div class="content">' + report.replace(/</g,"&lt;").replace(/>/g,"&gt;") + '</div>';
-    html += '<div class="footer">Finance Executive Dashboard v' + VER + '</div>';
+    html += '<div class="footer">COJUR Vault v' + VER + '</div>';
     html += '</body></html>';
     var blob = new Blob([html], {type:"text/html"});
     var url = URL.createObjectURL(blob);
@@ -2161,7 +2131,7 @@ export default function App() {
     }
     html += '<h2>Rating Bancario</h2><table><tr><td>Score geral</td><td class="num"><strong>'+ratingScore+'/100</strong></td></tr><tr><td>Saude financeira</td><td class="num">'+healthScore+'/100</td></tr></table>';
     if (aiReport) { html += '<h2>Analise IA</h2><div style="white-space:pre-wrap;line-height:1.7;background:#f9fafb;padding:16px;border-radius:8px;border:1px solid #eee">'+aiReport.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'; }
-    html += '<div class="footer">Finance Executive Dashboard v'+VER+' | Gerado em '+new Date().toLocaleDateString("pt-BR")+" "+new Date().toLocaleTimeString("pt-BR")+'</div></body></html>';
+    html += '<div class="footer">COJUR Vault v'+VER+' | Gerado em '+new Date().toLocaleDateString("pt-BR")+" "+new Date().toLocaleTimeString("pt-BR")+'</div></body></html>';
     var blob = new Blob([html], {type:"text/html"});
     var url = URL.createObjectURL(blob);
     var w = window.open(url, "_blank");
@@ -2521,7 +2491,7 @@ export default function App() {
         {}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:12,padding:"16px 18px",borderRadius:16,background:"rgba(8,8,20,0.75)",border:"1px solid rgba(0,229,255,0.10)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:"0 0 40px rgba(0,229,255,0.04), 0 8px 32px rgba(0,0,0,0.30)",position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(90deg, rgba(0,255,136,0.03), transparent 30%, transparent 70%, rgba(0,229,255,0.03))"}} />
-          <div style={{display:"flex",alignItems:"center",gap:12,position:"relative",zIndex:1}}><div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg, "+T.green+", "+T.cyan+")",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 24px "+T.cyan+"50, 0 0 8px "+T.green+"40"}}><Wallet size={18} color="#fff" /></div><div><h1 style={{fontSize:16,fontWeight:900,margin:0,letterSpacing:2,textTransform:"uppercase",fontFamily:"'Inter', sans-serif",color:T.cyan,textShadow:"0 0 10px "+T.cyan+"60, 0 0 30px "+T.cyan+"20"}}>FINANCE</h1><div style={{fontSize:8,color:T.dim,letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontFamily:"'Inter', sans-serif"}}>{privateMode?"PRIVATE":"DASHBOARD"}</div></div></div>
+          <div style={{display:"flex",alignItems:"center",gap:12,position:"relative",zIndex:1}}><div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg, "+T.green+", "+T.cyan+")",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 24px "+T.cyan+"50, 0 0 8px "+T.green+"40"}}><Wallet size={18} color="#fff" /></div><div><h1 style={{fontSize:16,fontWeight:900,margin:0,letterSpacing:2,textTransform:"uppercase",fontFamily:"'Inter', sans-serif",color:T.cyan,textShadow:"0 0 10px "+T.cyan+"60, 0 0 30px "+T.cyan+"20"}}>COJUR VAULT</h1><div style={{fontSize:8,color:T.dim,letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontFamily:"'Inter', sans-serif"}}>{privateMode?"PRIVATE":"COMMAND CENTER"}</div></div></div>
           <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap",position:"relative",zIndex:1}}>
             {st && <div style={{position:"fixed",top:12,right:12,display:"flex",alignItems:"center",gap:4,padding:"6px 14px",borderRadius:8,fontSize:12,fontWeight:700,background:T.green+"18",color:T.green,animation:"fi 0.3s",zIndex:950,boxShadow:"0 0 20px "+T.green+"30"}}><CheckCircle size={13} />{st}</div>}
             <button onClick={function(){setDarkMode(!darkMode)}} style={{padding:"6px 10px",borderRadius:8,background:darkMode?"rgba(0,229,255,0.06)":"rgba(0,0,0,0.06)",border:"1px solid "+(darkMode?"rgba(0,229,255,0.12)":"rgba(0,0,0,0.10)"),cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:darkMode?T.gold:T.blue,fontSize:10,fontWeight:600}}>{darkMode ? <Sun size={12} /> : <Moon size={12} />}</button>
@@ -3080,7 +3050,7 @@ export default function App() {
         {tab==="cards" && <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{padding:5,borderRadius:8,background:T.blue+"12",display:"flex",border:"1px solid "+T.blue+"10"}}><CreditCard size={15} color={T.blue} /></div><h2 style={{margin:0,fontSize:17,fontWeight:900,letterSpacing:-0.3}}>Cartoes e Faturas: {MSF[mes-1]} {ano}</h2><Bd color={T.cyan}>premium</Bd></div>
-            <button onClick={function(){setModal({type:"card",title:"Novo Cartao",data:{cor:T.blue,cor2:"#172554",band:"Cartao",fecha:3,venc:10,bankKey:"custom",emoji:"💳",logoUrl:"",visual:"black",statusEstr:"manter_estavel",titular:"joao"}})}} style={{display:"flex",alignItems:"center",gap:5,padding:"8px 14px",borderRadius:12,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 6px 20px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.15)"}}><Plus size={13} /> Cartao</button>
+            <button onClick={function(){setModal({type:"card",title:"Novo Cartao",data:{cor:T.blue,cor2:"#172554",band:"Cartao",fecha:3,venc:27,bankKey:"custom",emoji:"💳",logoUrl:"",visual:"black",statusEstr:"manter_estavel",titular:"joao"}})}} style={{display:"flex",alignItems:"center",gap:5,padding:"8px 14px",borderRadius:12,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 6px 20px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.15)"}}><Plus size={13} /> Cartao</button>
           </div>
 
           <div style={Object.assign({},bx,{marginBottom:14,background:"linear-gradient(135deg, rgba(10,18,32,0.97), rgba(59,130,246,0.05))",borderColor:T.blue+"18",position:"relative",overflow:"hidden"})}>
@@ -3166,160 +3136,584 @@ export default function App() {
         </div>}
 
         {}
-        {tab==="rating" && <div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{padding:5,borderRadius:8,background:ratingColor+"12",display:"flex",border:"1px solid "+ratingColor+"10"}}><Shield size={15} color={ratingColor} /></div><h2 style={{margin:0,fontSize:17,fontWeight:900,letterSpacing:-0.3}}>Rating bancario premium</h2></div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}><Bd color={ratingColor}>{ratingScore}/100</Bd><Bd color={T.dim}>Score interno orientativo</Bd></div>
+        {tab==="rating" && (function(){
+          var CALENDAR_ITEMS = [
+            {day:"25",title:"DIA DO SALÁRIO",color:T.green,items:["Salário entrou no Santander","Travar almofada R$ 8.000 (não mexer)","Conferir DDA + débitos automáticos"]},
+            {day:"26",title:"DIA DO RATING",color:T.purple,items:["Investir R$ 5.000 no Santander","→ R$ 2.000 em CDB Liquidez Diária","→ R$ 3.000 em LCI/LCA (prazo)"]},
+            {day:"29",title:"DIA DO PEDIDO",color:T.gold,items:["Almofada R$ 8.000 mantida","Investimento do mês aplicado","Renda cadastrada: R$ 30.000 no app","Open Finance ativo","SOLICITAR cartão Unlimited (1×/mês)"]}
+          ];
+          var DEBITS_LIST = ["Energia","Água","Internet","Celular","Pl. Saúde","Condomínio","Seguro","Previdência","Stream. 1","Stream. 2","Fixo 1","Fixo 2"];
+          var BOOST_ITEMS = ["20+ transações/mês no Santander","Patrimônio crescente (nunca resgatar)","Liquidez diária além da almofada","Open Finance ativo 90+ dias","Anti-pico avançado (lotes semanais)","Pedido com holerite/IR via gerente Select","90 dias sem pedir crédito em outros bancos","Login diário App Way + App Santander","Gerente Select fixo (tratar pelo nome)","Previdência PGBL R$ 100+/mês contratada","Carteira digital ativa (Apple/Google Pay)","Serasa Premium assinado (R$ 30/mês)","1+ compra internacional/mês no AAdvantage","Gasto progressivo (+R$ 500/mês de escada)","Pagamento pré-fechamento (hack utilização)"];
+          var PROIBIDO_ITEMS = ["Não atrasei nenhum pagamento","Não entrei no cheque especial","Não usei rotativo (100% sempre)","Não fiz renegociação de dívida","Não estourei limite","Não fiz spam de solicitações","Não pedi crédito em outros bancos","Não fiz simulações repetidas","Santander não virou conta-passagem","Sem pingue-pongue de investimento","Anti-pico aplicado","Sem parcelamentos novos","Cadastro atualizado (renda/endereço/tel)","Sem pendências/boletos esquecidos","Open Finance estável","Não fiz chargeback/contestação","Não fiz saque no crédito","Monitorei 3 birôs (Serasa+BoaVista+Quod)"];
+          var PARCELAS_DATA = [
+            {n:"Amazon",v:15.40,t:2},{n:"Dock Robô",v:57,t:2},{n:"Lacoste",v:190,t:2},
+            {n:"Levis",v:150,t:3},{n:"Smiles",v:105,t:3},
+            {n:"Leroy 2",v:117.24,t:4},{n:"Rei Cast.",v:62.83,t:4},{n:"Decolar",v:133.35,t:4},{n:"Aspirador",v:209.57,t:4},
+            {n:"UNIP",v:371,t:5},
+            {n:"iFood",v:541.81,t:6},{n:"Invicta",v:81.20,t:6},{n:"SeaWorld",v:119.42,t:6},
+            {n:"Bicicleta",v:115,t:7},{n:"Boticário",v:22.15,t:7},{n:"Azzaro",v:45.66,t:7},{n:"Invictus",v:37,t:7},
+            {n:"Viag.Fort.",v:50,t:8},{n:"Leroy",v:199.98,t:8},
+            {n:"Serasa 1",v:96.36,t:9,s:1},{n:"Serasa 2",v:51.76,t:9,s:1},
+            {n:"Emp.Barbara",v:614,t:9},{n:"Parc.Itaú",v:300,t:9},{n:"Pintura",v:76.54,t:9},
+            {n:"Tampa",v:9.17,t:9},{n:"ML",v:11.83,t:9},{n:"Livelo",v:102.12,t:9},
+            {n:"Estratégia",v:54.77,t:9},{n:"Spike",v:106.84,t:9},{n:"Kindle",v:161.21,t:9},
+            {n:"Emp.Bradesco",v:568.60,t:9}
+          ];
+          var CARD_DATES = ["29/04","29/05","29/06","29/07","31/08","29/09","29/10","30/11","29/12"];
+          var WEEKLY_TASKS = [{day:"Segunda",tasks:["1 Pix pequeno","1 pagamento (boleto/conta)"]},{day:"Quinta",tasks:["1 Pix pequeno","1 pagamento (boleto/conta)"]}];
+          var MELHORIAS = [
+            {t:"Renda no app Santander",d:"Cadastrar R$ 30.000 (inclua benefícios, extras). DIRPF justifica.",ic:"💰"},
+            {t:"Open Finance",d:"Conectar Itaú e Bradesco ao Santander. Ele vê patrimônio total e limite R$ 40.500 no Itaú.",ic:"🔗"},
+            {t:"Gerente Select fixo",d:"Ligar e pedir gerente dedicado. Na hora do upgrade, ele advoga por você.",ic:"🤝"},
+            {t:"Previdência PGBL",d:"R$ 100/mês no Santander. Produto + deduz até 12% do IR.",ic:"📈"},
+            {t:"Login diário",d:"Abrir App Way + App Santander todo dia. Engajamento digital é rastreado.",ic:"📱"},
+            {t:"Cartão consignado",d:"Se disponível para servidor: aprovação quase garantida.",ic:"💳"}
+          ];
+          var debtGroups = {};
+          PARCELAS_DATA.forEach(function(p){if(!debtGroups[p.t])debtGroups[p.t]=[];debtGroups[p.t].push(p);});
+          var debtEntries = Object.keys(debtGroups).sort(function(a,b){return a-b}).map(function(t){
+            var items=debtGroups[t]; var moIdx=parseInt(t)-1+3;
+            var MN2=["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+            var moLabel=moIdx<12?MN2[moIdx]+"/26":MN2[moIdx-12]+"/27";
+            return{t:parseInt(t),moLabel:moLabel,items:items,total:items.reduce(function(s,p){return s+p.v},0)};
+          });
+          var coachBx = Object.assign({},bx,{marginBottom:10,padding:16});
+          var subTabs = [{id:"plano",lb:"Plano",ic:"🎯"},{id:"cartoes",lb:"Cartões",ic:"💳"},{id:"tracker",lb:"Tracker",ic:"📊"},{id:"dividas",lb:"Dívidas",ic:"📉"},{id:"regras",lb:"Regras",ic:"⚖️"}];
+
+          return <div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{padding:5,borderRadius:8,background:ratingColor+"12",display:"flex",border:"1px solid "+ratingColor+"10"}}><Shield size={15} color={ratingColor} /></div><h2 style={{margin:0,fontSize:15,fontWeight:900,letterSpacing:-0.3}}>Coaching Financeiro</h2></div>
+            <div style={{fontSize:12,fontWeight:900,color:ratingColor,fontFamily:"monospace"}}>{ratingScore}/100</div>
           </div>
 
-          {}
-          <div style={Object.assign({},bx,{marginBottom:14,padding:18,background:"linear-gradient(135deg, rgba(10,18,32,0.98), rgba(6,12,22,0.95) 50%, rgba(20,30,55,0.90))",borderColor:ratingColor+"20",position:"relative",overflow:"hidden"})}>
-            <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"radial-gradient(ellipse at 0% 0%, "+ratingColor+"10, transparent 40%)"}} />
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:8,marginBottom:12,position:"relative",zIndex:1}}>
-              {[{l:"Score geral",v:ratingScore+"/100",c:ratingColor},{l:"Score Santander",v:planoSantander.score+"/100",c:"#E11931"},{l:"Score Itau",v:planoItau.score+"/100",c:"#FF7A00"},{l:"Mes anterior",v:ratingAnterior.score+"/100",c:ratingAnterior.color},{l:"Variacao",v:(ratingDelta>=0?"+":"")+ratingDelta+" pts",c:ratingDeltaColor},{l:"Uso agregado",v:pct(ratingAtual.usoTotal),c:ratingAtual.usoTotal<=30?T.green:ratingAtual.usoTotal<=50?T.gold:T.red}].map(function(x,i){return <div key={i} style={{padding:"11px 13px",borderRadius:14,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:5,letterSpacing:0.4,fontWeight:700}}>{x.l}</div><div style={{fontSize:16,fontWeight:900,fontFamily:"'Inter', monospace",color:x.c}}>{x.v}</div></div>;})}
-            </div>
-            <PB value={ratingScore} max={100} color={ratingColor} h={8} />
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:10,position:"relative",zIndex:1}}>
-              <div style={{padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.04)",fontSize:10,color:T.dim}}><strong style={{color:T.muted}}>Checklist manual:</strong> {ratingAtual.checklist.toFixed(0)} pts / 70</div>
-              <div style={{padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.04)",fontSize:10,color:T.dim}}><strong style={{color:T.muted}}>Automatico:</strong> {ratingAtual.auto} pts / 30</div>
-            </div>
-            <div style={{marginTop:10,padding:"12px 14px",borderRadius:14,background:"linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015))",border:"1px solid rgba(255,255,255,0.05)",fontSize:11,color:T.muted,lineHeight:1.5}}>Este rating e um <strong style={{color:T.gold}}>score interno orientativo do app</strong>, construido com boas praticas observaveis. Nao representa formula interna real do Santander ou do Itaú.</div>
+          {/* Sub-tabs */}
+          <div style={{display:"flex",gap:3,marginBottom:12,overflowX:"auto",scrollbarWidth:"none"}}>
+            {subTabs.map(function(st2){var act=coachSub===st2.id;return <button key={st2.id} onClick={function(){setCoachSub(st2.id)}} style={{flex:1,padding:"7px 4px",border:"none",borderRadius:10,cursor:"pointer",fontFamily:"inherit",background:act?"rgba(0,229,255,0.08)":"rgba(255,255,255,0.02)",border:act?"1px solid rgba(0,229,255,0.12)":"1px solid transparent",transition:"all 0.2s"}}><div style={{fontSize:13}}>{st2.ic}</div><div style={{fontSize:8,fontWeight:act?700:400,color:act?T.cyan:T.dim,marginTop:2}}>{st2.lb}</div></button>;})}
           </div>
 
-          {}
-          <div style={Object.assign({},bx,{marginBottom:14,padding:18,borderColor:T.green+"20"})}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <div style={{padding:5,borderRadius:8,background:T.green+"12",display:"flex",border:"1px solid "+T.green+"10"}}><CheckCircle size={14} color={T.green} /></div>
-                <div><div style={{fontSize:14,fontWeight:900,letterSpacing:-0.2}}>Checklist mensal do rating</div><div style={{fontSize:10,color:T.dim,marginTop:2}}>Marque os itens cumpridos neste mes. Isso altera diretamente o score.</div></div>
+          {/* 30-SECOND MONTHLY SUMMARY */}
+          {(function(){
+            var resumos = {
+              1:{foco:"Planejamento anual",acao:"Defina metas. Organize documentos (IRPF). Revise cadastro Santander.",emoji:"📋",cor:T.cyan},
+              2:{foco:"Consistência",acao:"Mantenha o plano. Pague tudo em dia. Consulte score nos 3 birôs.",emoji:"📊",cor:T.cyan},
+              3:{foco:"Preparação",acao:"Abra conta Select. Porte salário. 1ª aplicação R$ 5k no Santander.",emoji:"🚀",cor:T.gold},
+              4:{foco:"IGNIÇÃO",acao:"Select aberta. Salário portado. Invista R$ 5k dia 26. Peça AAdvantage aumento dia 5/5.",emoji:"🚀",cor:T.gold},
+              5:{foco:"Construção",acao:"2º mês Select. Gaste R$ 3.000 no AAdvantage. Peça aumento dia 5. Tente Unlimited dia 29.",emoji:"🔧",cor:T.cyan},
+              6:{foco:"Aceleração",acao:"Peça aumento Itaú dia 5. Tente Unlimited dia 29. R$ 15k+ investidos.",emoji:"⚡",cor:T.purple},
+              7:{foco:"Consistência",acao:"Gaste R$ 3.500 no AAdvantage (escada). Mantenha anti-pico. Score subindo.",emoji:"📈",cor:T.cyan},
+              8:{foco:"Preparação premium",acao:"Peça aumento AAdvantage dia 5. Tente Unlimited dia 29. R$ 30k+ investidos.",emoji:"📈",cor:T.purple},
+              9:{foco:"6 meses Select!",acao:"Marco crítico! Tente Unlimited dia 29. Reforce argumento com gerente.",emoji:"🎯",cor:T.gold},
+              10:{foco:"⭐ JANELA PREMIUM",acao:"Melhor mês! Peça aumento dia 5. UNLIMITED dia 29. Bancos liberam mais pré-Black Friday!",emoji:"⭐",cor:T.gold},
+              11:{foco:"⭐ JANELA PREMIUM",acao:"2ª melhor janela! Tente Unlimited dia 30. Gaste forte no AAdvantage.",emoji:"⭐",cor:T.gold},
+              12:{foco:"LIBERTAÇÃO",acao:"Dívidas quitam! Nome limpo! Tente Unlimited dia 29. Peça aumento Itaú dia 5.",emoji:"🎆",cor:T.green}
+            };
+            var r = resumos[mes] || {foco:"Execute o plano",acao:"Siga o checklist. Pague em dia. Invista dia 26.",emoji:"📋",cor:T.cyan};
+            return <div style={Object.assign({},bx,{marginBottom:12,padding:0,overflow:"hidden",background:"linear-gradient(135deg, "+r.cor+"12, rgba(0,0,0,0.20))",borderColor:r.cor+"25"})}>
+              <div style={{padding:"14px 16px",position:"relative"}}>
+                <div style={{position:"absolute",top:-10,right:-10,fontSize:40,opacity:0.06}}>{r.emoji}</div>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,position:"relative"}}>
+                  <span style={{fontSize:20}}>{r.emoji}</span>
+                  <div>
+                    <div style={{fontSize:8,color:T.dim,letterSpacing:2,fontWeight:700}}>FOCO DE {MSF[mes-1].toUpperCase()}</div>
+                    <div style={{fontSize:15,fontWeight:900,color:r.cor,lineHeight:1.2}}>{r.foco}</div>
+                  </div>
+                </div>
+                <div style={{fontSize:11,color:T.text,lineHeight:1.6,fontWeight:500,position:"relative"}}>{r.acao}</div>
               </div>
-              <div style={{fontSize:12,fontWeight:900,color:ratingColor,fontFamily:"monospace"}}>{ratingTasks.filter(function(t){return !!ratingMes[t.id]}).length}/{ratingTasks.length}</div>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:6}}>
-              {ratingTasks.map(function(t) {
-                var ok = !!ratingMes[t.id];
-                return <div key={t.id} onClick={function(){togRatingTask(t.id)}} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:10,padding:"12px 14px",borderRadius:14,background:ok?"rgba(16,185,129,0.06)":"rgba(255,255,255,0.02)",border:"1px solid "+(ok?"rgba(16,185,129,0.14)":"rgba(255,255,255,0.05)"),cursor:"pointer",transition:"all 0.2s",boxShadow:ok?"0 2px 8px rgba(16,185,129,0.08)":"none"}}>
-                  <div style={{width:22,height:22,borderRadius:7,background:ok?"linear-gradient(135deg, "+T.green+", "+T.emerald+")":"rgba(255,255,255,0.04)",border:ok?"none":"2px solid rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:ok?"0 2px 8px rgba(16,185,129,0.25)":"none",marginTop:1}}>{ok && <Check size={13} color="#fff" strokeWidth={3} />}</div>
-                  <div><div style={{fontSize:12,fontWeight:700,color:ok?T.text:T.muted}}>{t.titulo}</div><div style={{fontSize:9,color:T.dim,marginTop:3,lineHeight:1.4}}>{t.desc}</div></div>
-                  <div style={{fontSize:9,fontWeight:800,color:ok?T.green:T.dim,alignSelf:"center"}}>{ok?"FEITO":"PENDENTE"}</div>
-                </div>;
-              })}
-            </div>
-            <div style={{marginTop:10,padding:"10px 14px",borderRadius:12,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.04)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:10,color:T.dim}}>Cada item marcado adiciona ~8.75 pontos ao score. Total possivel: 70 pts.</span>
-              <span style={{fontSize:12,fontWeight:900,color:ratingColor,fontFamily:"monospace"}}>{ratingAtual.checklist.toFixed(0)}/70</span>
-            </div>
-          </div>
+              <div style={{height:3,background:"linear-gradient(90deg, "+r.cor+", "+r.cor+"40, transparent)",borderRadius:"0 0 0 0"}} />
+            </div>;
+          })()}
 
-          {}
-          <div style={Object.assign({},bx,{marginBottom:14,padding:18,borderColor:T.red+"15"})}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-              <div style={{padding:5,borderRadius:8,background:T.red+"12",display:"flex",border:"1px solid "+T.red+"10"}}><AlertTriangle size={14} color={T.red} /></div>
-              <div style={{fontSize:14,fontWeight:900,letterSpacing:-0.2,color:T.red}}>O que nao fazer</div>
+          {/* ═══ PLANO ═══ */}
+          {coachSub==="plano" && <div>
+            {/* Metas fixas */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:10}}>🎛️ METAS FIXAS DO MÊS</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                {[{l:"Almofada",v:"R$ 8k",c:T.cyan},{l:"Investir",v:"R$ 5k",c:T.purple},{l:"Débitos",v:"8-12",c:T.gold},{l:"Pagamentos",v:"10+",c:T.green},{l:"Transações",v:"20+",c:T.orange},{l:"Atrasos",v:"ZERO",c:T.red}].map(function(m,i){return <div key={i} style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"7px 9px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:7,color:T.dim,letterSpacing:0.5,fontWeight:600}}>{m.l.toUpperCase()}</div><div style={{fontSize:14,fontWeight:800,color:m.c,fontFamily:"monospace",marginTop:2}}>{m.v}</div></div>;})}
+              </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-              {ratingDonts.map(function(d,i){return <div key={i} style={{padding:"10px 12px",borderRadius:12,background:"rgba(239,68,68,0.04)",border:"1px solid rgba(239,68,68,0.08)",fontSize:10,color:T.muted,lineHeight:1.4,display:"flex",gap:8,alignItems:"flex-start"}}><span style={{color:T.red,fontWeight:900,fontSize:11,flexShrink:0}}>✕</span><span>{d}</span></div>;})}
-            </div>
-          </div>
 
-          {}
-          {ratingAtual.motivos.length > 0 && <div style={Object.assign({},bx,{marginBottom:14,padding:18})}>
-            <div style={{fontSize:14,fontWeight:900,marginBottom:10,letterSpacing:-0.2}}>Fatores automaticos do score</div>
-            <div style={{display:"flex",flexDirection:"column",gap:6}}>
-              {ratingAtual.motivos.map(function(m,i) {
-                var cor = m.tipo === "ok" ? T.green : m.tipo === "warn" ? T.gold : T.red;
-                var icon = m.tipo === "ok" ? "+" : m.tipo === "warn" ? "!" : "✕";
-                return <div key={i} style={{display:"flex",gap:10,alignItems:"center",padding:"10px 12px",borderRadius:12,background:cor+"06",border:"1px solid "+cor+"12"}}>
-                  <div style={{width:22,height:22,borderRadius:7,background:cor+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:cor,flexShrink:0}}>{icon}</div>
-                  <span style={{fontSize:11,color:T.muted}}>{m.txt}</span>
-                </div>;
-              })}
+            {/* Calendário */}
+            {CALENDAR_ITEMS.map(function(cal,ci){return <div key={ci} style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:cal.color,marginBottom:8}}>📅 DIA {cal.day} — {cal.title}</div>
+              {cal.items.map(function(item,ii){var k="coach_cal_"+ci+"_"+ii;var on=!!(ratingMes[k]);return <div key={ii} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:ii<cal.items.length-1?"1px solid rgba(255,255,255,0.03)":"none"}}><button onClick={function(){togRatingTask(k)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:cal.color),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.2s"}}>{on&&<Check size={10} color="#020208" />}</button><span style={{fontSize:10,color:on?T.dim:T.muted,textDecoration:on?"line-through":"none",lineHeight:1.4}}>{item}</span></div>;})}
+            </div>;})}
+
+            {/* Transaction counter */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.orange,marginBottom:10}}>📊 CONTADOR DE TRANSAÇÕES</div>
+              <div style={{textAlign:"center"}}>
+                <div style={{fontSize:42,fontWeight:900,color:txCount>=20?T.green:T.orange,fontFamily:"monospace",lineHeight:1}}>{txCount}</div>
+                <div style={{fontSize:9,color:T.dim,marginTop:4}}>de 20 transações (Pix / boleto / débito)</div>
+                <PB value={Math.min(txCount,20)} max={20} color={txCount>=20?T.green:T.orange} h={5} />
+                <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:10}}>
+                  <button onClick={function(){setTxCount(txCount+1)}} style={{padding:"8px 22px",borderRadius:10,background:T.orange+"18",border:"1px solid "+T.orange+"30",color:T.orange,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>+ Transação</button>
+                  <button onClick={function(){setTxCount(0)}} style={{padding:"8px 14px",borderRadius:10,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",color:T.dim,fontSize:10,cursor:"pointer",fontFamily:"inherit"}}>Zerar</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Anti-Pico */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.orange,marginBottom:8}}>🌊 ANTI-PICO — SALDO MÉDIO ESTÁVEL</div>
+              <div style={{background:"rgba(255,138,80,0.04)",borderRadius:10,padding:10,marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{textAlign:"center"}}><div style={{fontSize:7,color:T.dim}}>PISO</div><div style={{fontSize:13,fontWeight:800,color:T.red,fontFamily:"monospace"}}>R$ 8k</div></div>
+                <div style={{flex:1,height:4,borderRadius:4,background:"rgba(255,255,255,0.04)",margin:"0 10px",position:"relative"}}><div style={{position:"absolute",left:"25%",right:"15%",height:"100%",borderRadius:4,background:"linear-gradient(90deg,"+T.green+"20,"+T.cyan+"20)"}}/></div>
+                <div style={{textAlign:"center"}}><div style={{fontSize:7,color:T.dim}}>TETO</div><div style={{fontSize:13,fontWeight:800,color:T.green,fontFamily:"monospace"}}>R$ 14k</div></div>
+              </div>
+              <div style={{fontSize:9,color:T.dim,lineHeight:1.5}}>Lote 1 (dias 26-30): essenciais. Lote 2 (dias 03-07): contas grandes. Lote 3 (dias 10-14): restantes. Excesso acima de R$ 14k → CDB liquidez.</div>
+            </div>
+
+            {/* Débitos automáticos */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.purple,marginBottom:8}}>🔁 DÉBITOS AUTOMÁTICOS (8-12)</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:3}}>
+                {DEBITS_LIST.map(function(d,i){var k="coach_deb_"+i;var on=!!(ratingMes[k]);return <div key={i} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 6px",borderRadius:7,background:on?"rgba(0,255,136,0.03)":"rgba(255,255,255,0.01)",border:"1px solid "+(on?"rgba(0,255,136,0.08)":"rgba(255,255,255,0.03)")}}><button onClick={function(){togRatingTask(k)}} style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid "+(on?T.green:T.purple),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={8} color="#020208" />}</button><span style={{fontSize:8,color:on?T.dim:T.muted}}>{d}</span></div>;})}
+              </div>
+              <div style={{textAlign:"center",marginTop:6}}><span style={{fontSize:10,fontWeight:700,color:T.purple,fontFamily:"monospace"}}>{DEBITS_LIST.filter(function(_,i){return !!(ratingMes["coach_deb_"+i])}).length}/12</span></div>
+            </div>
+
+            {/* Pagamentos */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.green,marginBottom:8}}>🧾 PAGAMENTOS NO MÊS (10+)</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                {Array.from({length:13},function(_,i){var k="coach_pay_"+i;var on=!!(ratingMes[k]);return <button key={i} onClick={function(){togRatingTask(k)}} style={{padding:"4px 9px",borderRadius:7,background:on?"rgba(0,255,136,0.06)":"rgba(255,255,255,0.01)",border:"1px solid "+(on?"rgba(0,255,136,0.1)":"rgba(255,255,255,0.04)"),color:on?T.green:T.dim,fontSize:9,fontWeight:700,fontFamily:"monospace",cursor:"pointer"}}>{on?"✓ ":""}{i+1}</button>;})}
+              </div>
+            </div>
+
+            {/* Boost */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.gold,marginBottom:8}}>🚀 BOOST MÁXIMO</div>
+              {BOOST_ITEMS.map(function(item,i){var k="coach_boost_"+i;var on=!!(ratingMes[k]);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:i<BOOST_ITEMS.length-1?"1px solid rgba(255,255,255,0.02)":"none"}}><button onClick={function(){togRatingTask(k)}} style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid "+(on?T.green:T.gold),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={8} color="#020208" />}</button><span style={{fontSize:9,color:on?T.dim:T.muted,textDecoration:on?"line-through":"none",lineHeight:1.4}}>{item}</span>{on&&<span style={{fontSize:7,fontWeight:700,color:T.green,background:T.green+"12",padding:"1px 5px",borderRadius:4,marginLeft:"auto"}}>OK</span>}</div>;})}
+            </div>
+
+            {/* Checklist final */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.green,marginBottom:8}}>✅ CHECKLIST FINAL DO MÊS</div>
+              {["Salário dia 25 ok","Investimento dia 26 ok","Anti-pico aplicado","Boost Máximo marcado","Tentativa de cartão feita","Zero cheque especial e atrasos"].map(function(item,i){var k="coach_final_"+i;var on=!!(ratingMes[k]);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<5?"1px solid rgba(255,255,255,0.02)":"none"}}><button onClick={function(){togRatingTask(k)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:T.cyan),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={10} color="#020208" />}</button><span style={{fontSize:10,fontWeight:on?400:600,color:on?T.green:T.text,textDecoration:on?"line-through":"none"}}>{item}</span></div>;})}
             </div>
           </div>}
 
-          {}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(340px, 1fr))",gap:14,marginBottom:14}}>
-            {[planoSantander, planoItau].map(function(plano){ var th = plano.bankKey === "santander" ? "#E11931" : "#FF7A00"; var tentKey = "_tent_" + plano.bankKey; var tentVal = ratingMes[tentKey] || ""; return <div key={plano.bankKey} style={Object.assign({},bx,{padding:18,background:"linear-gradient(135deg, rgba(10,18,32,0.98), rgba(6,12,22,0.95) 42%, "+th+"08)",borderColor:th+"22",position:"relative",overflow:"hidden"})}>
-              <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"radial-gradient(ellipse at 100% 0%, "+th+"12, transparent 50%)"}} />
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10,marginBottom:12,position:"relative",zIndex:1}}>
-                <div><div style={{fontSize:9,color:T.dim,textTransform:"uppercase",fontWeight:800,letterSpacing:0.8}}>{plano.bankKey === "santander" ? "Santander Unlimited" : "Itaú The One"}</div><div style={{fontSize:19,fontWeight:900,marginTop:4,letterSpacing:-0.3}}>{plano.nome}</div><div style={{fontSize:10,color:T.muted,marginTop:6,lineHeight:1.5}}>{plano.resumo}</div></div>
-                <div style={{padding:"8px 12px",borderRadius:14,background:"linear-gradient(135deg, "+th+"20, "+th+"10)",border:"1px solid "+th+"28",fontSize:20,fontWeight:900,color:th,boxShadow:"0 6px 20px "+th+"18",minWidth:52,textAlign:"center"}}>{plano.score}</div>
+          {/* ═══ CARTÕES ═══ */}
+          {coachSub==="cartoes" && <div>
+            {/* Calendário de datas */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:10}}>📅 CALENDÁRIO DE AÇÕES — CARTÕES 2026/2027</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>Datas fixas para pedir aumento de limite, upgrade e tentativas de cartão</div>
+              {[
+                {data:"05/05/2026",acao:"🔴 Santander: 1º aumento AAdvantage (2 dias pós-fechamento, fatura paga)",tipo:"aumento",cor:"#E11931"},
+                {data:"29/05/2026",acao:"🔴 Santander: 2ª tentativa Unlimited (dia 29, pós-salário e aporte)",tipo:"upgrade",cor:"#E11931"},
+                {data:"05/06/2026",acao:"🟠 Itaú: 1º aumento Platinum (pós-fechamento fatura)",tipo:"aumento",cor:"#FF7A00"},
+                {data:"29/06/2026",acao:"🔴 Santander: 3ª tentativa Unlimited",tipo:"upgrade",cor:"#E11931"},
+                {data:"05/08/2026",acao:"🔴 Santander: 2º aumento AAdvantage (90 dias do 1º, pós-fechamento)",tipo:"aumento",cor:"#E11931"},
+                {data:"29/08/2026",acao:"🔴 Santander: 5ª tentativa Unlimited",tipo:"upgrade",cor:"#E11931"},
+                {data:"29/09/2026",acao:"🔴 Santander: 6ª tentativa Unlimited (6 meses Select!)",tipo:"upgrade",cor:"#E11931"},
+                {data:"05/10/2026",acao:"⭐ JANELA PREMIUM: pré-Black Friday. Bancos liberam mais limite!",tipo:"premium",cor:T.gold},
+                {data:"05/10/2026",acao:"🔴 Santander: 3º aumento AAdvantage (janela premium!)",tipo:"aumento",cor:T.gold},
+                {data:"29/10/2026",acao:"⭐ 🔴 Santander: 7ª tentativa Unlimited (ALVO PRINCIPAL + janela premium)",tipo:"upgrade",cor:T.gold},
+                {data:"05/11/2026",acao:"⭐ JANELA PREMIUM: bancos competem por clientes. Melhor momento!",tipo:"premium",cor:T.gold},
+                {data:"30/11/2026",acao:"🔴 Santander: 8ª tentativa Unlimited (janela premium novembro)",tipo:"upgrade",cor:T.gold},
+                {data:"05/12/2026",acao:"🟠 Itaú: 2º aumento Platinum (6 meses, pós-fechamento)",tipo:"aumento",cor:"#FF7A00"},
+                {data:"29/12/2026",acao:"🔴 Santander: 9ª tentativa Unlimited (dívidas quitadas!)",tipo:"upgrade",cor:T.green},
+                {data:"05/02/2027",acao:"🔴 Santander: 4º aumento AAdvantage (90 dias, pós-fechamento)",tipo:"aumento",cor:"#E11931"},
+                {data:"05/02/2027",acao:"🔺 Bradesco: 1º aumento Nanquim (pós-quitação) + 🟠 Itaú: Personnalité",tipo:"upgrade",cor:T.cyan},
+                {data:"Mar/2027",acao:"🔺 Bradesco: Aeternum. TODOS os cartões em nível máximo.",tipo:"final",cor:T.green}
+              ].map(function(ev,i){var ck="coach_card_cal_"+i;var on=!!(ratingMes[ck]);return <div key={i} style={{display:"flex",gap:8,marginBottom:0,opacity:on?0.55:1,transition:"opacity 0.2s"}}>
+                <button onClick={function(){togRatingTask(ck)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:ev.cor),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1,transition:"all 0.2s"}}>{on&&<Check size={9} color="#020208" />}</button>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:8}}>
+                  <div style={{width:6,height:6,borderRadius:"50%",background:on?T.green:ev.cor,boxShadow:on?"none":"0 0 6px "+ev.cor+"50",flexShrink:0,marginTop:2}} />
+                  {i<16&&<div style={{width:1,flex:1,background:(on?T.green:ev.cor)+"15",minHeight:18}} />}
+                </div>
+                <div style={{flex:1,paddingBottom:6}}>
+                  <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+                    <span style={{fontSize:9,fontWeight:800,color:on?T.dim:ev.cor,fontFamily:"monospace",minWidth:55,textDecoration:on?"line-through":"none"}}>{ev.data}</span>
+                    <span style={{fontSize:6,fontWeight:700,color:ev.tipo==="aumento"?T.cyan:ev.tipo==="upgrade"?T.gold:ev.tipo==="premium"?"#FFD000":T.green,background:(ev.tipo==="aumento"?T.cyan:ev.tipo==="upgrade"?T.gold:ev.tipo==="premium"?"#FFD000":T.green)+"12",padding:"1px 4px",borderRadius:3}}>{ev.tipo==="aumento"?"AUMENTO":ev.tipo==="upgrade"?"UPGRADE":ev.tipo==="premium"?"⭐ JANELA":"FINAL"}</span>
+                    {on&&<span style={{fontSize:6,fontWeight:700,color:T.green,background:T.green+"12",padding:"1px 4px",borderRadius:3}}>FEITO ✓</span>}
+                  </div>
+                  <div style={{fontSize:8,color:on?T.dim:T.muted,marginTop:1,lineHeight:1.4,textDecoration:on?"line-through":"none"}}>{ev.acao}</div>
+                </div>
+              </div>;})}
+              <div style={{marginTop:8,padding:"8px 10px",background:"rgba(0,0,0,0.15)",borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:9,color:T.dim}}>Progresso do calendário</span>
+                <span style={{fontSize:11,fontWeight:800,color:T.cyan,fontFamily:"monospace"}}>{(function(){var c=0;for(var j=0;j<17;j++){if(ratingMes["coach_card_cal_"+j])c++;}return c})()}/17</span>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:12,position:"relative",zIndex:1}}>
-                <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.3,fontWeight:700}}>{plano.bankKey === "santander" ? "Saldo medio/almofada" : "Investimentos no banco"}</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:th,marginTop:4}}>{f$(plano.bankKey === "santander" ? plano.contaBanco : plano.invBanco)}</div></div>
-                <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.3,fontWeight:700}}>{plano.bankKey === "santander" ? "Uso do Santander" : "Uso do Itau"}</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:plano.usoPct<=30?T.green:plano.usoPct<=50?T.gold:T.red,marginTop:4}}>{pct(plano.usoPct || 0)}</div></div>
-                <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.3,fontWeight:700}}>Fatura atual</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",marginTop:4}}>{f$(plano.faturaAtual || 0)}</div></div>
-                <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.3,fontWeight:700}}>Janela planejada</div><div style={{fontSize:11,fontWeight:800,color:plano.consultasPlanejadas?T.green:T.gold,marginTop:4}}>{plano.consultasPlanejadas ? "Ativa" : "Fora da janela"}</div></div>
-              </div>
-              {}
-              <div style={{marginBottom:12,position:"relative",zIndex:1}}><div style={{fontSize:13,fontWeight:900,marginBottom:8,letterSpacing:-0.2}}>Checklist {plano.bankKey === "santander" ? "Santander" : "Itaú"}</div><div style={{display:"flex",flexDirection:"column",gap:6}}>{plano.checks.map(function(item,i){return <div key={i} style={{display:"grid",gridTemplateColumns:"1fr auto",gap:8,padding:"9px 12px",borderRadius:12,background:item.ok?"rgba(16,185,129,0.06)":"rgba(239,68,68,0.05)",border:"1px solid "+(item.ok?"rgba(16,185,129,0.10)":"rgba(239,68,68,0.08)")}}><div><div style={{fontSize:11,fontWeight:700,color:T.text}}>{item.label}</div><div style={{fontSize:9,color:T.dim,marginTop:3}}>{item.detail}</div></div><div style={{display:"flex",alignItems:"center",fontSize:10,fontWeight:800,color:item.ok?T.green:T.red}}>{item.ok?"OK":"AJUSTAR"}</div></div>;})}</div></div>
-              {}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10,position:"relative",zIndex:1}}>
-                <div style={{padding:"10px 12px",borderRadius:12,background:"rgba(16,185,129,0.04)",border:"1px solid rgba(16,185,129,0.08)"}}><div style={{fontSize:11,fontWeight:900,marginBottom:6,color:T.green}}>Sinais positivos</div><div style={{display:"flex",flexDirection:"column",gap:4}}>{plano.sinaisPositivos.slice(0,4).map(function(s,i){return <div key={i} style={{fontSize:9,color:T.muted,display:"flex",gap:5}}><span style={{color:T.green}}>+</span>{s}</div>;})}{plano.sinaisPositivos.length===0 && <div style={{fontSize:9,color:T.dim}}>Nenhum sinal positivo detectado</div>}</div></div>
-                <div style={{padding:"10px 12px",borderRadius:12,background:"rgba(239,68,68,0.04)",border:"1px solid rgba(239,68,68,0.08)"}}><div style={{fontSize:11,fontWeight:900,marginBottom:6,color:T.red}}>Sinais de alerta</div><div style={{display:"flex",flexDirection:"column",gap:4}}>{plano.sinaisAlerta.slice(0,4).map(function(s,i){return <div key={i} style={{fontSize:9,color:T.muted,display:"flex",gap:5}}><span style={{color:T.red}}>!</span>{s}</div>;})}{plano.sinaisAlerta.length===0 && <div style={{fontSize:9,color:T.dim}}>Nenhum alerta detectado</div>}</div></div>
-              </div>
-              {}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,position:"relative",zIndex:1}}>
-                <div style={{padding:"12px 14px",borderRadius:14,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:12,fontWeight:900,marginBottom:8,letterSpacing:-0.2}}>Acoes do mes</div><div style={{display:"flex",flexDirection:"column",gap:6}}>{plano.actions.slice(0,4).map(function(a,i){return <div key={i} style={{fontSize:10,color:T.muted,lineHeight:1.4,paddingLeft:14,position:"relative"}}><span style={{position:"absolute",left:0,color:T.green,fontWeight:800}}>{i+1}.</span> {a}</div>;})}</div></div>
-                <div style={{padding:"12px 14px",borderRadius:14,background:"rgba(239,68,68,0.03)",border:"1px solid rgba(239,68,68,0.06)"}}><div style={{fontSize:12,fontWeight:900,marginBottom:8,color:T.red,letterSpacing:-0.2}}>Evitar no mes</div><div style={{display:"flex",flexDirection:"column",gap:6}}>{plano.avoid.slice(0,4).map(function(a,i){return <div key={i} style={{fontSize:10,color:T.muted,lineHeight:1.4,paddingLeft:14,position:"relative"}}><span style={{position:"absolute",left:0,color:T.red,fontWeight:800}}>{i+1}.</span> {a}</div>;})}</div></div>
-              </div>
-              {}
-              <div style={{marginTop:10,padding:"12px 14px",borderRadius:14,background:"rgba(255,255,255,0.025)",fontSize:10,color:T.muted,lineHeight:1.5,position:"relative",zIndex:1,border:"1px solid rgba(255,255,255,0.04)"}}><strong style={{color:T.gold}}>Janela ideal:</strong> {plano.janelaIdeal}<br /><strong style={{color:T.red}}>Momento inadequado:</strong> {plano.momentoRuim}</div>
-              {}
-              <div style={{marginTop:10,position:"relative",zIndex:1}}>
-                <div style={{fontSize:11,fontWeight:800,marginBottom:5,color:T.muted}}>Tentativas e datas ({plano.bankKey === "santander" ? "cartao" : "upgrade"})</div>
-                <textarea value={tentVal} onChange={function(e){updRatingTentativa(plano.bankKey, e.target.value)}} placeholder={"Ex: Tentei " + (plano.bankKey === "santander" ? "solicitar cartao" : "upgrade") + " em 15/04. Resultado: ..."} style={Object.assign({},inp,{minHeight:60,resize:"vertical",fontSize:10,lineHeight:1.5})} />
-              </div>
-            </div>;})}
-          </div>
+            </div>
 
-          {}
-          <div style={Object.assign({},bx,{marginBottom:14,padding:18})}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-              <div style={{padding:5,borderRadius:8,background:T.gold+"12",display:"flex",border:"1px solid "+T.gold+"10"}}><Edit3 size={14} color={T.gold} /></div>
-              <div style={{fontSize:14,fontWeight:900,letterSpacing:-0.2}}>Observacoes estrategicas do mes</div>
+            {/* Meus cartões */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.gold,marginBottom:10}}>💳 MEUS CARTÕES — STATUS ATUAL</div>
+              {[
+                {nome:"AAdvantage Platinum",banco:"Santander",limite:11343,cor:"#E11931",band:"Mastercard Platinum",papel:"PRINCIPAL — 70-80% dos gastos",usarAte:Math.round(11343*0.3),meta:"Unlimited Visa Infinite",emoji:"✈️"},
+                {nome:"Itaú Visa Platinum",banco:"Itaú",limite:18500,cor:"#FF7A00",band:"Visa Platinum",papel:"SECUNDÁRIO — 10-15% dos gastos",usarAte:Math.round(18500*0.3),meta:"Personnalité / Black",emoji:"🟧"},
+                {nome:"Bradesco Elo Nanquim",banco:"Bradesco",limite:5000,cor:"#CC092F",band:"Elo Nanquim",papel:"MANUTENÇÃO — 1-2 compras/mês",usarAte:Math.round(5000*0.3),meta:"Aeternum / Prime",emoji:"🔺"}
+              ].map(function(card,i){return <div key={i} style={{marginBottom:10,borderRadius:14,padding:14,background:"linear-gradient(135deg, "+card.cor+"08, rgba(0,0,0,0.2))",border:"1px solid "+card.cor+"20",position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:-15,right:-15,width:60,height:60,borderRadius:"50%",background:card.cor+"06"}} />
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,position:"relative"}}>
+                  <span style={{fontSize:20}}>{card.emoji}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:12,fontWeight:800,color:card.cor}}>{card.nome}</div>
+                    <div style={{fontSize:8,color:T.dim}}>{card.band} • {card.banco}</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:13,fontWeight:800,color:T.text,fontFamily:"monospace"}}>{f$(card.limite)}</div>
+                    <div style={{fontSize:7,color:T.dim}}>limite</div>
+                  </div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+                  <div style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:"6px 8px"}}>
+                    <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>USAR ATÉ (30%)</div>
+                    <div style={{fontSize:11,fontWeight:700,color:T.green,fontFamily:"monospace"}}>{f$(card.usarAte)}</div>
+                  </div>
+                  <div style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:"6px 8px"}}>
+                    <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>META UPGRADE</div>
+                    <div style={{fontSize:9,fontWeight:700,color:card.cor}}>{card.meta}</div>
+                  </div>
+                </div>
+                <div style={{marginTop:6,fontSize:8,color:T.muted,background:"rgba(255,255,255,0.02)",padding:"4px 8px",borderRadius:6}}>📌 {card.papel}</div>
+              </div>;})}
             </div>
-            <textarea value={ratingMes._obs || ""} onChange={function(e){updRatingObs(e.target.value)}} placeholder={"Anote aqui suas observacoes estrategicas de " + MSF[mes-1] + ": ofertas vistas, mudancas de segmento, sinais no app do banco, aumento de limite recebido, pre-aprovados detectados..."} style={Object.assign({},inp,{minHeight:90,resize:"vertical",fontSize:11,lineHeight:1.6})} />
-            <div style={{fontSize:9,color:T.dim,marginTop:6}}>Estas notas sao salvas por mes e ajudam a monitorar sua evolucao estrategica ao longo do tempo.</div>
-          </div>
 
-          {}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(320px, 1fr))",gap:12,marginBottom:12}}>
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              {}
-              <div style={bx}>
-                <div style={{fontSize:14,fontWeight:900,marginBottom:12,letterSpacing:-0.2}}>Checklist geral do app</div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{checklistGeral.map(function(item,i){return <div key={i} style={{padding:"10px 12px",borderRadius:12,background:item.ok?T.green+"10":T.red+"08",border:"1px solid "+(item.ok?T.green+"18":T.red+"14")}}><div style={{display:"flex",justifyContent:"space-between",gap:8}}><div style={{fontSize:11,fontWeight:700}}>{item.label}</div><div style={{fontSize:10,fontWeight:800,color:item.ok?T.green:T.red}}>{item.ok?"OK":"AJUSTAR"}</div></div><div style={{fontSize:9,color:T.muted,marginTop:3}}>{item.detail}</div></div>;})}</div>
+            {/* Estratégia por cartão */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:"#E11931",marginBottom:10}}>🔴 AADVANTAGE PLATINUM — ESTRATÉGIA</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Cartão principal Santander. Toda ação aqui constrói rating para o Unlimited.</div>
+              {[
+                {t:"Gastar em escada progressiva: +R$ 500/mês",d:"Mês 1: R$ 2.500 → Mês 2: R$ 3.000 → Mês 3: R$ 3.500. Banco vê tendência de crescimento e libera limite.",ic:"📈",k:"coach_card_sant_1"},
+                {t:"Pagar fatura INTEGRAL até dia 22 (5 dias antes do vencimento dia 27)",d:"Nunca rotativo. Pagamento antecipado sinaliza disciplina. Vencimento: dia 27.",ic:"⏰",k:"coach_card_sant_2"},
+                {t:"HACK: pagar parte da fatura ANTES do fechamento (dia 3)",d:"Gastou R$ 5.000? Pague R$ 3.000 antes do dia 3. Na fatura aparece só R$ 2.000 (17% do limite). Score sobe mais rápido.",ic:"🧠",k:"coach_card_sant_3"},
+                {t:"Pedir aumento 2-5 dias PÓS-FECHAMENTO (dia 5-8)",d:"Datas: 05/05, 05/08, 05/10, 05/02/2027. Logo após fatura paga, sistema registra bom pagador.",ic:"📈",k:"coach_card_sant_4"},
+                {t:"Cadastrar no Apple Pay / Google Pay / Samsung Pay",d:"Usar por aproximação. Bancos rastreiam como comportamento de cliente premium/tech-savvy.",ic:"📱",k:"coach_card_sant_5"},
+                {t:"Fazer 1 compra internacional por mês (mín. US$ 10)",d:"Spotify/iCloud em dólar, por exemplo. Sinaliza perfil viajante premium. Santander prioriza upgrade.",ic:"🌍",k:"coach_card_sant_6"},
+                {t:"Cadastrar em 5+ contas recorrentes",d:"Netflix, Spotify, iCloud, gym, seguro. Recorrência cria previsibilidade. Banco vê estabilidade.",ic:"🔄",k:"coach_card_sant_7"},
+                {t:"Nunca parcelar em mais de 3x",d:"Parcelamento longo compromete limite e mostra dependência de crédito.",ic:"🚫",k:"coach_card_sant_8"},
+                {t:"Pix salário SEMPRE do mesmo remetente/CNPJ",d:"Receber do mesmo CPF/CNPJ todo mês no mesmo dia. O banco mapeia como renda fixa comprovada.",ic:"💰",k:"coach_card_sant_9"},
+                {t:"Fazer 10+ transações/mês no cartão",d:"Frequência importa mais que valor. 10 compras de R$ 100 pesam mais que 1 de R$ 1.000.",ic:"🔢",k:"coach_card_sant_10"},
+                {t:"Nunca fazer chargeback ou contestação",d:"Mesmo legítimas, contestações prejudicam perfil de crédito interno. Evitar ao máximo.",ic:"⚠️",k:"coach_card_sant_11"},
+                {t:"Solicitar Unlimited na janela premium (Out-Nov)",d:"Bancos liberam mais em out-nov (pré-Black Friday). Alvos: 29/10 e 30/11/2026.",ic:"🏆",k:"coach_card_sant_12"}
+              ].map(function(item,i){var on=!!(ratingMes[item.k]);return <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"7px 0",borderBottom:i<11?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                <button onClick={function(){togRatingTask(item.k)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:"#E11931"),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{on&&<Check size={9} color="#020208" />}</button>
+                <div style={{flex:1}}><div style={{fontSize:10,fontWeight:on?400:600,color:on?T.dim:T.text,textDecoration:on?"line-through":"none",lineHeight:1.4}}><span style={{marginRight:4}}>{item.ic}</span>{item.t}</div><div style={{fontSize:8,color:T.dim,marginTop:1,lineHeight:1.3}}>{item.d}</div></div>
+              </div>;})}
+              <div style={{marginTop:6,padding:"6px 10px",background:"rgba(225,25,49,0.04)",borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:9,color:T.dim}}>Progresso Santander</span><span style={{fontSize:11,fontWeight:800,color:"#E11931",fontFamily:"monospace"}}>{(function(){var c=0;for(var j=1;j<=12;j++){if(ratingMes["coach_card_sant_"+j])c++;}return c})()}/12</span></div>
+            </div>
+
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:"#FF7A00",marginBottom:10}}>🟠 ITAÚ PLATINUM — ESTRATÉGIA</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Secundário. Manter ativo sem concentrar gastos. Conta histórica = valor.</div>
+              {[
+                {t:"Usar 10-15% dos gastos (~R$ 600-900/mês)",d:"Compras pontuais. Supermercado, farmácia, gasolina eventual.",ic:"🛒",k:"coach_card_itau_1"},
+                {t:"Pagar fatura integral até dia 22 (vencimento dia 27)",d:"Mesmo com uso baixo, pagar 5 dias antes. Pagamento antecipado conta.",ic:"⏰",k:"coach_card_itau_2"},
+                {t:"Usar até R$ 5.550 (30% de R$ 18.500)",d:"Nunca ultrapassar 30% de utilização.",ic:"📊",k:"coach_card_itau_3"},
+                {t:"Pedir aumento pós-fechamento a cada 6 meses",d:"Datas: 05/06/2026 e 05/12/2026. Pedir 2 dias após fatura paga, não no dia 29.",ic:"📈",k:"coach_card_itau_4"},
+                {t:"Após quitação das dívidas: avaliar Personnalité",d:"Data alvo: 29/01/2027. Renda R$ 21.671 qualifica. Personnalité abre portas para Black/Azul.",ic:"🔑",k:"coach_card_itau_5"},
+                {t:"Não fechar a conta em hipótese alguma",d:"Tempo de relacionamento é um dos fatores mais pesados do score.",ic:"⚠️",k:"coach_card_itau_6"}
+              ].map(function(item,i){var on=!!(ratingMes[item.k]);return <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<5?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                <button onClick={function(){togRatingTask(item.k)}} style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid "+(on?T.green:"#FF7A00"),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{on&&<Check size={8} color="#020208" />}</button>
+                <div style={{flex:1}}><div style={{fontSize:9,fontWeight:on?400:600,color:on?T.dim:T.muted,textDecoration:on?"line-through":"none",lineHeight:1.4}}><span style={{marginRight:3}}>{item.ic}</span>{item.t}</div><div style={{fontSize:8,color:T.dim,marginTop:1}}>{item.d}</div></div>
+              </div>;})}
+              <div style={{marginTop:6,padding:"6px 10px",background:"rgba(255,122,0,0.04)",borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:9,color:T.dim}}>Progresso Itaú</span><span style={{fontSize:11,fontWeight:800,color:"#FF7A00",fontFamily:"monospace"}}>{(function(){var c=0;for(var j=1;j<=6;j++){if(ratingMes["coach_card_itau_"+j])c++;}return c})()}/6</span></div>
+            </div>
+
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:"#CC092F",marginBottom:10}}>🔺 BRADESCO ELO NANQUIM — ESTRATÉGIA</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Manutenção pura. Manter vivo para diversidade bancária.</div>
+              {[
+                {t:"Fazer 1-2 compras pequenas por mês (R$ 100-300)",d:"Apenas para manter o cartão ativo. Farmácia, padaria.",ic:"🛒",k:"coach_card_brad_1"},
+                {t:"Pagar fatura integral até dia 22 (vencimento dia 27)",d:"Sempre 100%. Nunca rotativo neste cartão.",ic:"⏰",k:"coach_card_brad_2"},
+                {t:"Usar até R$ 1.500 (30% de R$ 5.000)",d:"Controle rígido. Cartão de manutenção, não de consumo.",ic:"📊",k:"coach_card_brad_3"},
+                {t:"Após quitação Empr. Bradesco: pedir aumento",d:"Data fixa: 29/01/2027 (1º mês após quitação em dez/26). Solicitar R$ 10-15k.",ic:"📈",k:"coach_card_brad_4"},
+                {t:"Avaliar Bradesco Aeternum no futuro",d:"Data alvo: Mar/2027+. Concorrente do Unlimited. Salas VIP ilimitadas + LoungeKey.",ic:"🏆",k:"coach_card_brad_5"}
+              ].map(function(item,i){var on=!!(ratingMes[item.k]);return <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                <button onClick={function(){togRatingTask(item.k)}} style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid "+(on?T.green:"#CC092F"),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{on&&<Check size={8} color="#020208" />}</button>
+                <div style={{flex:1}}><div style={{fontSize:9,fontWeight:on?400:600,color:on?T.dim:T.muted,textDecoration:on?"line-through":"none",lineHeight:1.4}}><span style={{marginRight:3}}>{item.ic}</span>{item.t}</div><div style={{fontSize:8,color:T.dim,marginTop:1}}>{item.d}</div></div>
+              </div>;})}
+              <div style={{marginTop:6,padding:"6px 10px",background:"rgba(204,9,47,0.04)",borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:9,color:T.dim}}>Progresso Bradesco</span><span style={{fontSize:11,fontWeight:800,color:"#CC092F",fontFamily:"monospace"}}>{(function(){var c=0;for(var j=1;j<=5;j++){if(ratingMes["coach_card_brad_"+j])c++;}return c})()}/5</span></div>
+            </div>
+
+            {/* Regras de ouro */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.gold,marginBottom:10}}>👑 REGRAS DE OURO — USO DE CARTÃO DE CRÉDITO</div>
+              {[
+                {titulo:"Utilização máxima: 30% do limite",desc:"O fator mais pesado na análise de crédito. Acima de 30% você é visto como dependente do crédito. Acima de 50% é sinal vermelho. Ideal: 10-25%.",ic:"📊"},
+                {titulo:"Pagar SEMPRE integral, NUNCA rotativo",desc:"Rotativo é a maior armadilha. Juros de 15% ao mês. Um único mês de rotativo destrói meses de bom histórico.",ic:"🚫"},
+                {titulo:"Pagar até dia 22 (5 dias ANTES do vencimento dia 27)",desc:"Pagamento antecipado libera limite antes e sinaliza ao banco que você tem caixa. Nunca esperar o dia 27.",ic:"⏰"},
+                {titulo:"Concentrar gastos em 1 cartão principal",desc:"O banco que recebe 70-80% dos seus gastos te vê como cliente premium. Pulverizar entre vários cartões enfraquece todos.",ic:"🎯"},
+                {titulo:"Usar para gastos recorrentes",desc:"Netflix, Spotify, academia, celular, seguros. Recorrência cria previsibilidade. O banco vê estabilidade.",ic:"🔄"},
+                {titulo:"Nunca parcelar acima de 3x",desc:"Parcelamento longo (10x, 12x) compromete limite por meses. Prefira à vista ou no máximo 3x sem juros.",ic:"💰"},
+                {titulo:"Solicitar aumento a cada 90 dias",desc:"Pelo app ou gerente. Mesmo que negado, a solicitação mostra ambição. Limite crescente = sinal de confiança.",ic:"📈"},
+                {titulo:"Fazer pelo menos 8-10 transações/mês",desc:"Frequência de uso importa mais que valor. 10 compras de R$ 100 pesam mais que 1 compra de R$ 1.000.",ic:"🔢"},
+                {titulo:"Nunca estourar o limite",desc:"Ultrapassar o limite (mesmo em R$ 1) é registrado como incidente. Configure alertas em 70% e 90% do limite.",ic:"⚠️"},
+                {titulo:"Evitar saques no crédito",desc:"Saque no cartão de crédito tem taxa altíssima e é interpretado como desespero financeiro. Nunca fazer.",ic:"🏧"},
+                {titulo:"Compras grandes: usar mas quitar na fatura",desc:"Eletrodomésticos, passagens. Mostra poder de compra, mas quite na fatura integral. Sem parcelamento.",ic:"🛍️"},
+                {titulo:"Upgrade é consequência, não pedido",desc:"Quando o banco vê: uso consistente + pagamento integral + limite crescente + investimentos, o upgrade vem até você.",ic:"🏆"}
+              ].map(function(regra,i){return <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<11?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                <div style={{width:28,height:28,borderRadius:8,background:T.gold+"10",border:"1px solid "+T.gold+"15",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12}}>{regra.ic}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:10,fontWeight:700,color:T.text,lineHeight:1.3}}>{regra.titulo}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2,lineHeight:1.5}}>{regra.desc}</div>
+                </div>
+              </div>;})}
+            </div>
+
+            {/* Utilização em tempo real */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:10}}>📊 UTILIZAÇÃO EM TEMPO REAL</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>Digite quanto já gastou no cartão este mês. Verde &lt; 20%, Amarelo 20-30%, Vermelho &gt; 30%.</div>
+              {[
+                {nome:"AAdvantage",key:"sant",limite:cardLimits.sant,cor:"#E11931"},
+                {nome:"Itaú Platinum",key:"itau",limite:cardLimits.itau,cor:"#FF7A00"},
+                {nome:"Bradesco Nanquim",key:"brad",limite:cardLimits.brad,cor:"#CC092F"}
+              ].map(function(c,i){
+                var gasto=cardSpend[c.key]||0;
+                var pctUso=c.limite>0?Math.round(gasto/c.limite*100):0;
+                var corBarra=pctUso<20?T.green:pctUso<=30?T.gold:T.red;
+                var status=pctUso<20?"IDEAL ✓":pctUso<=30?"ATENÇÃO":"PERIGO!";
+                return <div key={i} style={{marginBottom:12,padding:12,borderRadius:12,background:"rgba(0,0,0,0.15)",border:"1px solid "+c.cor+"15"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                    <span style={{fontSize:10,fontWeight:700,color:c.cor}}>{c.nome}</span>
+                    <span style={{fontSize:8,fontWeight:700,color:corBarra,background:corBarra+"15",padding:"2px 6px",borderRadius:4}}>{status}</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:8,color:T.dim}}>Gasto:</span>
+                    <input type="number" placeholder="0" value={gasto||""} onChange={function(e){var v=e.target.value?parseInt(e.target.value):0;setCardSpend(function(p){var n=Object.assign({},p);n[c.key]=v;return n})}} style={{flex:1,background:"rgba(0,0,0,0.3)",border:"1px solid "+corBarra+"30",borderRadius:8,padding:"6px 10px",color:corBarra,fontFamily:"monospace",fontSize:14,fontWeight:700,textAlign:"center",outline:"none",maxWidth:120}} />
+                    <span style={{fontSize:10,color:T.dim}}>de</span>
+                    <span style={{fontSize:10,fontWeight:700,color:T.muted,fontFamily:"monospace"}}>{f$(c.limite)}</span>
+                  </div>
+                  <div style={{marginTop:6,height:6,borderRadius:6,background:"rgba(255,255,255,0.04)",overflow:"hidden"}}>
+                    <div style={{height:"100%",borderRadius:6,background:corBarra,width:Math.min(pctUso,100)+"%",transition:"width 0.3s",boxShadow:"0 0 8px "+corBarra+"30"}} />
+                  </div>
+                  <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+                    <span style={{fontSize:8,color:T.dim}}>Utilização: <strong style={{color:corBarra}}>{pctUso}%</strong></span>
+                    <span style={{fontSize:8,color:T.dim}}>Disponível: <strong style={{color:T.muted,fontFamily:"monospace"}}>{f$(Math.max(c.limite-gasto,0))}</strong></span>
+                  </div>
+                </div>;
+              })}
+            </div>
+
+            {/* Histórico de limites */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.purple,marginBottom:10}}>📈 HISTÓRICO DE LIMITES</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>Atualize os limites quando conseguir aumento. Acompanhe a evolução.</div>
+              {[
+                {nome:"AAdvantage",key:"sant",cor:"#E11931"},
+                {nome:"Itaú Platinum",key:"itau",cor:"#FF7A00"},
+                {nome:"Bradesco Nanquim",key:"brad",cor:"#CC092F"}
+              ].map(function(c,i){
+                var lim=cardLimits[c.key]||0;
+                return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:i<2?"1px solid rgba(255,255,255,0.03)":"none"}}>
+                  <div style={{width:4,height:24,borderRadius:2,background:c.cor,flexShrink:0}} />
+                  <span style={{fontSize:10,fontWeight:600,color:T.muted,minWidth:100}}>{c.nome}</span>
+                  <input type="number" value={lim||""} onChange={function(e){var v=e.target.value?parseInt(e.target.value):0;setCardLimits(function(p){var n=Object.assign({},p);n[c.key]=v;return n})}} style={{flex:1,background:"rgba(0,0,0,0.3)",border:"1px solid "+c.cor+"20",borderRadius:8,padding:"5px 10px",color:c.cor,fontFamily:"monospace",fontSize:13,fontWeight:700,textAlign:"center",outline:"none",maxWidth:120}} />
+                </div>;
+              })}
+              <div style={{marginTop:8,fontSize:8,color:T.dim,lineHeight:1.5}}>💡 Dica: atualize após cada aprovação de aumento. Acompanhe se os limites estão crescendo a cada 90 dias (Santander) e 6 meses (Itaú).</div>
+            </div>
+
+            {/* Checklist pré-fechamento */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.orange,marginBottom:10}}>📋 CHECKLIST PRÉ-FECHAMENTO (DIA 1-3)</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>Faça ANTES do dia 3 (fechamento) para reduzir utilização reportada ao Serasa.</div>
+              {[
+                {t:"Verificar total gasto no AAdvantage este ciclo",d:"Abrir app Santander → cartões → fatura aberta. Anotar valor.",k:"coach_prefecha_1"},
+                {t:"Se gasto > 30% do limite: pagar antecipado a diferença",d:"Pagar parte da fatura ANTES do fechamento. Ex: gastou R$ 5k, pague R$ 3k → fatura fecha em R$ 2k.",k:"coach_prefecha_2"},
+                {t:"Verificar Itaú: gasto dentro de 30% (R$ 5.550)?",d:"Se não, pagar antecipado também. Mesmo hack funciona em qualquer banco.",k:"coach_prefecha_3"},
+                {t:"Confirmar que nenhum cartão está acima de 30%",d:"Verificar os 3 cartões. Todos devem fechar abaixo de 30% de utilização.",k:"coach_prefecha_4"},
+                {t:"Não fazer compras grandes nas 48h antes do fechamento",d:"Compra grande no dia 2-3 não dá tempo de pagar antes. Aguardar dia 4.",k:"coach_prefecha_5"}
+              ].map(function(item,i){var on=!!(ratingMes[item.k]);return <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"6px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                <button onClick={function(){togRatingTask(item.k)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:T.orange),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{on&&<Check size={9} color="#020208" />}</button>
+                <div style={{flex:1}}><div style={{fontSize:10,fontWeight:on?400:600,color:on?T.dim:T.text,textDecoration:on?"line-through":"none",lineHeight:1.4}}>{item.t}</div><div style={{fontSize:8,color:T.dim,marginTop:1,lineHeight:1.3}}>{item.d}</div></div>
+              </div>;})}
+            </div>
+
+            {/* Monitoramento Multi-birô */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.green,marginBottom:10}}>🔍 MONITORAMENTO MULTI-BIRÔ</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>O Santander pode consultar qualquer birô. Monitore todos, não só o Serasa.</div>
+              {[
+                {t:"Consultar Serasa Score (serasa.com.br)",d:"Score principal. Gratuito. Consultar toda semana.",k:"coach_biro_1",cor:T.cyan},
+                {t:"Consultar Boa Vista SCPC (boavistaservicos.com.br)",d:"Segundo birô mais consultado. Score pode ser diferente do Serasa.",k:"coach_biro_2",cor:T.purple},
+                {t:"Consultar Quod (quod.com.br)",d:"Birô mais novo, criado pelos 5 maiores bancos. Santander é sócio!",k:"coach_biro_3",cor:T.gold},
+                {t:"Assinar Serasa Premium (R$ 30/mês)",d:"Monitoramento em tempo real, alertas de consulta no CPF, selo premium visível aos bancos.",k:"coach_biro_4",cor:T.green},
+                {t:"Acessar Registrato BACEN (mensalmente)",d:"Único lugar que mostra TODAS as dívidas, contas e chaves Pix do CPF.",k:"coach_biro_5",cor:T.cyan}
+              ].map(function(item,i){var on=!!(ratingMes[item.k]);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                <button onClick={function(){togRatingTask(item.k)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:item.cor),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={9} color="#020208" />}</button>
+                <span style={{fontSize:9,color:on?T.dim:T.muted,textDecoration:on?"line-through":"none",lineHeight:1.4,flex:1}}>{item.t}</span>
+              </div>;})}
+            </div>
+
+            {/* Upgrade path */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:10}}>🚀 CAMINHO DE UPGRADE</div>
+              {[
+                {de:"AAdvantage Platinum",para:"Santander Unlimited",quando:"29/10/2026 (1ª tentativa) → 30/11 → 29/12",requisitos:"8+ meses Select, R$ 100k invest., score 850+, uso consistente",cor:"#E11931",k:"coach_upgrade_sant"},
+                {de:"Itaú Platinum",para:"Personnalité → Black",quando:"29/01/2027 (após quitação dívidas dez/26)",requisitos:"Renda R$ 21.671 qualifica. Investir no Itaú ou usar Open Finance.",cor:"#FF7A00",k:"coach_upgrade_itau"},
+                {de:"Bradesco Nanquim",para:"Aeternum / Prime",quando:"Mar/2027+ (após 3 meses sem dívida)",requisitos:"Quitar empréstimo. Pedir aumento limite. Construir relacionamento.",cor:"#CC092F",k:"coach_upgrade_brad"}
+              ].map(function(path,i){var ck=path.k;var on=!!(ratingMes[ck]);var stKey=ck+"_status";var stVal=ratingMes[stKey]||"pendente";return <div key={i} style={{marginBottom:8,borderRadius:12,padding:12,background:"linear-gradient(135deg, "+path.cor+"06, rgba(0,0,0,0.15))",border:"1px solid "+(on?T.green:path.cor)+"15"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <button onClick={function(){togRatingTask(ck)}} style={{width:20,height:20,borderRadius:"50%",border:"2px solid "+(on?T.green:path.cor),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.2s"}}>{on&&<Check size={10} color="#020208" />}</button>
+                  <div style={{fontSize:10,fontWeight:700,color:on?T.dim:path.cor,textDecoration:on?"line-through":"none"}}>{path.de}</div>
+                  <span style={{fontSize:10,color:T.dim}}>→</span>
+                  <div style={{fontSize:10,fontWeight:800,color:on?T.green:T.text}}>{path.para}</div>
+                  <select value={stVal} onChange={function(e){var rm2=Object.assign({},db.ratingMensal||{});var rk2=ano+"-"+String(mes).padStart(2,"0");rm2[rk2]=Object.assign({},rm2[rk2]||{});rm2[rk2][stKey]=e.target.value;sv(Object.assign({},db,{ratingMensal:rm2}))}} style={{marginLeft:"auto",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,padding:"2px 6px",color:stVal==="aprovado"?T.green:stVal==="negado"?T.red:stVal==="analise"?T.gold:T.dim,fontSize:7,fontWeight:700,outline:"none",fontFamily:"inherit"}}>
+                    <option value="pendente">Pendente</option>
+                    <option value="negado">Negado</option>
+                    <option value="analise">Análise</option>
+                    <option value="aprovado">Aprovado!</option>
+                  </select>
+                </div>
+                <div style={{fontSize:8,color:T.dim,lineHeight:1.4,marginLeft:28}}>📅 {path.quando}</div>
+                <div style={{fontSize:8,color:T.muted,marginTop:2,lineHeight:1.4,marginLeft:28}}>📋 {path.requisitos}</div>
+              </div>;})}
+            </div>
+          </div>}
+
+          {/* ═══ TRACKER ═══ */}
+          {coachSub==="tracker" && <div>
+            {/* Score input */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:8}}>📊 SCORE SERASA — {MSF[mes-1]} {ano}</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Digite o score consultado neste mês</div>
+              <input type="number" placeholder="Ex: 763" value={scoreInput||""} onChange={function(e){setScoreInput(e.target.value?parseInt(e.target.value):0)}} style={{width:"100%",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(0,229,255,0.12)",borderRadius:10,padding:"8px 12px",color:T.cyan,fontFamily:"monospace",fontSize:18,fontWeight:700,textAlign:"center",outline:"none"}} />
+              <div style={{marginTop:10,display:"flex",justifyContent:"space-between",padding:"6px 10px",background:"rgba(0,0,0,0.15)",borderRadius:8}}>
+                <span style={{fontSize:9,color:T.dim}}>Início (ABR/26)</span>
+                <span style={{fontSize:10,fontWeight:700,color:T.cyan,fontFamily:"monospace"}}>763 pts</span>
               </div>
-              {}
-              <div style={bx}>
-                <div style={{fontSize:13,fontWeight:900,marginBottom:10,letterSpacing:-0.2}}>Trilha de evolucao do rating</div>
-                <ResponsiveContainer width="100%" height={180}><AreaChart data={historicoRatingData}><CartesianGrid strokeDasharray="3 3" stroke={T.border} /><XAxis dataKey="nome" tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} /><YAxis tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} /><Tooltip content={<Tip />} /><Area type="monotone" dataKey="geral" name="Geral" stroke={ratingColor} fill="rgba(59,130,246,0.18)" strokeWidth={2} /><Area type="monotone" dataKey="santander" name="Santander" stroke="#E11931" fill="rgba(225,25,49,0.12)" strokeWidth={2} /><Area type="monotone" dataKey="itau" name="Itau" stroke="#FF7A00" fill="rgba(255,122,0,0.12)" strokeWidth={2} /></AreaChart></ResponsiveContainer>
+              <div style={{marginTop:6,display:"flex",justifyContent:"space-between",padding:"6px 10px",background:"rgba(0,0,0,0.15)",borderRadius:8}}>
+                <span style={{fontSize:9,color:T.dim}}>Atual</span>
+                <span style={{fontSize:10,fontWeight:700,color:scoreInput>=800?T.green:scoreInput>=700?T.gold:T.red,fontFamily:"monospace"}}>{scoreInput||"—"} pts</span>
+              </div>
+              <div style={{marginTop:6,display:"flex",justifyContent:"space-between",padding:"6px 10px",background:scoreInput>=800?"rgba(0,255,136,0.04)":"rgba(255,208,0,0.04)",borderRadius:8}}>
+                <span style={{fontSize:9,color:T.dim}}>Status</span>
+                <span style={{fontSize:10,fontWeight:700,color:scoreInput>=800?T.green:T.gold}}>{scoreInput>=900?"EXCELENTE":scoreInput>=800?"BOM":scoreInput>=700?"CONSTRUINDO":"CRÍTICO"}</span>
               </div>
             </div>
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              {}
-              <div style={bx}>
-                <div style={{fontSize:13,fontWeight:900,marginBottom:8,letterSpacing:-0.2}}>Acoes do mes para rating impecavel</div>
-                <div style={{display:"flex",flexDirection:"column",gap:7}}>{[focoEstrategico.acaoPrincipal].concat(planoSantander.actions.slice(0,2)).concat(planoItau.actions.slice(0,2)).slice(0,5).map(function(a,i){return <div key={i} style={{padding:"9px 10px",borderRadius:10,background:T.cyan+"10",border:"1px solid "+T.cyan+"16",fontSize:10,color:T.muted}}>{i+1}. {a}</div>;})}</div>
-              </div>
-              {}
-              <div style={bx}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:13,fontWeight:900,letterSpacing:-0.2}}>Checklist semanal</div><span style={{fontSize:10,color:T.cyan,fontWeight:800}}>{checklistSemanal.filter(function(x){return x.ok}).length}/{checklistSemanal.length}</span></div>
-                <div style={{display:"flex",flexDirection:"column",gap:6}}>{checklistSemanal.map(function(item){return <div key={item.id} onClick={function(){togWeeklyTask(item.id)}} style={{display:"grid",gridTemplateColumns:"auto 1fr",gap:10,padding:"10px 12px",borderRadius:12,background:item.ok?"rgba(16,185,129,0.06)":"rgba(255,255,255,0.02)",border:"1px solid "+(item.ok?"rgba(16,185,129,0.12)":"rgba(255,255,255,0.05)"),cursor:"pointer"}}>
-                  <div style={{width:20,height:20,borderRadius:6,background:item.ok?T.green:"transparent",border:item.ok?"none":"2px solid rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{item.ok && <Check size={12} color="#fff" strokeWidth={3} />}</div>
-                  <div><div style={{fontSize:11,fontWeight:700,color:item.ok?T.text:T.muted}}>{item.label}</div><div style={{fontSize:9,color:T.dim,marginTop:2}}>{item.detail}</div></div>
-                </div>;})}</div>
-                <div style={{marginTop:8,fontSize:9,color:T.dim,textAlign:"center"}}>Reseta automaticamente toda segunda-feira. Semana atual: {weekKey}</div>
-              </div>
-              {}
-              <div style={bx}>
-                <div style={{fontSize:13,fontWeight:900,marginBottom:8,letterSpacing:-0.2}}>Calendario financeiro premium</div>
-                <div style={{display:"flex",flexDirection:"column",gap:6}}>{calendarioFinanceiro.map(function(ev){return <div key={ev.id} style={{display:"grid",gridTemplateColumns:"38px 1fr",gap:8,alignItems:"center",padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{width:32,height:32,borderRadius:8,background:ev.cor+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:ev.cor,border:"1px solid "+ev.cor+"18"}}>{String(ev.dia).padStart(2,"0")}</div><div><div style={{fontSize:11,fontWeight:700}}>{ev.titulo}</div><div style={{fontSize:9,color:T.dim}}>{ev.subtitulo}</div></div></div>;})}</div>
+
+            {/* Patrimônio */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.purple,marginBottom:8}}>💎 PATRIMÔNIO SANTANDER</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Saldo total investido no Santander</div>
+              <input type="number" placeholder="Ex: 25000" value={patrimInput||""} onChange={function(e){setPatrimInput(e.target.value?parseInt(e.target.value):0)}} style={{width:"100%",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(184,77,255,0.15)",borderRadius:10,padding:"8px 12px",color:T.purple,fontFamily:"monospace",fontSize:18,fontWeight:700,textAlign:"center",outline:"none"}} />
+              <div style={{marginTop:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                  <span style={{fontSize:9,color:T.dim}}>Meta: R$ 100.000</span>
+                  <span style={{fontSize:9,fontWeight:700,color:T.purple,fontFamily:"monospace"}}>{f$(patrimInput||0)} / R$ 100k</span>
+                </div>
+                <PB value={patrimInput||0} max={100000} color={T.purple} h={6} />
               </div>
             </div>
-          </div>
-        </div>}
+
+            {/* Card attempt log */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.gold,marginBottom:8}}>📌 TENTATIVAS DE CARTÃO</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>1 tentativa/mês, dia 29 (ou próximo útil)</div>
+              {CARD_DATES.map(function(dt,i){var tentKey="_tent_sant_"+i;var tentVal=ratingMes[tentKey]||"";return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",marginBottom:3,borderRadius:10,background:"rgba(255,255,255,0.015)",border:"1px solid rgba(255,255,255,0.03)"}}>
+                <span style={{fontSize:9,fontWeight:700,color:T.gold,fontFamily:"monospace",width:36}}>{dt}</span>
+                <span style={{fontSize:9,color:T.dim,flex:1}}>Unlimited</span>
+                <select value={tentVal} onChange={function(e){updRatingTentativa("sant_"+i,e.target.value)}} style={{background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,padding:"2px 6px",color:tentVal==="aprovado"?T.green:tentVal==="negado"?T.red:tentVal==="analise"?T.gold:T.dim,fontSize:8,fontWeight:700,outline:"none",fontFamily:"inherit"}}>
+                  <option value="">Pendente</option>
+                  <option value="negado">Negado</option>
+                  <option value="analise">Análise</option>
+                  <option value="aprovado">Aprovado</option>
+                </select>
+              </div>;})}
+            </div>
+
+            {/* Rotina semanal */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:8}}>🔄 ROTINA SEMANAL</div>
+              {[0,1,2,3].map(function(sem){return <div key={sem} style={{background:"rgba(0,0,0,0.12)",borderRadius:10,padding:10,marginBottom:4}}>
+                <div style={{fontSize:8,fontWeight:700,color:T.cyan,letterSpacing:1.5,marginBottom:6}}>SEMANA {sem+1}</div>
+                {WEEKLY_TASKS.map(function(w,wi){return <div key={wi} style={{marginBottom:3}}>
+                  <div style={{fontSize:8,color:T.purple,fontWeight:600,marginBottom:2}}>{w.day}</div>
+                  {w.tasks.map(function(task,ti){var k="coach_wk_"+wi+"_"+ti+"_"+sem;var on=!!(ratingMes[k]);return <div key={ti} style={{display:"flex",alignItems:"center",gap:6,padding:"3px 0"}}><button onClick={function(){togRatingTask(k)}} style={{width:14,height:14,borderRadius:"50%",border:"1.5px solid "+(on?T.green:T.cyan),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={7} color="#020208" />}</button><span style={{fontSize:9,color:on?T.dim:T.muted,textDecoration:on?"line-through":"none"}}>{task}</span></div>;})}
+                </div>;})}
+              </div>;})}
+            </div>
+
+            {/* Rating history (existing) */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:ratingColor,marginBottom:8}}>📈 EVOLUÇÃO DO RATING INTERNO</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:10}}>
+                {[{l:"Score geral",v:ratingScore+"/100",c:ratingColor},{l:"Santander",v:planoSantander.score+"/100",c:"#E11931"},{l:"Variação",v:(ratingDelta>=0?"+":"")+ratingDelta+" pts",c:ratingDeltaColor}].map(function(x,i){return <div key={i} style={{padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.04)",textAlign:"center"}}><div style={{fontSize:7,color:T.dim,letterSpacing:0.5,fontWeight:600}}>{x.l.toUpperCase()}</div><div style={{fontSize:13,fontWeight:800,fontFamily:"monospace",color:x.c}}>{x.v}</div></div>;})}
+              </div>
+              <PB value={ratingScore} max={100} color={ratingColor} h={6} />
+            </div>
+          </div>}
+
+          {/* ═══ DÍVIDAS ═══ */}
+          {coachSub==="dividas" && <div>
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.red,marginBottom:8}}>📉 CASCATA DE DÍVIDAS</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:12}}>31 parcelas ativas em ABR/26. Veja quando cada uma termina.</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:12}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:7,color:T.dim}}>TOTAL ABR</div><div style={{fontSize:13,fontWeight:800,color:T.red,fontFamily:"monospace"}}>R$ 4.777</div></div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:7,color:T.dim}}>PARCELAS</div><div style={{fontSize:13,fontWeight:800,color:T.gold,fontFamily:"monospace"}}>31</div></div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:7,color:T.dim}}>LIVRE EM</div><div style={{fontSize:13,fontWeight:800,color:T.green,fontFamily:"monospace"}}>DEZ/26</div></div>
+              </div>
+              {debtEntries.map(function(group,gi){var isLast=gi===debtEntries.length-1;return <div key={gi} style={{marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:isLast?T.green:T.gold,boxShadow:"0 0 6px "+(isLast?T.green:T.gold)+"50"}} />
+                  <span style={{fontSize:9,fontWeight:800,color:isLast?T.green:T.gold,fontFamily:"monospace"}}>{group.moLabel}</span>
+                  <div style={{flex:1,height:1,background:"rgba(255,255,255,0.03)"}} />
+                  <span style={{fontSize:9,fontWeight:700,color:T.green,fontFamily:"monospace"}}>+{f$(group.total)}/mês</span>
+                </div>
+                <div style={{marginLeft:16,borderLeft:"1px solid rgba(255,255,255,0.03)",paddingLeft:10}}>
+                  {group.items.map(function(p,pi){return <div key={pi} style={{display:"flex",justifyContent:"space-between",padding:"2px 0",borderBottom:pi<group.items.length-1?"1px solid rgba(255,255,255,0.015)":"none"}}><span style={{fontSize:9,color:p.s?T.red:T.muted}}>{p.n}{p.s?" ⚠️":""}</span><span style={{fontSize:9,color:T.dim,fontFamily:"monospace"}}>{f$(p.v)}</span></div>;})}
+                </div>
+              </div>;})}
+            </div>
+
+            {/* Bar chart */}
+            <div style={coachBx}>
+              <div style={{fontSize:9,fontWeight:700,color:T.dim,letterSpacing:1,marginBottom:6}}>PARCELAS RESTANTES POR MÊS</div>
+              <div style={{display:"flex",gap:2,alignItems:"flex-end",height:55}}>
+                {Array.from({length:10},function(_,i){var m2=i+1;var val=PARCELAS_DATA.filter(function(p){return p.t>=m2}).reduce(function(s,p){return s+p.v},0);var h=Math.max((val/4777)*50,2);var c=val>3000?T.red:val>1000?T.gold:val>0?T.orange:T.green;return <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>{val>0&&<div style={{fontSize:6,color:c,fontWeight:700,fontFamily:"monospace"}}>{(val/1000).toFixed(1)}k</div>}<div style={{width:"100%",height:h,borderRadius:3,background:c}} /><div style={{fontSize:5,color:T.dim}}>{["ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ","JAN"][i]}</div></div>;})}
+              </div>
+            </div>
+          </div>}
+
+          {/* ═══ REGRAS ═══ */}
+          {coachSub==="regras" && <div>
+            {/* Proibido */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.red,marginBottom:8}}>🚫 AUDITORIA MENSAL — PROIBIDO</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Marque TODOS para confirmar que não se sabotou</div>
+              {PROIBIDO_ITEMS.map(function(item,i){var k="coach_pb_"+i;var on=!!(ratingMes[k]);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:i<PROIBIDO_ITEMS.length-1?"1px solid rgba(255,255,255,0.02)":"none"}}><button onClick={function(){togRatingTask(k)}} style={{width:16,height:16,borderRadius:"50%",border:"1.5px solid "+(on?T.green:T.red),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={8} color="#020208" />}</button><span style={{fontSize:9,color:on?T.green:T.muted,lineHeight:1.4}}>{item}</span>{on&&<span style={{fontSize:6,fontWeight:700,color:T.green,background:T.green+"12",padding:"1px 4px",borderRadius:3,marginLeft:"auto"}}>OK</span>}</div>;})}
+              <div style={{textAlign:"center",marginTop:8}}>
+                <span style={{fontSize:11,fontWeight:800,color:PROIBIDO_ITEMS.every(function(_,i){return !!(ratingMes["coach_pb_"+i])})?T.green:T.red,fontFamily:"monospace"}}>{PROIBIDO_ITEMS.filter(function(_,i){return !!(ratingMes["coach_pb_"+i])}).length}/{PROIBIDO_ITEMS.length}</span>
+                <span style={{fontSize:9,color:T.dim,marginLeft:6}}>{PROIBIDO_ITEMS.every(function(_,i){return !!(ratingMes["coach_pb_"+i])})?"MÊS LIMPO! ✓":"itens pendentes"}</span>
+              </div>
+            </div>
+
+            {/* Melhorias avançadas */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.purple,marginBottom:8}}>🧠 MELHORIAS AVANÇADAS</div>
+              {MELHORIAS.map(function(item,i){return <div key={i} style={{display:"flex",gap:8,padding:"7px 0",borderBottom:i<MELHORIAS.length-1?"1px solid rgba(255,255,255,0.02)":"none"}}><span style={{fontSize:13,flexShrink:0}}>{item.ic}</span><div><div style={{fontSize:10,fontWeight:700,color:T.text}}>{item.t}</div><div style={{fontSize:8,color:T.dim,marginTop:2,lineHeight:1.4}}>{item.d}</div></div></div>;})}
+            </div>
+
+            {/* Onde colocar o dinheiro */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:8}}>💎 ONDE COLOCAR O DINHEIRO</div>
+              {[{t:"CC Santander (almofada)",v:"R$ 8.000",d:"Nunca mexer. Saldo médio estável.",c:T.cyan},{t:"CDB Liquidez (dia 26)",v:"R$ 2.000/mês",d:"40% do aporte. ~14% a.a.",c:T.cyan},{t:"LCI/LCA (dia 26)",v:"R$ 3.000/mês",d:"60% do aporte. Isento IR.",c:T.purple},{t:"Cartão Santander (80%)",v:"~R$ 3.360/mês",d:"Todo gasto possível. AAdvantage→Unique→Unlimited.",c:T.gold},{t:"Previdência PGBL",v:"R$ 100+/mês",d:"Deduz IR + produto relacionamento.",c:T.green},{t:"Seguro",v:"R$ 40-80/mês",d:"+1 produto = +rating.",c:T.green}].map(function(item,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",padding:"5px 0",borderBottom:i<5?"1px solid rgba(255,255,255,0.02)":"none"}}><div><div style={{fontSize:9,fontWeight:600,color:T.muted}}>{item.t}</div><div style={{fontSize:7,color:T.dim,marginTop:1}}>{item.d}</div></div><span style={{fontSize:9,fontWeight:700,color:item.c,fontFamily:"monospace",flexShrink:0,marginLeft:8}}>{item.v}</span></div>;})}
+              <div style={{marginTop:8,background:"rgba(255,138,80,0.03)",borderRadius:8,padding:8,borderLeft:"2px solid "+T.orange+"25",opacity:0.7}}>
+                <div style={{fontSize:8,fontWeight:600,color:T.orange}}>🔧 Itaú + Bradesco = hibernação</div>
+                <div style={{fontSize:8,color:T.dim,marginTop:2}}>R$ 1.000 + R$ 500 nas CCs. 1 compra/mês cada cartão. Pagar parcelas até dez/26.</div>
+              </div>
+            </div>
+
+            {/* Projeção */}
+            <div style={coachBx}>
+              <div style={{fontSize:11,fontWeight:800,color:T.cyan,marginBottom:8}}>📈 PROJEÇÃO</div>
+              {[{m:"ABR-JUN",d:"Select aberto. Salário portado. R$ 15-20k invest. Score 780+. Elite/Unique.",c:T.cyan},{m:"JUL-SET",d:"R$ 30-40k invest. Score 820+. 5+ meses Select. Solicitar Unlimited.",c:T.purple},{m:"OUT-DEZ",d:"6-8 meses Select. R$ 50-60k. Score 860+. Serasa quitado. UNLIMITED!",c:T.gold},{m:"JAN-MAR 27",d:"Rating máximo. R$ 70k+. Score 900+. Unlimited com anuidade isenta.",c:T.green}].map(function(item,i){return <div key={i} style={{display:"flex",gap:8}}>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:8}}><div style={{width:7,height:7,borderRadius:"50%",background:item.c,boxShadow:"0 0 6px "+item.c+"50"}} />{i<3&&<div style={{width:1,flex:1,background:item.c+"15",minHeight:24}} />}</div>
+                <div style={{flex:1,paddingBottom:8}}><div style={{fontSize:9,fontWeight:800,color:item.c,fontFamily:"monospace"}}>{item.m}</div><div style={{fontSize:8,color:T.dim,marginTop:2,lineHeight:1.4}}>{item.d}</div></div>
+              </div>;})}
+            </div>
+          </div>}
+
+        </div>;
+        })()}
 
         {}
         {tab==="orc" && <div>
@@ -3744,7 +4138,7 @@ export default function App() {
         </div>}
 
         </div>
-        <div style={{textAlign:"center",paddingTop:16,marginTop:24,borderTop:"1px solid rgba(255,255,255,0.04)",color:T.dim,fontSize:9,letterSpacing:0.3}}>Finance Executive Dashboard v{VER} • {db.lancamentos.length} lancamentos + {lancEx.length - db.lancamentos.length} projetados</div>
+        <div style={{textAlign:"center",paddingTop:16,marginTop:24,borderTop:"1px solid rgba(255,255,255,0.04)",color:T.dim,fontSize:9,letterSpacing:0.3}}>COJUR Vault v{VER} • {db.lancamentos.length} lancamentos + {lancEx.length - db.lancamentos.length} projetados</div>
       </div>
 
       <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(2,2,8,0.92)",borderTop:"1px solid rgba(0,229,255,0.10)",display:"flex",alignItems:"center",padding:"5px 4px",paddingBottom:"max(5px, env(safe-area-inset-bottom))",zIndex:900,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",overflowX:"auto",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",gap:1}}>
