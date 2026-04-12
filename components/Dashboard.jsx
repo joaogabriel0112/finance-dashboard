@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle, PiggyBank, Wallet, BarChart3, ArrowUpRight, ArrowDownRight, Edit3, Check, Bell, Shield, Activity, Landmark, RotateCcw, CheckCircle, Download, Plus, Trash2, X, Search, Calendar, Filter, ChevronLeft, ChevronRight, ChevronDown, Copy, Upload, Sun, Moon, Heart, Repeat, Zap } from "lucide-react";
 
 var T_DARK = { bg:"#020208", surface:"#080814", card:"#0A0A1A", cardAlt:"#0F0F22", border:"rgba(0,229,255,0.10)", text:"#E8F0FF", muted:"#7B8DA6", dim:"#4A5A72", green:"#00FF88", greenL:"#39FFAD", gold:"#FFD000", amber:"#FF9F0A", red:"#FF2E5B", ruby:"#FF1A4A", blue:"#00AAFF", bluePremium:"#00C6FF", purple:"#B84DFF", cyan:"#00E5FF", pink:"#FF3CA0", orange:"#FF7A00", sky:"#00D4FF", steel:"#6A7A90", emerald:"#00FF88", whiteA:"rgba(0,229,255,0.04)", whiteB:"rgba(0,229,255,0.08)", glass:"rgba(0,229,255,0.03)", shadow:"0 0 40px rgba(0,229,255,0.08)" };
@@ -7,11 +7,103 @@ var T_LIGHT = { bg:"#F4F6FA", surface:"#FFFFFF", card:"#FFFFFF", cardAlt:"#F0F2F
 var T = T_DARK;
 var PC = [T.green,T.blue,T.gold,T.purple,T.cyan,T.pink,T.orange,"#FF6B6B",T.greenL,"#00AAFF"];
 var MS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-var MSF = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var MSF = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 var VER = 13;
 var SK = "findash8";
-var SUPA_URL = "https://vcxastdcsbzdsfcdbtan.supabase.co/functions/v1/findash-proxy";
-var FRASES = ["Cada real investido hoje e liberdade amanha.","Disciplina financeira constroi tranquilidade.","Pequenos aportes consistentes constroem fortunas.","O melhor momento para investir e agora.","Sua liberdade financeira esta perto.","Juros compostos trabalham por voce."];
+var FRASES = [
+"Cada real investido hoje é liberdade amanhã.",
+"Disciplina financeira constrói tranquilidade.",
+"Pequenos aportes consistentes constroem fortunas.",
+"O melhor momento para investir é agora.",
+"Sua liberdade financeira está perto.",
+"Juros compostos trabalham por você.",
+"Riqueza é o que você não gastou.",
+"Invista no que te deixa dormir tranquilo.",
+"Paciência é o ingrediente secreto dos milionários.",
+"Seu eu do futuro agradece cada aporte de hoje.",
+"Consistência vence intensidade no longo prazo.",
+"Dinheiro parado é dinheiro perdendo valor.",
+"Cada meta atingida é um degrau para a liberdade.",
+"Não é sobre quanto você ganha, é sobre quanto você guarda.",
+"A magia dos juros compostos precisa apenas de tempo.",
+"Construa patrimônio enquanto outros constroem dívidas.",
+"O hábito de investir importa mais que o valor.",
+"Liberdade financeira se conquista um mês de cada vez.",
+"Quem poupa hoje colhe independência amanhã.",
+"Sua disciplina de hoje define seu padrão de vida amanhã.",
+"Investir é plantar árvores cuja sombra você ainda vai precisar.",
+"O tempo no mercado vence o timing do mercado.",
+"Patrimônio se constrói em silêncio.",
+"Cada R$ 100 investido vira R$ 200 com paciência.",
+"A independência financeira é um estilo de vida, não um destino.",
+"Metas claras transformam sonhos em planos.",
+"O primeiro milhão é o mais difícil. Comece agora.",
+"Dinheiro investido é soldado trabalhando por você 24h.",
+"Aporte mensal é compromisso com o seu futuro.",
+"Enriquecer é um processo, não um evento.",
+"Proteja seu patrimônio como protege sua saúde.",
+"Rentabilidade vem da disciplina, não da sorte.",
+"O melhor investimento é aquele que você mantém.",
+"Sua reserva de emergência é seu escudo contra o caos.",
+"Cada mês sem dívida é um mês de liberdade.",
+"Faça seu dinheiro trabalhar enquanto você dorme.",
+"Metas financeiras são promessas que você faz a si mesmo.",
+"O caminho para R$ 100 mil começa com o primeiro aporte.",
+"Pense em décadas, não em dias.",
+"Quem investe com constância nunca se arrepende.",
+"Sua conta de investimentos é seu segundo salário em construção.",
+"Aportar é cuidar de quem você será daqui a 10 anos.",
+"O segredo não é ganhar mais, é administrar melhor.",
+"Patrimônio sólido se constrói com decisões simples e repetidas.",
+"Invista primeiro, gaste o que sobrar.",
+"A melhor hora para começar foi ontem. A segunda melhor é agora.",
+"Foque no processo, os resultados virão.",
+"Cada meta batida prova que você é capaz da próxima.",
+"O dinheiro é um ótimo servo, mas um péssimo mestre.",
+"Sua jornada financeira é única. Compare-se apenas com quem você era ontem."
+];
+var FRASES_PARC = [
+"Não é o seu salário que te faz rico, é o seu hábito de gastar. — Charles A. Jaffe",
+"Cuidado com pequenas despesas: um pequeno vazamento afunda um grande navio. — Benjamin Franklin",
+"O preço de qualquer coisa é a quantidade de vida que você troca por ela. — Henry David Thoreau",
+"Nunca gaste o seu dinheiro antes de tê-lo. — Thomas Jefferson",
+"A dívida é a escravidão do homem livre. — Publilius Syrus",
+"Regra nº 1: nunca perca dinheiro. Regra nº 2: nunca esqueça a regra nº 1. — Warren Buffett",
+"Quanto mais cedo você começar a trabalhar para diminuir suas dívidas, mais rápido alcançará a paz financeira. — Dave Ramsey",
+"Uma pessoa rica não é quem tem mais, mas quem precisa de menos. — Sêneca",
+"O investimento em conhecimento sempre paga os melhores juros. — Benjamin Franklin",
+"Se você comprar coisas de que não precisa, logo terá de vender coisas de que precisa. — Warren Buffett",
+"Riqueza consiste não em ter grandes posses, mas em ter poucas necessidades. — Epicteto",
+"O homem que não sabe administrar pouco, não administrará muito. — Robert Kiyosaki",
+"Gaste menos do que ganha e invista a diferença. A simplicidade reside nisso. — J.L. Collins",
+"Dinheiro é apenas uma ferramenta. Ele te levará aonde quiser, mas não substituirá você como motorista. — Ayn Rand",
+"A liberdade financeira está disponível para quem aprende sobre ela e trabalha por ela. — Robert Kiyosaki",
+"Não economize o que sobra após gastar; gaste o que sobra após economizar. — Warren Buffett",
+"Os juros compostos são a oitava maravilha do mundo. Quem entende, ganha. Quem não entende, paga. — Albert Einstein",
+"O caminho para a riqueza depende de duas palavras: trabalho e poupança. — Benjamin Franklin",
+"Seu nível de sucesso raramente excede seu nível de desenvolvimento pessoal. — Jim Rohn",
+"A maior riqueza é viver contente com pouco. — Platão",
+"Pessoas ricas adquirem ativos. Pessoas pobres e de classe média adquirem passivos pensando que são ativos. — Robert Kiyosaki",
+"Não se trata de ter tudo, mas de aproveitar tudo que você tem. — Gustavo Cerbasi",
+"Um orçamento diz ao dinheiro para onde ir, em vez de perguntar para onde ele foi. — Dave Ramsey",
+"O melhor momento para plantar uma árvore foi 20 anos atrás. O segundo melhor momento é agora. — Provérbio chinês",
+"Quem vive de aparência morre de realidade. — Gustavo Cerbasi",
+"Corte seu casaco de acordo com o tecido que tem. — Provérbio inglês",
+"O problema não é o quanto você ganha, é o quanto você gasta. — Will Smith",
+"A paciência é amarga, mas seu fruto é doce. — Jean-Jacques Rousseau",
+"Investir é transferir poder de compra do presente para o futuro. — Howard Marks",
+"A diferença entre quem é rico e quem não é: disciplina. — Tony Robbins",
+"Dívida é normal. Seja esquisito. — Dave Ramsey",
+"A simplicidade é o último grau de sofisticação. — Leonardo da Vinci",
+"Não trabalhe pelo dinheiro; faça o dinheiro trabalhar por você. — Robert Kiyosaki",
+"Uma jornada de mil milhas começa com um único passo. — Lao-Tsé",
+"O dinheiro que você tem lhe dá liberdade; o dinheiro que você persegue lhe tira. — Jean-Jacques Rousseau",
+"Mais importante do que o retorno sobre o investimento é o retorno do investimento. — Will Rogers",
+"Toda conquista começa com a decisão de tentar. — John F. Kennedy",
+"Controle seus gastos ou eles controlarão você. — John Bogle",
+"O sucesso financeiro não é um sprint, é uma maratona. — Suze Orman",
+"A riqueza não é fruto de grandes rendas, mas de hábitos inteligentes. — Nathalia Arcuri"
+];
 
 var BANK_LOGOS = {
   itau: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAKl0lEQVR42u2ba4xdVRXHf2vvc+68OqXttJSWaYdWqKUUWpG2IiAlYAyQaEhMCUQIYEKs4Bc+aCQGE2JEY0wkURKJkRAwPE00AgZBECqBFgWxFJDGPqfl1ZkW5n3P2Xv5Ye/7aqcF6y29lbOTO/fMPefss/b/rL0e/7W3qKpStMNupoCgALAAsACwALBoBYAFgAWABYBFKwAsACwALAAsWgFgAWAB4CemJa0ljsKH0btS/fNJA1BB46cCVAUMMSASjz9qdwrqJ+lLan19DE2OKKWvCurCYIydDNLG/30OLgOXh2P1ARsxiEnAJmBTMEmDQk4KlXfhCWIjoMcagOqDZkWgvMvQvf2wZzu6Zyvs2Yrs3QVDe2BkEBkfQrMxJBsDl6HORQ0DxCA2AZOgaTuUuqC9C7p60O6ZyPRedOZJSM8CmNWHmT4PsUkN2DpZjo0pHAV2Y3vxLzwEr/8Z2fkPZGAHMjYOOYhGzTFRhcx+6iQHUVetvJHatwIqYTTa2Y7O6MP1LkOXXIj93Bpsx7QjBmLzNTAKmm3ZgP/FFaS7tmBMfFUJYSqLCQBpHTINYuihPEg8rEO60pf6MHVzIA+HrncheuN9lBasPCIgNhfA2JUbHSS/ZTltb/VDdwm8b3QgR9as1xyJMTBUpjxnPubWl0g6Z+wHfqvFgepABL/hQdJdEbw8C6pQ8Zgfi7evaGIG3SXS/h34DQ8G4NS1ciAd3+zrTyFGwLdAzd4rYgV54+mDGNeWAVDBWLzPMP0bkURrXvSoxuYeEkX6X8X5LIZT2oIARvun+96GwZ3BYbTCqhFVSEAGtgfZaK5cTQeQge3I6Ggw4LTCshsFY4JMA9tbGMAIlg5sC2GE2NZJscUiGSGAP2SYdFQ1MH7t2YH4lsr3a/IN7mw2fk0EUKJce3cG7Fpx0dy+t5ruiJs4hYNU8sE7sVdtKfUTA3zwdtNDmSZqoATIhgdbb/pWEpShAXzLZiJiAhcw9kHotd7TVTm6oxjKCMjY+62aykUP7B1aHmnUQDHgfMiH5QhWECQSsyaZlHvEgE6MoD7yk00yMc0dkSsHPq8OQJ1wuK5puFIHlF3tnLEHH+zhkAfOw4SD4Qwdyw80I0LkGstNHXLSNAUUQvKeZ5HXM+i4I1t9DXbNj/BjH+DvvIp08wYoCYzm4EANSIccNnbqfCCfp0xFp/ei85ai6imt/y0k0sAAicvA540ytwSAVVPjApMcc1BNwHz5u9ips7FTZ5NddAP66nrobCdf+llk/mfwU6aRPHIbxudxQugk3l0nn7Jlxc89GX/9bzCzFmK6exCE7M1n0HUPI6mtsS8STIy4vAU1sC5xF+po+NzhNj2JOX5R+O2NZxAxuGlzkG8/hbUpsm8XPPrjMJ0rnKFJAmjeE6jnWFPROoKikipOmYEsOAspj8HwAGos7NsNSRJtbh19VeElWxbAel1Rh5SE5K4bcC/ch44NkWx9JRjzoT2Y8ijS1gVDe9ChcrivBJIAwxleQEqgSXBCMpqHc+02AFHO0Qzk9Q2wdgq0dQagXY4d3Qfl6HzbpEE6pYUBFDG1HFgMmjn8+VdhFq4AsTj7K9yU4+G8ayEpgUmQnj782l/iTII+fy/2tefIL/46suhczKwFaHsXWp6AXZvgqTtINr+ICGSnno2s/gaiHr/xcZJn7w9mePEK5IK1eGPxrz2J/cu9mA4TNFlM0yOB5mqgScDaaKANlHNYvBp77nXBSW/8E3LyKtKVl8eyI5jOaZgvXB/O73oV7d9EcvUdB4YHC1bgz76S/PbLSNc9hsxdSnL21VGxBH32gWAte5eRnHttnLE5PHEPdJpQ4TRJQ0m0dQCszJJK3bY+dBgfrnk+Y9DX/ko+5/fYpV9CjMWPvY9/+XdgUtj6ElJqJ39vK7JlA+zeCGPDsOQCktMvxdgS/oqf4tc/hpRHav2OD9WMRzZe+32iMSbVJA3l0SZmc01+HSW01BE1MEioxtTeeudU0ifvxu1Yj/5kC0I7fnAn/PyaUNVMgc5OuOV0ZPdIcMptkD16O9ktT1P69PmY2SejJ/RAPoGaWPutn5ZC7XmV3yUwHZp2BNPRelNYqrwbpc6GqEO0MaWSksF0HhcLuSDGwpQUo9Hbjo5CYnFf/SYsuxQzZzFpUoL2KVUzoZ0zEO8bE55JjhqaB2nrRKo8pbSYBlZqrh3HETP2g16nDYOvVNFCCOM6jsPd9AfSRech0Y7p++9ikrZa8LsfXxZCZUEOVU9W0I5p8dbmpZVNpfQFoGt6NXSL9v2gJrMaOzoX4rYxj7tobQDP52RP/Ax/0wL4Vh/5c/fsRwLUBdjqEJ2sQN8YX/numRHAFqb06Z4dD2WSKVzJCMqoxqB26mzyqbPxI2WcgJm3HPE53iToc/eQbO4PC41OOKUBPM3G0QqIC1aStyc4BZZdcuCbEgkxYffs+JO2mg0MMgmgM3ob00z1Va8o6sGC7H0Xt2crdt5ybMd09DtP4wf78fffhPS/DKsux+Rl7HW/przofuS0c0gWXwB5ORSI0nZ028t49VgFu2AF7vvPo86RLFwVPLFNGsuqCjL9xNam9AGkpw+t61XbuiLrkqBpW8jKMoc+fDMuDjSZcyrJaV/EHH8K8vidlN/9N5qUsPOXUbryNswZl5C/s7kafNMxFbvzbfJHbkONQcSQ9J2FXbiKbMt6SNvDdaWuRjPYM6/plH4Tw5goVU8fmgAuC2nUurvItrwIKOZf6yAFSpb0738kv3Ul7syvIN0z0dEhTP8/SUb2kv/g82TnfA0zdwk6PICuuxvSlOxTZ6Pekbz9JtItpA99j2zb3zBnXIyqR195DLa8QHbmZUGe3ZuCDC5DU5CZfU2n9Ju3uCh6tnxwB3LzqdiJUbAGJjxk8Zo2II3VJ2NgwqHlGHBrPF8ykHkYjw5IQ04MQIXK6wBsdMdjvn4ZIZSAsXhdCrSFXNq3d+J/+DrJ9PlN9cLN08DoIWXaHJjRC/1vhkG2WWg3VW9Z9YDeQ8kibaamFN6FcCYx0G0b7SgRjIZ+FDoTpHplDIm6beN9DlxPH+a4uU2n9Js7hb3DmJT8xDOw2zaHAcelugfV2snOqYLmk19/QIA8yWqr+ntNArmHE0/HmiRcb2wLOpH6WHDJhahTMC1QnjMSZFm8mqa74KYDGElPs3INeW8vDJUhSWurUj+WemeluGTDs4fK5L3zMCvXRILQtjCAEqy+7ZoBNz5EdsJCdF8ZRvJQUKoY78qK+0pRqbrs19S2PEz6qbumcl+1r9iH+vCskRx9v0w2ZyHc+DC2qyd6pOa+xCOzSr/ikUf3oi88AG88jex8BRncjoyOI3ndWCqf/2GReSVl1AS0ow3t6UPnLUdPPRYXme9PLlRtfRaoq4Ht6HvbwlKzfbuRoXdh+D1kfBgtj2Gy8do2h0o9QyxiLGpTNG1HSh1oezc6pQe6j4dpc5Gek2DWSWhPH2Z6L7aetjqC2xyO6kabOqYpjjND8lB6DBtttFagMjbwf0kayFcOscmm6p2P5Y02kyXLH7rV6799Of/vW70OC+SPkjF+IjcbftQQhGOqFfuFCwALAAsACwCLVgBYAFgAWABYtALAAsACwALAohUAFgAWAH5y2n8AvNeg0SMPjKcAAAAASUVORK5CYII=",
@@ -104,16 +196,16 @@ function getCardStatusColor(status) {
   if (status === "foco_mes") return T.gold;
   if (status === "concentrar_gastos") return T.cyan;
   if (status === "prioritario") return T.green;
-  if (status === "manter_estavel") return T.blue;
+  if (status === "manter_estável") return T.blue;
   if (status === "evitar_uso_alto") return T.red;
   if (status === "usar_moderadamente") return T.amber;
   return T.steel;
 }
 function getCardStatusLabel(status) {
-  if (status === "foco_mes") return "Foco do mes";
+  if (status === "foco_mes") return "Foco do mês";
   if (status === "concentrar_gastos") return "Concentrar gastos";
   if (status === "prioritario") return "Cartao prioritario";
-  if (status === "manter_estavel") return "Manter estavel";
+  if (status === "manter_estável") return "Manter estável";
   if (status === "evitar_uso_alto") return "Evitar uso alto";
   if (status === "usar_moderadamente") return "Usar moderadamente";
   return "Estrategia livre";
@@ -229,19 +321,21 @@ function gMA(d) { var dt = new Date((d||hj())+"T12:00:00"); return { mes: dt.get
 
 var CATS = [
   {id:"c1",nome:"Casa",tipo:"despesa",orc:0,emoji:"🏠",cor:"#3B82F6"},
-  {id:"c2",nome:"Alimentacao",tipo:"despesa",orc:0,emoji:"🍽️",cor:"#F97316"},
+  {id:"c2",nome:"Alimentação",tipo:"despesa",orc:0,emoji:"🍽️",cor:"#F97316"},
   {id:"c3",nome:"Assinaturas",tipo:"despesa",orc:0,emoji:"📱",cor:"#8B5CF6"},
-  {id:"c4",nome:"Educacao",tipo:"despesa",orc:0,emoji:"📚",cor:"#06B6D4"},
-  {id:"c5",nome:"Saude",tipo:"despesa",orc:0,emoji:"💊",cor:"#EF4444"},
+  {id:"c4",nome:"Educação",tipo:"despesa",orc:0,emoji:"📚",cor:"#06B6D4"},
+  {id:"c5",nome:"Saúde",tipo:"despesa",orc:0,emoji:"💊",cor:"#EF4444"},
   {id:"c6",nome:"Outros",tipo:"despesa",orc:0,emoji:"📦",cor:"#6B7280"},
   {id:"c7",nome:"Transporte",tipo:"despesa",orc:0,emoji:"🚗",cor:"#14B8A6"},
-  {id:"c8",nome:"Dividas",tipo:"despesa",orc:0,emoji:"💳",cor:"#DC2626"},
+  {id:"c8",nome:"Dívidas",tipo:"despesa",orc:0,emoji:"💳",cor:"#DC2626"},
   {id:"c9",nome:"Mercado",tipo:"despesa",orc:0,emoji:"🛒",cor:"#22C55E"},
-  {id:"c10",nome:"Salario",tipo:"receita",orc:0,emoji:"💰",cor:"#10B981"},
+  {id:"c10",nome:"Salário",tipo:"receita",orc:0,emoji:"💰",cor:"#10B981"},
   {id:"c11",nome:"Dog",tipo:"despesa",orc:0,emoji:"🐕",cor:"#D97706"},
   {id:"c12",nome:"Academia",tipo:"despesa",orc:0,emoji:"🏋️",cor:"#7C3AED"},
   {id:"c13",nome:"Celular",tipo:"despesa",orc:0,emoji:"📲",cor:"#0EA5E9"},
-  {id:"c14",nome:"Variaveis",tipo:"despesa",orc:0,emoji:"🔀",cor:"#EC4899"}
+  {id:"c14",nome:"Variáveis",tipo:"despesa",orc:0,emoji:"🔀",cor:"#EC4899"},
+  {id:"c15",nome:"Anuidades",tipo:"despesa",orc:0,emoji:"💳",cor:"#F59E0B"},
+  {id:"c16",nome:"Milhas",tipo:"despesa",orc:0,emoji:"✈️",cor:"#0EA5E9"}
 ];
 
 function mkL() {
@@ -252,25 +346,25 @@ function mkL() {
     L.push({id:uid(),data:dt,mes:r.mes,ano:r.ano,tipo:tp,cat:cat,desc:ds,valor:vl,status:st||"pago",cartaoId:cartaoId||"",pg:metodo,rec:!!rec,pT:pt||0,pA:pa||0});
   }
   // === RECEITA ===
-  a("2026-03-25","receita","c10","Salario",21671,"pago",true);
-  a("2026-04-25","receita","c10","Salario",21671,"pendente",true);
+  a("2026-03-25","receita","c10","Salário",21671,"pago",true);
+  a("2026-04-25","receita","c10","Salário",21671,"pendente",true);
   // === DESPESAS FIXAS (31 itens = R$ 8.801,61) - todas recorrentes ===
   a("2026-04-01","despesa","c1","Aluguel",2800,"pendente",true);
   a("2026-04-01","despesa","c1","Luz",149.90,"pendente",true);
   a("2026-04-01","despesa","c1","Internet",129.90,"pendente",true);
-  a("2026-04-01","despesa","c1","Agua",80,"pendente",true);
-  a("2026-04-01","despesa","c9","Supermercado",1400,"pendente",true);
-  a("2026-04-01","despesa","c9","Cafe Capsulas",60,"pendente",true);
-  a("2026-04-01","despesa","c2","Gastos Saidas",700,"pendente",true);
-  a("2026-04-01","despesa","c7","Gasolina",620,"pendente",true);
-  a("2026-04-01","despesa","c13","Plano Pos",66,"pendente",true);
+  a("2026-04-01","despesa","c1","Água",80,"pendente",true);
+  a("2026-04-01","despesa","c9","Supermercado",1400,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c9","Café Cápsulas",60,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c2","Gastos Saídas",700,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c7","Gasolina",620,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c13","Plano Pós",66,"pendente",true);
   a("2026-04-01","despesa","c13","Plano Pos Barbara",66,"pendente",true);
-  a("2026-04-01","despesa","c6","Barbeiro",55,"pendente",true);
-  a("2026-04-01","despesa","c7","Lavagem Carro",50,"pendente",true);
-  a("2026-04-01","despesa","c3","Clube Curtai",44.90,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c4","Pos Graduacao",98,"pendente",true);
+  a("2026-04-01","despesa","c6","Barbeiro",55,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c7","Lavagem Carro",50,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c16","Clube Curtai",44.90,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c4","Pós-Graduação",98,"pendente",true);
   a("2026-04-01","despesa","c11","Spike",250,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c12","TotalPass",139.90,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","TotalPass",139.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","TotalPass Barbara",119.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","Streaming",55.21,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","Cinemark",32.90,"pendente",true,0,0,"cartao","cd1");
@@ -284,7 +378,9 @@ function mkL() {
   a("2026-04-01","despesa","c3","Claude",689,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","Santander Select",50,"pendente",true);
   a("2026-04-01","despesa","c3","Revolut Ultra",199.99,"pendente",true);
-  a("2026-04-01","despesa","c3","Anuidade BRB",91,"pendente",false,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c3","Serasa Premium",23.90,"pendente",true);
+  a("2026-04-01","despesa","c16","Revpoints 500",46.90,"pendente",true,0,0,"cartao","cd1");
+  a("2026-04-01","despesa","c15","Anuidade BRB",91,"pendente",false,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Faculdade Barbara",764,"pendente",true,0,0,"cartao","cd1");
   // === DIVIDAS E PARCELAMENTOS (31 itens = R$ 4.776,81) ===
   // pT=total meses, pA=1 (primeiro mes)
@@ -292,14 +388,14 @@ function mkL() {
   a("2026-04-01","parcela","c8","Acordo Serasa 2",51.76,"pendente",false,9,1,"pix","");
   a("2026-04-01","parcela","c8","Amazon parc.",15.40,"pendente",false,2,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Bicicleta",115,"pendente",false,7,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Boticario",22.15,"pendente",false,7,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Dock Robo",57,"pendente",false,2,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Empr. Barbara Itau",614,"pendente",false,9,1,"pix","");
+  a("2026-04-01","parcela","c8","Boticário",22.15,"pendente",false,7,1,"cartao","cd1");
+  a("2026-04-01","parcela","c8","Dock Robô",57,"pendente",false,2,1,"cartao","cd1");
+  a("2026-04-01","parcela","c8","Empr. Barbara Itaú",614,"pendente",false,9,1,"pix","");
   a("2026-04-01","parcela","c8","Ifood Parcela",541.81,"pendente",false,6,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Lacoste",190,"pendente",false,2,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Leroy Merlin",199.98,"pendente",false,8,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Levis",150,"pendente",false,3,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Parcelas Itau",300,"pendente",false,9,1,"cartao","cd1");
+  a("2026-04-01","parcela","c8","Parcelas Itaú",300,"pendente",false,9,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Perf. Azzaro",45.66,"pendente",false,7,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Perf. Invictus",37,"pendente",false,7,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Pintura",76.54,"pendente",false,9,1,"cartao","cd1");
@@ -309,18 +405,18 @@ function mkL() {
   a("2026-04-01","parcela","c8","Viagem Fortaleza",50,"pendente",false,8,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Mercado Livre",11.83,"pendente",false,9,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Leroy Merlin 2",117.24,"pendente",false,4,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Livelo",102.12,"pendente",false,9,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Smiles",105,"pendente",false,3,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Estrategia Concursos",54.77,"pendente",false,9,1,"cartao","cd1");
+  a("2026-04-01","parcela","c16","Livelo",102.12,"pendente",false,9,1,"cartao","cd1");
+  a("2026-04-01","parcela","c16","Smiles",105,"pendente",false,3,1,"cartao","cd1");
+  a("2026-04-01","parcela","c8","Estratégia Concursos",54.77,"pendente",false,9,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Hotel Spike",106.84,"pendente",false,9,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Rei Castanhas",62.83,"pendente",false,4,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Kindle",161.21,"pendente",false,9,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","Decolar",133.35,"pendente",false,4,1,"cartao","cd1");
-  a("2026-04-01","parcela","c8","Aspirador Robo",209.57,"pendente",false,4,1,"cartao","cd1");
+  a("2026-04-01","parcela","c8","Aspirador Robô",209.57,"pendente",false,4,1,"cartao","cd1");
   a("2026-04-01","parcela","c8","SeaWorld",119.42,"pendente",false,6,1,"cartao","cd1");
   a("2026-05-01","parcela","c8","Rack",81.77,"pendente",false,12,1,"cartao","cd1");
   a("2026-05-01","parcela","c8","SSD PS5",97.91,"pendente",false,12,1,"cartao","cd1");
-  a("2026-05-01","parcela","c8","Emprestimo Cartao BRB",241.44,"pendente",false,18,1,"cartao","cd1");
+  a("2026-05-01","parcela","c8","Empréstimo Cartão BRB",241.44,"pendente",false,18,1,"cartao","cd1");
   // === DESPESAS VARIAVEIS ABRIL (8 itens = R$ 826,31) ===
   a("2026-04-01","despesa","c14","Amazon",28.79,"pendente",false,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c14","Amazon",73.56,"pendente",false,0,0,"cartao","cd1");
@@ -336,29 +432,31 @@ function mkL() {
 var DEF = {
   v: VER,
   investimentoFixo: 5000,
-  contas: [{id:"ct1",nome:"Itau Conta Corrente",saldo:0},{id:"ct2",nome:"Santander Conta Corrente",saldo:0},{id:"ct3",nome:"Bradesco Conta Corrente",saldo:0},{id:"ct4",nome:"Revolut Ultra",saldo:0}],
+  contas: [{id:"ct1",nome:"Itaú Conta Corrente",saldo:0},{id:"ct2",nome:"Santander Conta Corrente",saldo:0},{id:"ct3",nome:"Bradesco Conta Corrente",saldo:0},{id:"ct4",nome:"Revolut Ultra",saldo:0}],
   lancamentos: mkL(),
   cartoes: [
     {id:"cd1",nome:"AAdvantage Platinum",band:"Mastercard Platinum",bankKey:"santander",emoji:"✈️",limite:11343,venc:27,fecha:3,cor:"#E11931",cor2:"#8B0000",visual:"executive",statusEstr:"concentrar_gastos",logoUrl:"",obs:"Cartao principal Santander",titular:"joao"},
-    {id:"cd2",nome:"Revolut Ultra",band:"Visa Infinite",bankKey:"revolut",emoji:"⚡",limite:999999,venc:0,fecha:0,cor:"#0075EB",cor2:"#001A3A",visual:"fintech",statusEstr:"manter_estavel",logoUrl:"",obs:"Sem limite definido",titular:"joao"},
-    {id:"cd3",nome:"Itau Visa Platinum",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:18500,venc:27,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
-    {id:"cd4",nome:"Bradesco Elo Nanquim",band:"Elo Nanquim",bankKey:"bradesco",emoji:"🔺",limite:5000,venc:27,fecha:3,cor:"#CC092F",cor2:"#4C0A17",visual:"black",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"joao"},
-    {id:"cd5",nome:"Nubank",band:"Mastercard",bankKey:"nubank",emoji:"🟣",limite:5000,venc:10,fecha:3,cor:"#8A05BE",cor2:"#1A0030",visual:"fintech",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd6",nome:"Mercado Pago",band:"Visa",bankKey:"mercadopago",emoji:"🤝",limite:3000,venc:10,fecha:3,cor:"#00B1EA",cor2:"#003A6B",visual:"fintech",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd7",nome:"Will Bank",band:"Visa",bankKey:"will",emoji:"🟡",limite:2000,venc:10,fecha:3,cor:"#FFD200",cor2:"#8B7300",visual:"classic",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd8",nome:"Itau Platinum Barbara",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:5000,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd9",nome:"Itau Multiplo Barbara",band:"Visa",bankKey:"itau",emoji:"🟧",limite:3000,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"classic",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd10",nome:"Itau Visa Signature Barbara",band:"Visa Signature",bankKey:"itau",emoji:"🟧",limite:10000,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd11",nome:"BTG Barbara",band:"Mastercard Black",bankKey:"btg",emoji:"🔵",limite:5000,venc:10,fecha:3,cor:"#0055A4",cor2:"#002244",visual:"black",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"},
-    {id:"cd12",nome:"XP Barbara",band:"Visa",bankKey:"xp",emoji:"🟢",limite:3000,venc:10,fecha:3,cor:"#00C853",cor2:"#1A1A1A",visual:"black",statusEstr:"manter_estavel",logoUrl:"",obs:"",titular:"barbara"}
+    {id:"cd2",nome:"Revolut Ultra",band:"Visa Infinite",bankKey:"revolut",emoji:"⚡",limite:999999,venc:0,fecha:0,cor:"#0075EB",cor2:"#001A3A",visual:"fintech",statusEstr:"manter_estável",logoUrl:"",obs:"Sem limite definido",titular:"joao"},
+    {id:"cd3",nome:"Itau Visa Platinum",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:18500,venc:27,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"joao"},
+    {id:"cd4",nome:"Bradesco Elo Nanquim",band:"Elo Nanquim",bankKey:"bradesco",emoji:"🔺",limite:5000,venc:27,fecha:3,cor:"#CC092F",cor2:"#4C0A17",visual:"black",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"joao"},
+    {id:"cd5",nome:"Nubank",band:"Mastercard",bankKey:"nubank",emoji:"🟣",limite:5000,venc:10,fecha:3,cor:"#8A05BE",cor2:"#1A0030",visual:"fintech",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd6",nome:"Mercado Pago",band:"Visa",bankKey:"mercadopago",emoji:"🤝",limite:3000,venc:10,fecha:3,cor:"#00B1EA",cor2:"#003A6B",visual:"fintech",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd7",nome:"Will Bank",band:"Visa",bankKey:"will",emoji:"🟡",limite:2000,venc:10,fecha:3,cor:"#FFD200",cor2:"#8B7300",visual:"classic",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd8",nome:"Itau Platinum Barbara",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:5000,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd9",nome:"Itau Multiplo Barbara",band:"Visa",bankKey:"itau",emoji:"🟧",limite:3000,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"classic",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd10",nome:"Itau Visa Signature Barbara",band:"Visa Signature",bankKey:"itau",emoji:"🟧",limite:10000,venc:10,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd11",nome:"BTG Barbara",band:"Mastercard Black",bankKey:"btg",emoji:"🔵",limite:5000,venc:10,fecha:3,cor:"#0055A4",cor2:"#002244",visual:"black",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"},
+    {id:"cd12",nome:"XP Barbara",band:"Visa",bankKey:"xp",emoji:"🟢",limite:3000,venc:10,fecha:3,cor:"#00C853",cor2:"#1A1A1A",visual:"black",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:"barbara"}
   ],
   dividas: [
-    {id:"d1",nome:"Emprestimo Barbara Itau",total:7368,pago:0,parcela:614,pRest:12,vDia:1,taxa:1.5},
-    {id:"d2",nome:"Parcelas Itau",total:3600,pago:0,parcela:300,pRest:12,vDia:1,taxa:1.0},
+    {id:"d1",nome:"Empréstimo Barbara Itaú",total:7368,pago:0,parcela:614,pRest:12,vDia:1,taxa:1.5},
+    {id:"d2",nome:"Parcelas Itaú",total:3600,pago:0,parcela:300,pRest:12,vDia:1,taxa:1.0},
     {id:"d3",nome:"Acordo Serasa",total:1156,pago:0,parcela:96.36,pRest:12,vDia:1,taxa:0},
     {id:"d4",nome:"Acordo Serasa 2",total:621,pago:0,parcela:51.76,pRest:12,vDia:1,taxa:0}
   ],
-  investimentos: [{id:"i1",nome:"Renda Fixa Santander",valor:25000,rent:1.0}],
+  investimentos: [
+    {id:"i1",nome:"Renda Fixa Santander",valor:25000,rent:1.0,tipo:"cdb",banco:"santander",liquidez:"diaria",dataAplicacao:"2026-03-01",vencimento:""}
+  ],
   metas: [
     {id:"m1",nome:"Meta R$ 35 mil",valor:35000,prazo:"2026-03-25",vinc:"invest"},
     {id:"m2",nome:"Meta R$ 52 mil",valor:52000,prazo:"2026-05-25",vinc:"invest"},
@@ -383,7 +481,7 @@ var DEF = {
 
 
 
-function expandLancamentos(db) {
+function expandLançamentos(db) {
   var base = db.lancamentos;
   var extras = [];
   var existeChave = {};
@@ -468,7 +566,7 @@ function getPat(db) {
 function getVisaoAnual(db, anoRef) {
   var result = [];
   for (var m=1; m<=12; m++) {
-    var pvM = getPrevisao(db, m, anoRef);
+    var pvM = getPrevisão(db, m, anoRef);
     var temDados = pvM.receitaMes > 0 || pvM.despLancadas > 0;
     result.push({ m:m, nome:MS[m-1], rc:pvM.receitaMes, dp:pvM.despTotalMes, saldo:pvM.sobraPrevista, temDados:temDados });
   }
@@ -488,7 +586,7 @@ function getMetP(db) {
 
 function getAl(db, m, a) {
   var r = getRes(db, m, a);
-  var pv = getPrevisao(db, m, a);
+  var pv = getPrevisão(db, m, a);
   var al = [];
   var tFixas = 0;
   for (var i=0; i<db.lancamentos.length; i++) {
@@ -497,9 +595,9 @@ function getAl(db, m, a) {
   }
   if (r.rc > 0 && r.dp > r.rc*0.9) al.push({s:"danger",t:"Despesas",m:"Despesas em "+pct(r.dp/r.rc*100)+" da receita",r:"Revise gastos"});
   if (r.rc > 0 && tFixas > r.rc*0.6) al.push({s:"warning",t:"Fixas",m:"Fixas: "+pct(tFixas/r.rc*100)+" da receita",r:"Tente reduzir"});
-  if (r.saldo < 0) al.push({s:"danger",t:"Saldo",m:"Mes negativo: "+f$(r.saldo),r:"Corte despesas"});
-  if (pv.orcTotal > 0 && pv.despLancadas > pv.orcTotal) al.push({s:"warning",t:"Orcamento",m:"Lancamentos excedem orcamento em "+f$(pv.despLancadas - pv.orcTotal),r:"Revise categorias"});
-  if (pv.sobraPrevista < 0) al.push({s:"danger",t:"Projecao",m:"Sobra prevista negativa: "+f$(pv.sobraPrevista),r:"Corte despesas"});
+  if (r.saldo < 0) al.push({s:"danger",t:"Saldo",m:"Mês negativo: "+f$(r.saldo),r:"Corte despesas"});
+  if (pv.orcTotal > 0 && pv.despLancadas > pv.orcTotal) al.push({s:"warning",t:"Orçamento",m:"Lançamentos excedem orçamento em "+f$(pv.despLancadas - pv.orcTotal),r:"Revise categorias"});
+  if (pv.sobraPrevista < 0) al.push({s:"danger",t:"Projeção",m:"Sobra prevista negativa: "+f$(pv.sobraPrevista),r:"Corte despesas"});
   pv.porCat.forEach(function(c) {
     if (c.orc > 0 && c.projetado > c.orc * 1.2) al.push({s:"warning",t:"Categoria",m:c.nome+": "+pct(c.projetado/c.orc*100)+" do planejado",r:"Reduza "+c.nome});
   });
@@ -516,12 +614,12 @@ function getAl(db, m, a) {
     });
   });
   (db.lancamentos||[]).forEach(function(l) {
-    if (l.mes === m && l.ano === a && l.tipo !== "receita" && getMetodoPg(l) === "cartao" && !(l.cartaoId||"")) al.push({s:"danger",t:"Lancamento",m:"Compra em cartao sem cartao vinculado",r:"Edite o lancamento e vincule o cartao"});
+    if (l.mes === m && l.ano === a && l.tipo !== "receita" && getMetodoPg(l) === "cartao" && !(l.cartaoId||"")) al.push({s:"danger",t:"Lançamento",m:"Compra em cartão sem cartão vinculado",r:"Edite o lançamento e vincule o cartão"});
   });
   return al;
 }
 
-function getPrevisao(db, m, a) {
+function getPrevisão(db, m, a) {
   var cats = (db.categorias||[]).filter(function(c){return c.tipo === "despesa"});
   var lancMes = (db.lancamentos||[]).filter(function(l){return l.mes===m && l.ano===a && l.tipo!=="receita"});
 
@@ -730,7 +828,7 @@ function getCardsResumo(db, m, a) {
       logoUrl:card.logoUrl || "",
       emoji:card.emoji || "",
       visual:card.visual || "black",
-      statusEstr:card.statusEstr || "manter_estavel",
+      statusEstr:card.statusEstr || "manter_estável",
       limite:limite,
       venc:card.venc || 1,
       fecha:card.fecha || 31,
@@ -793,11 +891,11 @@ function getProxSalarioInfo(db, m, a, salarioDia) {
 function getCalendarioFinanceiro(db, m, a, salarioDia) {
   var eventos = [];
   var sd = salarioDia || 25;
-  eventos.push({id:"salario-"+m+"-"+a, dia:sd, data:mkDt(a, m, sd), titulo:"Salario", subtitulo:"Entrada principal do mes", cor:T.green, tag:"salario"});
+  eventos.push({id:"salario-"+m+"-"+a, dia:sd, data:mkDt(a, m, sd), titulo:"Salário", subtitulo:"Entrada principal do mês", cor:T.green, tag:"salario"});
   eventos.push({id:"aporte-"+m+"-"+a, dia:Math.min(sd + 1, dimMes(m, a)), data:mkDt(a, m, Math.min(sd + 1, dimMes(m, a))), titulo:"Aporte ideal", subtitulo:"Janela sugerida para aporte Santander", cor:T.cyan, tag:"aporte"});
   eventos.push({id:"janela-"+m+"-"+a, dia:Math.min(sd + 5, dimMes(m, a)), data:mkDt(a, m, Math.min(sd + 5, dimMes(m, a))), titulo:"Janela de consulta", subtitulo:"Bom momento para avaliar ofertas/pre-aprovados", cor:T.gold, tag:"cartao"});
   (db.cartoes || []).forEach(function(card) {
-    eventos.push({id:card.id+"-fecha-"+m+"-"+a, dia:card.fecha || 1, data:mkDt(a, m, card.fecha || 1), titulo:"Fechamento " + (card.nome || "Cartao"), subtitulo:"Compras apos esta data migram de ciclo", cor:card.cor || T.blue, tag:"fechamento"});
+    eventos.push({id:card.id+"-fecha-"+m+"-"+a, dia:card.fecha || 1, data:mkDt(a, m, card.fecha || 1), titulo:"Fechamento " + (card.nome || "Cartao"), subtitulo:"Compras após esta data migram de ciclo", cor:card.cor || T.blue, tag:"fechamento"});
     eventos.push({id:card.id+"-venc-"+m+"-"+a, dia:card.venc || 1, data:mkDt(a, m, card.venc || 1), titulo:"Vencimento " + (card.nome || "Cartao"), subtitulo:"Fatura principal do cartao", cor:card.cor || T.blue, tag:"fatura"});
   });
   return eventos.sort(function(x,y){ return x.data - y.data; });
@@ -832,26 +930,26 @@ function getRatingSnapshot(db, m, a, salarioDia, ratingMensal) {
 function getRatingTasks() {
   return [
     {id:"salario", titulo:"Receber salario no Santander", desc:"Manter a principal entrada recorrente no banco fortalece relacionamento e estabilidade."},
-    {id:"almofada", titulo:"Manter almofada estavel em conta", desc:"Evite zerar a conta logo apos o credito do salario."},
+    {id:"almofada", titulo:"Manter almofada estável em conta", desc:"Evite zerar a conta logo após o crédito do salario."},
     {id:"aporte", titulo:"Fazer aporte mensal no Santander", desc:"Aporte recorrente sinaliza capacidade financeira e vinculo."},
-    {id:"fatura", titulo:"Pagar fatura integral no vencimento", desc:"Nada de minimo, rotativo ou parcelamento de fatura."},
-    {id:"uso", titulo:"Usar limite com moderacao", desc:"O ideal e manter uso saudavel, sem pressao excessiva por varios ciclos."},
-    {id:"pix", titulo:"Concentrar movimentacao real", desc:"Pix, contas e despesas recorrentes ajudam na leitura de relacionamento."},
-    {id:"ofertas", titulo:"Consultar ofertas em janelas estrategicas", desc:"Evite tentativas repetidas e seguidas de cartao ou upgrade."},
+    {id:"fatura", titulo:"Pagar fatura integral no vencimento", desc:"Nada de mínimo, rotativo ou parcelamento de fatura."},
+    {id:"uso", titulo:"Usar limite com moderação", desc:"O ideal é manter uso saudável, sem pressão excessiva por vários ciclos."},
+    {id:"pix", titulo:"Concentrar movimentação real", desc:"Pix, contas e despesas recorrentes ajudam na leitura de relacionamento."},
+    {id:"ofertas", titulo:"Consultar ofertas em janelas estratégicas", desc:"Evite tentativas repetidas e seguidas de cartão ou upgrade."},
     {id:"cadastro", titulo:"Manter renda e cadastro coerentes", desc:"Dados atualizados e consistentes fortalecem a analise."}
   ];
 }
 
 function getRatingDonts() {
   return [
-    "Nao atrasar fatura, boleto, debito automatico ou emprestimo.",
-    "Nao entrar no rotativo, cheque especial ou parcelar fatura.",
-    "Nao solicitar cartao, upgrade ou nova analise varias vezes em curto prazo.",
-    "Nao zerar completamente o saldo logo apos o salario cair.",
-    "Nao usar limite alto demais por varios ciclos seguidos.",
-    "Nao deixar renda, cadastro e Open Finance incoerentes.",
-    "Nao movimentar valores artificiais so para parecer renda.",
-    "Nao alternar relacionamento bancario sem estrategia clara."
+    "Não atrasar fatura, boleto, débito automático ou empréstimo.",
+    "Não entrar no rotativo, cheque especial ou parcelar fatura.",
+    "Não solicitar cartao, upgrade ou nova analise varias vezes em curto prazo.",
+    "Não zerar completamente o saldo logo após o salario cair.",
+    "Não usar limite alto demais por varios ciclos seguidos.",
+    "Não deixar renda, cadastro e Open Finance incoerentes.",
+    "Não movimentar valores artificiais so para parecer renda.",
+    "Não alternar relacionamento bancário sem estratégia clara."
   ];
 }
 
@@ -893,17 +991,17 @@ function getBankPlan(db, m, a, bankKey, salarioDia, ratingMensal) {
   var positivas = [];
   var actions = [];
   var avoid = bankKey === "santander" ? [
-    "Nao receber salario e esvaziar a conta imediatamente.",
-    "Nao enfraquecer saldo medio perto da analise.",
-    "Nao repetir pedidos de cartao em sequencia curta.",
-    "Nao pressionar o limite perto do fechamento.",
-    "Nao deixar o relacionamento principal sem constancia."
+    "Não receber salario e esvaziar a conta imediatamente.",
+    "Não enfraquecer saldo médio perto da analise.",
+    "Não repetir pedidos de cartão em sequência curta.",
+    "Não pressionar o limite perto do fechamento.",
+    "Não deixar o relacionamento principal sem constancia."
   ] : [
-    "Nao pedir upgrade em momento de uso alto do limite.",
-    "Nao manter investimento desalinhado com a estrategia.",
-    "Nao insistir no upgrade sem melhora de base.",
-    "Nao ignorar ofertas no app e movimentos de limite.",
-    "Nao baguncar a coerencia entre renda, gasto e limite."
+    "Não pedir upgrade em momento de uso alto do limite.",
+    "Não manter investimento desalinhado com a estrategia.",
+    "Não insistir no upgrade sem melhora de base.",
+    "Não ignorar ofertas no app e movimentos de limite.",
+    "Não baguncar a coerência entre renda, gasto e limite."
   ];
   var ratingMesAtual = (ratingMensal||{})[(a + "-" + String(m).padStart(2,"0"))] || {};
   var salarioOk = bankKey === "santander" ? (receitaMes > 0 && (contaBanco > 0 || invBanco > 0 || ratingMesAtual.salario)) : (receitaMes > 0 && (invBanco > 0 || !!atual));
@@ -914,30 +1012,30 @@ function getBankPlan(db, m, a, bankKey, salarioDia, ratingMensal) {
   var usoAtencao = uso > 30 && uso <= 50;
   var concentracao = bankKey === "santander" ? contaSant >= contaItau : contaItau >= 15000 || invBanco > 0;
   var openFinanceOk = bankKey === "itau" ? (invBanco > 0 || !!atual) : true;
-  var janelaIdeal = bankKey === "santander" ? "Preferir analisar ofertas entre 3 e 7 dias apos o salario, com saldo medio preservado e sem estresse de caixa." : "Preferir avaliar upgrade alguns dias apos o pagamento integral, com uso de limite controlado e base coerente.";
-  var momentoRuim = bankKey === "santander" ? "Evite tentar quando a sobra do mes estiver pressionada, o saldo medio estiver fraco ou houver uso alto do limite." : "Evite solicitar upgrade com uso alto do limite, investimento desalinhado ou logo apos negacao recente.";
+  var janelaIdeal = bankKey === "santander" ? "Preferir analisar ofertas entre 3 e 7 dias após o salario, com saldo médio preservado e sem estresse de caixa." : "Preferir avaliar upgrade alguns dias após o pagamento integral, com uso de limite controlado e base coerente.";
+  var momentoRuim = bankKey === "santander" ? "Evite tentar quando a sobra do mês estiver pressionada, o saldo médio estiver fraco ou houver uso alto do limite." : "Evite solicitar upgrade com uso alto do limite, investimento desalinhado ou logo após negação recente.";
   var checks = bankKey === "santander" ? [
     boolItem("Salario no Santander", salarioOk, "Entrada principal organizada no banco foco."),
     boolItem("Almofada minima mantida", almofadaMin, "Meta orientativa de ao menos R$ 6 mil."),
     boolItem("Almofada ideal mantida", almofadaIdeal, "Meta orientativa de ao menos R$ 8 mil."),
     boolItem("Aporte mensal realizado", aporteMensal, "Investimento recorrente reforca relacionamento."),
-    boolItem("Uso saudavel do cartao Santander", usoSaudavel || !atual, atual ? pctSafe(uso) : "Sem cartao Santander cadastrado"),
+    boolItem("Uso saudável do cartao Santander", usoSaudavel || !atual, atual ? pctSafe(uso) : "Sem cartão Santander cadastrado"),
     boolItem("Fatura integral paga", pagamentoIntegral, faturaAtual ? f$(faturaAtual.total || 0) : "Sem fatura no periodo"),
     boolItem("Sem atraso", semAtraso, "Sem faturas vencidas em aberto."),
     boolItem("Sem rotativo", semRotativo, "O app assume boa pratica quando ha pagamento integral e sem atraso."),
-    boolItem("Constancia de movimentacao", constancia, "Receitas e despesas recorrentes organizadas."),
+    boolItem("Constancia de movimentação", constancia, "Receitas e despesas recorrentes organizadas."),
     boolItem("Consulta em janela planejada", consultasPlanejadas, "Evita excesso de tentativas."),
     boolItem("Concentracao de relacionamento", concentracao, "Relacionamento mais robusto no banco foco.")
   ] : [
     boolItem("Investimento mantido ou ampliado", invBanco > 0, "Base de investimento no Itaú visivel no app."),
-    boolItem("Uso consistente do cartao Itau", !!atual, atual ? pctSafe(uso) : "Cadastre o cartao Itaú para monitorar"),
-    boolItem("Uso saudavel do limite", usoSaudavel || !atual, atual ? pctSafe(uso) : "Sem cartao no periodo"),
+    boolItem("Uso consistente do cartão Itaú", !!atual, atual ? pctSafe(uso) : "Cadastre o cartão Itaú para monitorar"),
+    boolItem("Uso saudável do limite", usoSaudavel || !atual, atual ? pctSafe(uso) : "Sem cartão no período"),
     boolItem("Fatura integral paga", pagamentoIntegral, faturaAtual ? f$(faturaAtual.total || 0) : "Sem fatura no periodo"),
     boolItem("Sem atraso", semAtraso, "Sem faturas vencidas em aberto."),
     boolItem("Sem rotativo", semRotativo, "Heuristica interna do app, nao score oficial."),
-    boolItem("Upgrade em momento adequado", consultasPlanejadas && (uso <= 35 || !atual), "Momento sem pressao de caixa e de limite."),
+    boolItem("Upgrade em momento adequado", consultasPlanejadas && (uso <= 35 || !atual), "Momento sem pressão de caixa e de limite."),
     boolItem("Open Finance coerente", openFinanceOk, "Indicador interno apenas orientativo."),
-    boolItem("Coerencia renda, limite e gasto", receitaMes > 0 && (uso <= 40 || !atual), atual ? "Limite comprometido em faixa gerenciavel." : "Sem cartao no periodo")
+    boolItem("Coerência renda, limite e gasto", receitaMes > 0 && (uso <= 40 || !atual), atual ? "Limite comprometido em faixa gerenciável." : "Sem cartão no período")
   ];
   var score = 0;
   checks.forEach(function(item) { score += item.ok ? (100 / checks.length) : 0; });
@@ -946,15 +1044,15 @@ function getBankPlan(db, m, a, bankKey, salarioDia, ratingMensal) {
   if (prox.sobra < 0) score -= 6;
   score = Math.max(0, Math.min(100, Math.round(score)));
   checks.forEach(function(item){ if (item.ok) positivas.push(item.label); else alertas.push(item.label); });
-  if (!salarioOk && bankKey === "santander") actions.push("Fortalecer a leitura de relacionamento principal no Santander neste mes.");
+  if (!salarioOk && bankKey === "santander") actions.push("Fortalecer a leitura de relacionamento principal no Santander neste mês.");
   if (!almofadaMin && bankKey === "santander") actions.push("Recompor almofada minima antes de nova tentativa de cartao.");
   if (!almofadaIdeal && bankKey === "santander") actions.push("Buscar almofada ideal para melhorar estabilidade percebida.");
   if (!aporteMensal) actions.push(bankKey === "santander" ? "Registrar aporte mensal no banco foco." : "Manter ou ampliar base de investimento no Itaú.");
-  if (uso > 30 && atual) actions.push("Reduzir uso do limite para faixa mais saudavel antes de nova solicitacao.");
+  if (uso > 30 && atual) actions.push("Reduzir uso do limite para faixa mais saudável antes de nova solicitação.");
   if (!pagamentoIntegral && atual) actions.push("Priorizar pagamento integral da fatura atual antes de qualquer pedido.");
   if (!semAtraso && atual) actions.push("Regularizar faturas vencidas e restaurar disciplina operacional.");
-  if (bankKey === "itau" && !openFinanceOk) actions.push("Reforcar coerencia operacional do Itaú antes de tentar upgrade.");
-  if (!actions.length) actions.push(bankKey === "santander" ? "Manter consistencia do relacionamento e testar oferta apenas em janela planejada." : "Manter base estavel e observar upgrade em janela adequada.");
+  if (bankKey === "itau" && !openFinanceOk) actions.push("Reforçar coerência operacional do Itaú antes de tentar upgrade.");
+  if (!actions.length) actions.push(bankKey === "santander" ? "Manter consistência do relacionamento e testar oferta apenas em janela planejada." : "Manter base estável e observar upgrade em janela adequada.");
   return {
     bankKey:bankKey,
     nome:bankKey === "santander" ? "PLANO SANTANDER UNLIMITED" : "PLANO ITAÚ THE ONE",
@@ -975,7 +1073,7 @@ function getBankPlan(db, m, a, bankKey, salarioDia, ratingMensal) {
     sinaisAlerta:alertas.slice(0, 5),
     janelaIdeal:janelaIdeal,
     momentoRuim:momentoRuim,
-    resumo:bankKey === "santander" ? "Modelo orientativo para fortalecer relacionamento, saldo medio, aporte e disciplina de fatura no Santander." : "Modelo orientativo para melhorar coerencia de base, uso de limite e timing de upgrade no Itaú."
+    resumo:bankKey === "santander" ? "Modelo orientativo para fortalecer relacionamento, saldo médio, aporte e disciplina de fatura no Santander." : "Modelo orientativo para melhorar coerência de base, uso de limite e timing de upgrade no Itaú."
   };
 }
 function getStrategicFocus(planoSant, planoItau, fluxo, als, cardsResumo, bancoFocoManual) {
@@ -983,17 +1081,17 @@ function getStrategicFocus(planoSant, planoItau, fluxo, als, cardsResumo, bancoF
   var bancoFoco = bancoFocoManual || bancoFocoAuto;
   var plano = bancoFoco === "Santander" ? planoSant : planoItau;
   var criticos = (als || []).filter(function(a){ return a.s === "danger"; }).length;
-  var risco = criticos > 0 ? (als.filter(function(a){ return a.s === "danger"; })[0] || {}).m : (fluxo.sobraPrevista < 0 ? "Sobra prevista negativa no mes." : (plano.sinaisAlerta[0] || "Sem risco critico dominante."));
+  var risco = criticos > 0 ? (als.filter(function(a){ return a.s === "danger"; })[0] || {}).m : (fluxo.sobraPrevista < 0 ? "Sobra prevista negativa no mes." : (plano.sinaisAlerta[0] || "Sem risco crítico dominante."));
   var cardFoco = cardsResumo.filter(function(c){ return c.statusEstr === "foco_mes" || c.statusEstr === "prioritario" || c.statusEstr === "concentrar_gastos"; })[0] || cardsResumo.slice().sort(function(a,b){ return b.usoRealPct - a.usoRealPct; })[0] || null;
   return {
     bancoFoco:bancoFoco,
     planoFoco:plano,
     criticos:criticos,
-    acaoPrincipal:plano.actions[0] || "Manter disciplina do mes.",
+    acaoPrincipal:plano.actions[0] || "Manter disciplina do mês.",
     riscoPrincipal:risco,
     cardFoco:cardFoco,
-    metaMes:fluxo.sobraPrevista >= 0 ? "Preservar sobra positiva e limite saudavel." : "Reequilibrar caixa antes de novas solicitacoes.",
-    resumoExecutivo:"Score interno orientativo do app, nao score oficial de banco. O foco do mes aponta a frente com maior ganho marginal esperado."
+    metaMes:fluxo.sobraPrevista >= 0 ? "Preservar sobra positiva e limite saudável." : "Reequilibrar caixa antes de novas solicitações.",
+    resumoExecutivo:"Score interno orientativo do app, nao score oficial de banco. O foco do mês aponta a frente com maior ganho marginal esperado."
   };
 }
 function getChecklistGeral(fluxo, cardsResumo, als) {
@@ -1003,23 +1101,23 @@ function getChecklistGeral(fluxo, cardsResumo, als) {
     boolItem("Sobra realizada acompanhada", true, f$(fluxo.sobraRealizada)),
     boolItem("Faturas sob controle", cardsResumo.every(function(c){ return !c.faturas[0] || c.faturas[0].paga || c.faturas[0].vencDate >= getRefDatePeriodo(c.faturas[0].mes, c.faturas[0].ano); }), "Sem vencidas no periodo"),
     boolItem("PIX sob controle", fluxo.pix >= 0, f$(fluxo.pix)),
-    boolItem("Limite saudavel", cardsResumo.every(function(c){ return c.usoRealPct <= 50; }), cardsResumo.length ? pctSafe(cardsResumo.reduce(function(s,c){ return s + c.usoRealPct; },0)/cardsResumo.length) : "0.0%"),
+    boolItem("Limite saudável", cardsResumo.every(function(c){ return c.usoRealPct <= 50; }), cardsResumo.length ? pctSafe(cardsResumo.reduce(function(s,c){ return s + c.usoRealPct; },0)/cardsResumo.length) : "0.0%"),
     boolItem("Caixa com cobertura", fluxo.sobraPrevista >= 0, f$(fluxo.sobraPrevista)),
     boolItem("Nenhum atraso", !(als||[]).some(function(a){ return a.t === "Fatura" && a.s === "danger"; }), "Monitorado pelos alertas"),
     boolItem("Nenhum rotativo", cardsResumo.every(function(c){ return !c.faturas[0] || c.faturas[0].paga || c.faturas[0].total === 0; }), "Heuristica interna do app"),
-    boolItem("Nenhum erro critico ignorado", !(als||[]).some(function(a){ return a.s === "danger"; }), (als||[]).filter(function(a){ return a.s === "danger"; }).length + " criticos")
+    boolItem("Nenhum erro crítico ignorado", !(als||[]).some(function(a){ return a.s === "danger"; }), (als||[]).filter(function(a){ return a.s === "danger"; }).length + " críticos")
   ];
 }
 function getWeeklyChecklist() {
   return [
-    {id:"wk_saldo", titulo:"Revisar saldo e almofada", desc:"Especialmente no banco foco do mes"},
+    {id:"wk_saldo", titulo:"Revisar saldo e almofada", desc:"Especialmente no banco foco do mês"},
     {id:"wk_limite", titulo:"Revisar uso do limite", desc:"Manter abaixo de 30% no ciclo"},
     {id:"wk_fecha", titulo:"Revisar compras perto do fechamento", desc:"Evitar pressao perto do ciclo"},
     {id:"wk_compromissos", titulo:"Revisar compromissos da semana", desc:"PIX, faturas e aportes"},
-    {id:"wk_alertas", titulo:"Revisar alertas", desc:"Sem deixar pendencias criticas acumularem"},
-    {id:"wk_cartao", titulo:"Revisar cartao foco", desc:"Uso e status do cartao prioritario"},
+    {id:"wk_alertas", titulo:"Revisar alertas", desc:"Sem deixar pendências críticas acumularem"},
+    {id:"wk_cartao", titulo:"Revisar cartão foco", desc:"Uso e status do cartão prioritário"},
     {id:"wk_janela", titulo:"Revisar janela de pedido ou upgrade", desc:"Usar timing planejado"},
-    {id:"wk_sobra", titulo:"Revisar risco para a sobra do mes", desc:"Garantir sobra positiva"}
+    {id:"wk_sobra", titulo:"Revisar risco para a sobra do mês", desc:"Garantir sobra positiva"}
   ];
 }
 function getWeekKey() {
@@ -1058,25 +1156,6 @@ function doLoad() {
   return null;
 }
 
-function supaSync(data) {
-  try {
-    var j = typeof data === "string" ? data : JSON.stringify(data);
-    fetch(SUPA_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({data: j})
-    }).catch(function(){});
-  } catch(e) {}
-}
-
-function supaLoad(cb) {
-  fetch(SUPA_URL).then(function(r){return r.json()}).then(function(res){
-    if (res && res.data) {
-      try { cb(JSON.parse(res.data)); } catch(e) { cb(null); }
-    } else { cb(null); }
-  }).catch(function(){ cb(null); });
-}
-
 function norm(r) {
   if (!r || typeof r !== "object") return null;
   var d = Object.assign({}, DEF, r);
@@ -1090,17 +1169,6 @@ function norm(r) {
     d.dividas = DEF.dividas;
     d.investimentos = DEF.investimentos;
     d.investimentoFixo = DEF.investimentoFixo;
-  }
-  
-  // === MIGRAÇÃO v12 → v13: forçar atualização dos cartões ===
-  if (!r._migratedV13) {
-    d.cartoes = DEF.cartoes;
-    d._migratedV13 = true;
-  }
-  // === Forçar dividas do DEF se ainda não migrou ===
-  if (!r._migratedDiv13) {
-    d.dividas = DEF.dividas;
-    d._migratedDiv13 = true;
   }
 
   var savedCats = r.categorias || [];
@@ -1116,12 +1184,12 @@ function norm(r) {
     if (!l.mes) { var x = gMA(l.data); l.mes = x.mes; l.ano = x.ano; }
     var out = {id:l.id||uid(), data:l.data||hj(), mes:l.mes, ano:l.ano, tipo:l.tipo||"despesa", cat:l.cat||l.categoria||"c8", desc:l.desc||l.descricao||"", valor:l.valor||0, totalCompra:l.totalCompra||0, status:l.status||"pago", cartaoId:l.cartaoId||"", pg:l.pg||(l.cartaoId?"cartao":"pix"), rec:!!l.rec, pT:l.pT||l.parcTotal||0, pA:l.pA||l.parcAtual||0};
     var descL = (out.desc||"").toLowerCase();
-    var pixForce = ["acordo serasa","empr. barbara","unip","empr. bradesco","emprestimo bradesco","parcelas itau"];
+    var pixForce = ["acordo serasa","empr. barbara","unip"];
     var isPix = false;
     for (var pf = 0; pf < pixForce.length; pf++) { if (descL.indexOf(pixForce[pf]) >= 0) { isPix = true; break; } }
     if (isPix) { out.pg = "pix"; out.cartaoId = ""; }
     else if ((out.tipo === "parcela" || out.cat === "c14") && !out.cartaoId) { out.pg = "cartao"; out.cartaoId = "cd1"; }
-    var brbFixas = ["anuidade brb","faculdade barbara","claude","spotify","icloud","chatgpt","tec concursos","legis","medicamentos","ritalina","venvanse","cinemark","streaming","totalpass barbara","totalpass","total pass","spike","clube curtai","curtai"];
+    var brbFixas = ["anuidade brb","faculdade barbara","faculdade bárbara","claude","spotify","icloud","chatgpt","tec concursos","legis","medicamentos","ritalina","venvanse","cinemark","streaming","totalpass barbara","totalpass","total pass","spike","clube curtai","curtai","supermercado","cafe capsulas","café cápsulas","gastos saidas","gastos saídas","gasolina","barbeiro","lavagem carro","pós-graduação","pos graduacao","estratégia concursos","estrategia concursos","boticário","boticario","dock robô","dock robo","aspirador robô","aspirador robo","revpoints"];
     if (!isPix && (!out.cartaoId || out.pg !== "cartao")) {
       for (var bf = 0; bf < brbFixas.length; bf++) {
         if (descL.indexOf(brbFixas[bf]) >= 0) { out.pg = "cartao"; out.cartaoId = "cd1"; break; }
@@ -1130,17 +1198,30 @@ function norm(r) {
     if (descL.indexOf("anuidade brb") >= 0) out.rec = false;
     return out;
   });
+  d.lancamentos = d.lancamentos.filter(function(l){return (l.desc||"").indexOf("Empr. Bradesco") < 0});
   d.lancamentos.forEach(function(l){
     if (l.desc === "Claude" && l.rec) l.valor = 689;
     if (l.desc === "Santander Select" && l.rec) l.valor = 50;
   });
+  // Inject new recurrent subscriptions if missing
+  var novasRec = [
+    {desc:"Serasa Premium",valor:23.90,cat:"c3",pg:"pix",cartaoId:""},
+    {desc:"Revpoints 500",valor:46.90,cat:"c16",pg:"cartao",cartaoId:"cd1"}
+  ];
+  novasRec.forEach(function(nr){
+    var nrL = nr.desc.toLowerCase();
+    var existe = d.lancamentos.some(function(l){return l.desc.toLowerCase()===nrL});
+    if (!existe) {
+      d.lancamentos.push({id:uid(),data:"2026-04-01",mes:4,ano:2026,tipo:"despesa",cat:nr.cat,desc:nr.desc,valor:nr.valor,status:"pendente",cartaoId:nr.cartaoId,pg:nr.pg,rec:true,pT:0,pA:0,totalCompra:0});
+    }
+  });
   var novasParc = [
     {desc:"Rack",valor:81.77,pT:12,data:"2026-05-01"},
-    {desc:"SSD PS5",valor:97.91,pT:12,data:"2026-05-01"},
-    {desc:"Emprestimo Cartao BRB",valor:241.44,pT:18,data:"2026-05-01"}
+    {desc:"SSD PS5",valor:97.91,pT:12,data:"2026-05-01"}
   ];
   novasParc.forEach(function(np){
-    var existe = d.lancamentos.some(function(l){return l.desc===np.desc && l.tipo==="parcela"});
+    var npL = np.desc.toLowerCase();
+    var existe = d.lancamentos.some(function(l){return l.desc.toLowerCase()===npL && l.tipo==="parcela"});
     if (!existe) {
       var ma = gMA(np.data);
       d.lancamentos.push({id:uid(),data:np.data,mes:ma.mes,ano:ma.ano,tipo:"parcela",cat:"c8",desc:np.desc,valor:np.valor,status:"pendente",cartaoId:"cd1",pg:"cartao",rec:false,pT:np.pT,pA:1,totalCompra:0});
@@ -1148,7 +1229,7 @@ function norm(r) {
   });
   if (!Array.isArray(d.contas) || !d.contas.length) d.contas = DEF.contas;
   if (!Array.isArray(d.cartoes)) d.cartoes = DEF.cartoes;
-  d.cartoes = d.cartoes.map(function(c){ return Object.assign({obs:"", bankKey: inferBankKey(c.nome), logoUrl:"", emoji:"", cor2:"", visual:"black", statusEstr:"manter_estavel", titular:"joao"}, c, { bankKey:(c.bankKey||inferBankKey(c.nome||c.band)), logoUrl:c.logoUrl||"", emoji:c.emoji||"", cor2:c.cor2||"", visual:c.visual||"black", statusEstr:c.statusEstr||"manter_estavel", titular:c.titular||"joao" }); });
+  d.cartoes = d.cartoes.map(function(c){ return Object.assign({obs:"", bankKey: inferBankKey(c.nome), logoUrl:"", emoji:"", cor2:"", visual:"black", statusEstr:"manter_estável", titular:"joao"}, c, { bankKey:(c.bankKey||inferBankKey(c.nome||c.band)), logoUrl:c.logoUrl||"", emoji:c.emoji||"", cor2:c.cor2||"", visual:c.visual||"black", statusEstr:c.statusEstr||"manter_estável", titular:c.titular||"joao" }); });
   if (!d.ratingMensal || typeof d.ratingMensal !== "object") d.ratingMensal = {};
   if (!d.salarioDia) d.salarioDia = 25;
   if (!d.faturasManuais || typeof d.faturasManuais !== "object") d.faturasManuais = {};
@@ -1268,7 +1349,7 @@ function LForm(props) {
         <FL label="Parcelas (0=avulso)"><input type="number" value={f.pT} onChange={function(e){u("pT",e.target.value)}} style={inp} /></FL>
       </div>
       {f.tipo !== "receita" && <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-        <FL label="Forma de pagamento"><select value={f.pg||"pix"} onChange={function(e){u("pg",e.target.value); if(e.target.value!=="cartao"){u("cartaoId","");u("totalCompra","");}}} style={inp}><option value="pix">PIX</option><option value="cartao">Cartao de credito</option></select></FL>
+        <FL label="Forma de pagamento"><select value={f.pg||"pix"} onChange={function(e){u("pg",e.target.value); if(e.target.value!=="cartao"){u("cartaoId","");u("totalCompra","");}}} style={inp}><option value="pix">PIX</option><option value="cartao">Cartão de crédito</option></select></FL>
         <FL label="Cartao">{errs.cartaoId && <span style={{color:T.red,fontSize:9,fontWeight:700,marginLeft:6}}>Selecione</span>}{(f.pg||"pix") === "cartao" ? <select value={f.cartaoId||""} onChange={function(e){u("cartaoId",e.target.value)}} style={Object.assign({},inp,errStyle("cartaoId"))}><option value="">Selecione</option>{props.cards.map(function(c){return <option key={c.id} value={c.id}>{c.nome}</option>})}</select> : <div style={{padding:"8px 10px",borderRadius:8,background:T.card,border:"1px solid "+T.border,fontSize:10,color:T.dim}}>Nao se aplica ao PIX</div>}</FL>
       </div>}
       {f.tipo !== "receita" && (f.pg||"pix") === "cartao" && numP > 1 && <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -1323,6 +1404,7 @@ var TABS = [
   {id:"cards",lb:"Cards",ic:CreditCard},
   {id:"rating",lb:"Coaching",ic:Shield},
   {id:"orc",lb:"Orc.",ic:DollarSign},
+  {id:"assin",lb:"Assin.",ic:Repeat},
   {id:"parc",lb:"Parcelas",ic:Landmark},
   {id:"metas",lb:"Metas",ic:Target},
   {id:"invest",lb:"Invest.",ic:TrendingUp},
@@ -1436,34 +1518,9 @@ export default function App() {
   function flash(m) { setSt(m); setTimeout(function(){setSt(null)}, 2200); }
 
   useEffect(function() {
-    var localData = doLoad();
-    supaLoad(function(supaData) {
-      var data = supaData || localData;
-      if (data) {
-        var n = norm(data);
-        if (n) { setDB(n); doSave(n); flash("Dados restaurados!"); }
-      }
-    });
+    var r = doLoad();
+    if (r) { var n = norm(r); if (n) { setDB(n); flash("Dados restaurados!"); } }
   }, []);
-
-  useEffect(function() {
-    var timer = setInterval(function() {
-      supaSync(db);
-    }, 10000);
-    return function() { clearInterval(timer); };
-  }, [db]);
-
-  useEffect(function() {
-    var handleUnload = function() {
-      doSave(db);
-      try {
-        var j = JSON.stringify({data: JSON.stringify(db)});
-        navigator.sendBeacon(SUPA_URL, new Blob([j], {type: "application/json"}));
-      } catch(e) {}
-    };
-    window.addEventListener("beforeunload", handleUnload);
-    return function() { window.removeEventListener("beforeunload", handleUnload); };
-  }, [db]);
 
   useEffect(function() {
     var meta = document.createElement("meta");
@@ -1495,7 +1552,7 @@ export default function App() {
     };
   }, []);
 
-  function sv(nd) { setDB(nd); doSave(nd); supaSync(nd); setSt("Salvo \u2713"); setTimeout(function(){setSt(null)}, 1500); }
+  function sv(nd) { setDB(nd); doSave(nd); setSt("Salvo \u2713"); setTimeout(function(){setSt(null)}, 1500); }
 
   function ups(key, item) {
     var list = db[key] || [];
@@ -1565,7 +1622,7 @@ export default function App() {
   function duplicateLanc(lanc) {
     var novo = Object.assign({}, lanc, {id: uid(), status: "pendente", desc: lanc.desc + " (copia)", rec: false, virtual: undefined, pT: 0, pA: 0});
     sv(Object.assign({}, db, {lancamentos: (db.lancamentos||[]).concat([novo])}));
-    flash("Lancamento duplicado!");
+    flash("Lançamento duplicado!");
   }
 
   function bulkToggle(id) {
@@ -1576,13 +1633,13 @@ export default function App() {
 
   function bulkMarkPago() {
     var ids = Object.keys(bulkSel);
-    if (ids.length === 0) { flash("Nenhum lancamento selecionado"); return; }
+    if (ids.length === 0) { flash("Nenhum lançamento selecionado"); return; }
     sv(Object.assign({}, db, {lancamentos: (db.lancamentos||[]).map(function(l){
       return bulkSel[l.id] ? Object.assign({},l,{status:"pago"}) : l;
     })}));
     setBulkSel({});
     setBulkMode(false);
-    flash(ids.length + " lancamento(s) marcado(s) como pago!");
+    flash(ids.length + " lançamento(s) marcado(s) como pago!");
   }
 
   function bulkSelectAll() {
@@ -1683,7 +1740,7 @@ export default function App() {
   }
 
   function askResetFatValor(cardId, mesFat, anoFat) {
-    setCfm({msg:"Voltar o valor desta fatura para o calculo automatico?", fn:function(){ resetFatManual(cardId, mesFat, anoFat); setCfm(null); }});
+    setCfm({msg:"Voltar o valor desta fatura para o cálculo automático?", fn:function(){ resetFatManual(cardId, mesFat, anoFat); setCfm(null); }});
   }
 
   function askResetFatVenc(cardId, mesFat, anoFat) {
@@ -1702,8 +1759,8 @@ export default function App() {
     reader.onload = function(e) {
       try {
         var n = norm(JSON.parse(e.target.result));
-        if (!n) { flash("Arquivo invalido"); return; }
-        setCfm({msg:"Substituir todos os dados? Um backup automatico sera salvo.", fn:function(){
+        if (!n) { flash("Arquivo inválido"); return; }
+        setCfm({msg:"Substituir todos os dados? Um backup automático será salvo.", fn:function(){
           try { var s = getStorageSafe(); if (s) s.setItem(SK + "_backup", JSON.stringify(db)); } catch(bkErr) {}
           sv(n);
           flash("Importado! Backup salvo.");
@@ -1734,7 +1791,7 @@ export default function App() {
     return "MES: " + MSF[mes-1] + "/" + ano +
     "\nReceita: " + f$(p.receitaMes) + " | Despesas lancadas: " + f$(p.despLancadas) + " | Sobra: " + f$(p.sobraPrevista) +
     "\nFluxo PIX: " + f$(f.pix) + " | Fatura cartoes: " + f$(f.faturaDoMes) + " | Invest. fixo: " + f$(f.investFixo) +
-    "\nPatrimonio liq: " + f$(pat.liq) + " | Saldo contas: " + f$(pat.sc) + " | Investido: " + f$(pat.inv) + " | Dividas: " + f$(pat.dv) +
+    "\nPatrimônio liq: " + f$(pat.liq) + " | Saldo contas: " + f$(pat.sc) + " | Investido: " + f$(pat.inv) + " | Dívidas: " + f$(pat.dv) +
     "\nFixas mensais: " + f$(totalFixas) + " (" + fixas.length + " itens)" +
     "\nParcelas: " + f$(totalParcMes) + " (" + parcelas.length + " itens)" +
     "\nCartoes: " + cardsResumo.map(function(c){return c.nome+" uso "+pct(c.usoRealPct)+" limite "+f$(c.limite)}).join("; ") +
@@ -1746,7 +1803,7 @@ export default function App() {
     "\nTop 5 despesas do mes: " + lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&l.tipo!=="receita"}).sort(function(a,b){return b.valor-a.valor}).slice(0,5).map(function(l){return l.desc+" "+f$(l.valor)}).join(", ");
   }
 
-  var aiSysPrompt = "Voce e um consultor financeiro pessoal integrado ao app COJUR Vault. Responda em portugues brasileiro, de forma direta e pratica. Use os dados reais fornecidos. Nunca use travessoes dentro de paragrafos. Seja conciso (max 200 palavras). Formate com paragrafos curtos.";
+  var aiSysPrompt = "Você é um consultor financeiro pessoal integrado ao app COJUR Vault. Responda em portugues brasileiro, de forma direta e pratica. Use os dados reais fornecidos. Nunca use travessões dentro de parágrafos. Seja conciso (max 200 palavras). Formate com parágrafos curtos.";
 
   function sendAiMsg() {
     if (!aiInput.trim() || aiLoading) return;
@@ -1774,8 +1831,8 @@ export default function App() {
     setAiLoading(true);
     var ctx = getFinCtx();
     callAI(
-      "Voce e um analista financeiro. Gere 4-5 insights curtos e acionaveis baseados nos dados. Cada insight em uma linha. Use dados especificos. Nunca use travessoes dentro de paragrafos. Responda em portugues.",
-      "Analise estes dados e gere insights praticos:\n" + ctx
+      "Você é um analista financeiro. Gere 4-5 insights curtos e acionaveis baseados nos dados. Cada insight em uma linha. Use dados específicos. Nunca use travessões dentro de parágrafos. Responda em portugues.",
+      "Análise estes dados e gere insights práticos:\n" + ctx
     ).then(function(r){setAiInsights(r);setAiLoading(false)});
   }
 
@@ -1784,7 +1841,7 @@ export default function App() {
     setAiLoading(true);
     var ctx = getFinCtx();
     callAI(
-      "Voce e um planejador financeiro. Crie um plano otimizado para atingir as metas. Considere quitacao de dividas vs investimento. Seja especifico com valores e prazos. Nunca use travessoes dentro de paragrafos. Max 250 palavras. Portugues.",
+      "Você é um planejador financeiro. Crie um plano otimizado para atingir as metas. Considere quitacao de dividas vs investimento. Seja específico com valores e prazos. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.",
       "Com estes dados, crie um plano otimizado para as metas:\n" + ctx
     ).then(function(r){setAiPlan(r);setAiLoading(false)});
   }
@@ -1794,7 +1851,7 @@ export default function App() {
     var catNames = (db.categorias||[]).filter(function(c){return c.tipo==="despesa"}).map(function(c){return c.id+":"+c.nome}).join(", ");
     callAI(
       "Responda APENAS com o ID da categoria mais provavel. Nada mais. Categorias: " + catNames,
-      "Lancamento: " + desc
+      "Lançamento: " + desc
     ).then(function(r){
       var clean = r.trim().toLowerCase();
       var found = (db.categorias||[]).find(function(c){return clean.indexOf(c.id)>=0});
@@ -1806,7 +1863,7 @@ export default function App() {
     if (!aiSimQ.trim() || aiLoading) return;
     setAiLoading(true);
     callAI(
-      "Voce e um simulador financeiro. Receba os dados reais e a pergunta 'E se...'. Calcule o impacto numerico na sobra mensal, prazo das metas, dividas e rating. Seja especifico com valores. Nunca use travessoes dentro de paragrafos. Max 250 palavras. Portugues.",
+      "Você é um simulador financeiro. Receba os dados reais e a pergunta 'E se...'. Calcule o impacto numerico na sobra mensal, prazo das metas, dividas e rating. Seja específico com valores. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.",
       "DADOS:\n" + getFinCtx() + "\n\nSIMULACAO: " + aiSimQ
     ).then(function(r){setAiSim(r);setAiLoading(false)});
   }
@@ -1815,8 +1872,8 @@ export default function App() {
     if (aiLoading) return;
     setAiLoading(true);
     callAI(
-      "Voce e um consultor financeiro gerando um relatorio mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dividas e Parcelas, Investimentos e Metas, Rating Bancario, Recomendacoes. Use dados especificos. Nunca use travessoes dentro de paragrafos. Max 400 palavras. Portugues.",
-      "Gere o relatorio financeiro de " + MSF[mes-1] + "/" + ano + ":\n" + getFinCtx()
+      "Você é um consultor financeiro gerando um relatório mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dívidas e Parcelas, Investimentos e Metas, Rating Bancário, Recomendações. Use dados específicos. Nunca use travessões dentro de parágrafos. Max 400 palavras. Português.",
+      "Gere o relatório financeiro de " + MSF[mes-1] + "/" + ano + ":\n" + getFinCtx()
     ).then(function(r){setAiReport(r);setAiLoading(false)});
   }
 
@@ -1826,7 +1883,7 @@ export default function App() {
     var hoje = new Date();
     var diaHoje = hoje.getDate();
     callAI(
-      "Voce e um coach especializado em rating bancario Santander Unlimited e Itau The One. Gere 5 acoes CONCRETAS para HOJE (dia " + diaHoje + "), considerando onde estamos no ciclo do mes: proximidade de fechamento, vencimento, salario, janela de pedido. Nunca use travessoes dentro de paragrafos. Seja direto. Max 200 palavras. Portugues.",
+      "Você é um coach especializado em rating bancário Santander Unlimited e Itaú The One. Gere 5 ações CONCRETAS para HOJE (dia " + diaHoje + "), considerando onde estamos no ciclo do mês: proximidade de fechamento, vencimento, salário, janela de pedido. Nunca use travessões dentro de parágrafos. Seja direto. Max 200 palavras. Português.",
       "DADOS ATUAIS:\n" + getFinCtx() + "\nDia de salario: " + (db.salarioDia||25) + "\nHoje: dia " + diaHoje + " de " + MSF[mes-1]
     ).then(function(r){setAiCoach(r);setAiLoading(false)});
   }
@@ -1837,7 +1894,7 @@ export default function App() {
     var catList = (db.categorias||[]).map(function(c){return c.id+":"+c.nome+":"+c.tipo}).join(", ");
     var cardList = (db.cartoes||[]).map(function(c){return c.id+":"+c.nome}).join(", ");
     callAI(
-      "Extraia dados de lancamento financeiro do texto. Responda APENAS com JSON puro (sem markdown, sem ```). Formato: {\"desc\":\"...\",\"valor\":0,\"tipo\":\"despesa|receita|parcela\",\"cat\":\"ID\",\"data\":\"YYYY-MM-DD\",\"status\":\"pago|pendente\",\"pg\":\"pix|cartao\",\"cartaoId\":\"\",\"pT\":0,\"pA\":1}. Categorias: " + catList + ". Cartoes: " + cardList + ". Hoje: " + hj() + ". Se nao especificado: tipo=despesa, status=pendente, pg=pix, data=hoje.",
+      "Extraia dados de lançamento financeiro do texto. Responda APENAS com JSON puro (sem markdown, sem ```). Formato: {\"desc\":\"...\",\"valor\":0,\"tipo\":\"despesa|receita|parcela\",\"cat\":\"ID\",\"data\":\"YYYY-MM-DD\",\"status\":\"pago|pendente\",\"pg\":\"pix|cartao\",\"cartaoId\":\"\",\"pT\":0,\"pA\":1}. Categorias: " + catList + ". Cartoes: " + cardList + ". Hoje: " + hj() + ". Se não especificado: tipo=despesa, status=pendente, pg=pix, data=hoje.",
       aiNlpInput
     ).then(function(r){
       setAiLoading(false);
@@ -1845,10 +1902,10 @@ export default function App() {
         var clean = r.replace(/```json/g,"").replace(/```/g,"").trim();
         var parsed = JSON.parse(clean);
         var ma = gMA(parsed.data || hj());
-        setModal({type:"lanc",title:"IA: Confirmar lancamento",data:Object.assign({id:"",rec:false},parsed,{mes:ma.mes,ano:ma.ano,valor:parseBR(parsed.valor)})});
+        setModal({type:"lanc",title:"IA: Confirmar lançamento",data:Object.assign({id:"",rec:false},parsed,{mes:ma.mes,ano:ma.ano,valor:parseBR(parsed.valor)})});
         setAiNlpInput("");
-        flash("Lancamento criado pela IA! Confirme os dados.");
-      } catch(e) { flash("Nao consegui interpretar. Tente reformular."); }
+        flash("Lançamento criado pela IA! Confirme os dados.");
+      } catch(e) { flash("Não consegui interpretar. Tente reformular."); }
     });
   }
 
@@ -1864,7 +1921,7 @@ export default function App() {
       last3.push(MS[ref.mes-1]+": total "+f$(total)+" | "+top);
     }
     callAI(
-      "Voce e um detector de anomalias financeiras. Compare os 3 meses e identifique: gastos que apareceram de repente, valores que subiram muito, categorias fora do padrao, despesas duplicadas suspeitas. Seja especifico. Nunca use travessoes dentro de paragrafos. Max 200 palavras. Portugues.",
+      "Você é um detector de anomalias financeiras. Compare os 3 meses e identifique: gastos que apareceram de repente, valores que subiram muito, categorias fora do padrao, despesas duplicadas suspeitas. Seja específico. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.",
       "ULTIMOS 3 MESES:\n" + last3.join("\n") + "\n\nDADOS COMPLETOS DO MES ATUAL:\n" + getFinCtx()
     ).then(function(r){setAiAnom(r);setAiLoading(false)});
   }
@@ -1873,7 +1930,7 @@ export default function App() {
     if (aiLoading) return;
     setAiLoading(true);
     callAI(
-      "Voce e um previsor financeiro. Com base nos dados atuais (fixas, parcelas, receita recorrente, tendencias), projete o proximo mes: receita esperada, despesas fixas, parcelas (quais terminam, quais continuam), sobra estimada, eventos importantes. Nunca use travessoes dentro de paragrafos. Seja especifico com valores. Max 250 palavras. Portugues.",
+      "Você é um previsor financeiro. Com base nos dados atuais (fixas, parcelas, receita recorrente, tendencias), projete o proximo mes: receita esperada, despesas fixas, parcelas (quais terminam, quais continuam), sobra estimada, eventos importantes. Nunca use travessões dentro de parágrafos. Seja específico com valores. Max 250 palavras. Português.",
       "DADOS DE " + MSF[mes-1] + ":\n" + getFinCtx()
     ).then(function(r){setAiPredict(r);setAiLoading(false)});
   }
@@ -1882,7 +1939,7 @@ export default function App() {
     if (aiLoading) return;
     setAiLoading(true);
     callAI(
-      "Voce e um especialista em economia domestica. Analise os gastos e sugira 5-7 cortes ou otimizacoes concretas, com o valor estimado de economia por mes. Priorize por impacto. Nunca use travessoes dentro de paragrafos. Seja direto e pratico. Max 250 palavras. Portugues.",
+      "Você é um especialista em economia doméstica. Análise os gastos e sugira 5-7 cortes ou otimizações concretas, com o valor estimado de economia por mês. Priorize por impacto. Nunca use travessões dentro de parágrafos. Seja direto e prático. Max 250 palavras. Português.",
       "GASTOS ATUAIS:\n" + getFinCtx()
     ).then(function(r){setAiEcon(r);setAiLoading(false)});
   }
@@ -1892,17 +1949,17 @@ export default function App() {
     setAiLoading(true);
     var divs = (db.dividas||[]).filter(function(d){return !d.quitada}).map(function(d){
       var rest = d.total - d.pago;
-      return d.nome + ": total " + f$(d.total) + ", pago " + f$(d.pago) + ", restante " + f$(rest) + ", parcela " + f$(d.parcela) + "/mes, juros " + (d.juros||"desconhecido");
+      return d.nome + ": total " + f$(d.total) + ", pago " + f$(d.pago) + ", restante " + f$(rest) + ", parcela " + f$(d.parcela) + "/mês, juros " + (d.juros||"desconhecido");
     }).join("\n");
     var parcs = (db.lancamentos||[]).filter(function(l){return l.tipo==="parcela" && l.pT>0}).reduce(function(acc,l){
       if (!acc[l.desc]) acc[l.desc] = {nome:l.desc,valor:l.valor,pT:l.pT,pA:l.pA};
       if (l.pA > acc[l.desc].pA) acc[l.desc] = {nome:l.desc,valor:l.valor,pT:l.pT,pA:l.pA};
       return acc;
     },{});
-    var parcList = Object.keys(parcs).map(function(k){var p=parcs[k]; return p.nome+": "+f$(p.valor)+"/mes, "+p.pA+"/"+p.pT+" parcelas";}).join("\n");
+    var parcList = Object.keys(parcs).map(function(k){var p=parcs[k]; return p.nome+": "+f$(p.valor)+"/mês, "+p.pA+"/"+p.pT+" parcelas";}).join("\n");
     callAI(
-      "Voce e um estrategista de quitacao de dividas. Compare metodo avalanche (juros altos primeiro) vs bola de neve (menores primeiro). Analise cada divida/parcelamento e recomende a ordem ideal de quitacao. Calcule quanto o usuario economizaria em juros. Nunca use travessoes dentro de paragrafos. Seja especifico. Max 300 palavras. Portugues.",
-      "DIVIDAS ATIVAS:\n" + (divs || "Nenhuma divida formal") + "\n\nPARCELAMENTOS:\n" + (parcList || "Nenhum parcelamento") + "\n\nSobra mensal estimada: " + f$(getPrevisao(db, mes, ano).sobra) + "\n\nDADOS GERAIS:\n" + getFinCtx()
+      "Você é um estrategista de quitação de dívidas. Compare método avalanche (juros altos primeiro) vs bola de neve (menores primeiro). Análise cada dívida/parcelamento e recomende a ordem ideal de quitação. Calcule quanto o usuário economizaria em juros. Nunca use travessões dentro de parágrafos. Seja específico. Max 300 palavras. Português.",
+      "DÍVIDAS ATIVAS:\n" + (divs || "Nenhuma dívida formal") + "\n\nPARCELAMENTOS:\n" + (parcList || "Nenhum parcelamento") + "\n\nSobra mensal estimada: " + f$(getPrevisão(db, mes, ano).sobra) + "\n\nDADOS GERAIS:\n" + getFinCtx()
     ).then(function(r){setAiDebtCmp(r);setAiLoading(false)});
   }
 
@@ -1910,7 +1967,7 @@ export default function App() {
     if (aiLoading) return;
     setAiLoading(true);
     callAI(
-      "Voce e um orcamentista pessoal. Crie um orcamento mensal ideal baseado na renda real do usuario. Use a regra 50/30/20 adaptada a realidade do usuario (considerando dividas e metas). Para cada categoria de gasto, indique: valor ideal, valor atual, e ajuste necessario. Nunca use travessoes dentro de paragrafos. Seja concreto com valores. Max 300 palavras. Portugues.",
+      "Você é um orçamentista pessoal. Crie um orçamento mensal ideal baseado na renda real do usuario. Use a regra 50/30/20 adaptada a realidade do usuário (considerando dividas e metas). Para cada categoria de gasto, indique: valor ideal, valor atual, e ajuste necessário. Nunca use travessões dentro de parágrafos. Seja concreto com valores. Max 300 palavras. Português.",
       "DADOS FINANCEIROS:\n" + getFinCtx()
     ).then(function(r){setAiBudget(r);setAiLoading(false)});
   }
@@ -1919,7 +1976,7 @@ export default function App() {
     if (aiLoading) return;
     setAiLoading(true);
     callAI(
-      "Voce e um medico financeiro. Faca um diagnostico completo da saude financeira. Avalie de 0 a 100 cada pilar: 1) Liquidez (reserva de emergencia), 2) Endividamento (relacao divida/renda), 3) Poupanca (taxa de poupanca mensal), 4) Investimentos (diversificacao e crescimento), 5) Protecao (seguros e previdencia), 6) Planejamento (metas e organizacao). De uma NOTA GERAL de 0 a 100 e explique cada pilar em 1-2 frases. Nunca use travessoes dentro de paragrafos. Portugues.",
+      "Você é um médico financeiro. Faça um diagnóstico completo da saúde financeira. Avalie de 0 a 100 cada pilar: 1) Liquidez (reserva de emergência), 2) Endividamento (relação dívida/renda), 3) Poupanca (taxa de poupança mensal), 4) Investimentos (diversificação e crescimento), 5) Proteção (seguros e previdência), 6) Planejamento (metas e organização). Dê uma NOTA GERAL de 0 a 100 e explique cada pilar em 1-2 frases. Nunca use travessões dentro de parágrafos. Português.",
       "DADOS:\n" + getFinCtx()
     ).then(function(r){setAiDiag(r);setAiLoading(false)});
   }
@@ -1942,20 +1999,20 @@ export default function App() {
     var topSemana = lancSemana.filter(function(l){return l.tipo!=="receita"}).sort(function(a,b){return b.valor-a.valor}).slice(0,5).map(function(l){return l.desc+": "+f$(l.valor)}).join(", ");
     var proxVenc = (db.fixas||[]).concat((db.lancamentos||[]).filter(function(l){return l.tipo==="parcela"&&l.mes===mes&&l.ano===ano&&l.status==="pendente"})).filter(function(f){return (f.dia||15) > diaHoje && (f.dia||15) <= diaHoje+7}).map(function(f){return (f.nome||f.desc)+": "+f$(f.valor||0)+" dia "+(f.dia||15)}).join(", ");
     callAI(
-      "Voce e um assistente financeiro fazendo o resumo semanal. Analise a semana e faca: 1) Resumo da semana (total gasto, total recebido), 2) Top gastos da semana, 3) Proximos vencimentos nos proximos 7 dias, 4) Alerta se ritmo de gasto esta acima do ideal para fechar o mes, 5) Dica rapida para a proxima semana. Nunca use travessoes dentro de paragrafos. Max 200 palavras. Portugues.",
-      "SEMANA (ultimos " + (diaSemana+1) + " dias):\nGastos: " + f$(gastoSemana) + "\nReceitas: " + f$(recSemana) + "\nTop gastos: " + (topSemana||"nenhum") + "\nProximos vencimentos (7 dias): " + (proxVenc||"nenhum") + "\nDia do mes: " + diaHoje + "/" + MSF[mes-1] + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
+      "Você é um assistente financeiro fazendo o resumo semanal. Análise a semana e faça: 1) Resumo da semana (total gasto, total recebido), 2) Top gastos da semana, 3) Próximos vencimentos nos proximos 7 dias, 4) Alerta se ritmo de gasto está acima do ideal para fechar o mês, 5) Dica rapida para a próxima semana. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.",
+      "SEMANA (ultimos " + (diaSemana+1) + " dias):\nGastos: " + f$(gastoSemana) + "\nReceitas: " + f$(recSemana) + "\nTop gastos: " + (topSemana||"nenhum") + "\nPróximos vencimentos (7 dias): " + (proxVenc||"nenhum") + "\nDia do mes: " + diaHoje + "/" + MSF[mes-1] + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
     ).then(function(r){setAiWeekly(r);setAiLoading(false)});
   }
 
   function generatePatrimonial() {
     if (aiLoading) return;
     setAiLoading(true);
-    var pv = getPrevisao(db, mes, ano);
+    var pv = getPrevisão(db, mes, ano);
     var divAtivas = (db.dividas||[]).filter(function(d){return !d.quitada});
     var divInfo = divAtivas.map(function(d){
       var rest = d.total - d.pago;
       var mesesRest = d.parcela > 0 ? Math.ceil(rest / d.parcela) : 0;
-      return d.nome + ": restam " + f$(rest) + ", " + f$(d.parcela) + "/mes, ~" + mesesRest + " meses";
+      return d.nome + ": restam " + f$(rest) + ", " + f$(d.parcela) + "/mês, ~" + mesesRest + " meses";
     }).join("\n");
     var parcAtivas = (db.lancamentos||[]).filter(function(l){return l.tipo==="parcela"&&l.pT>0&&l.pA<l.pT});
     var parcInfo = parcAtivas.reduce(function(acc,l){
@@ -1963,36 +2020,36 @@ export default function App() {
       if (l.pA > acc[l.desc].pA) acc[l.desc] = l;
       return acc;
     },{});
-    var parcList = Object.keys(parcInfo).map(function(k){var p=parcInfo[k]; return p.desc+": "+f$(p.valor)+"/mes, faltam "+(p.pT-p.pA)+" parcelas (~"+(p.pT-p.pA)+" meses)";}).join("\n");
+    var parcList = Object.keys(parcInfo).map(function(k){var p=parcInfo[k]; return p.desc+": "+f$(p.valor)+"/mês, faltam "+(p.pT-p.pA)+" parcelas (~"+(p.pT-p.pA)+" meses)";}).join("\n");
     callAI(
-      "Voce e um planejador patrimonial de longo prazo. Projete os proximos 12 meses, mes a mes, considerando: renda fixa, despesas fixas, parcelas que terminam (liberam orcamento), dividas sendo pagas, investimentos acumulando, e metas em progresso. Para cada mes mostre: patrimonio liquido projetado (investimentos - dividas restantes), sobra acumulada, dividas que se encerram, parcelas que terminam. No final, de o panorama geral: quando ficara livre de dividas, quando atingira cada meta, patrimonio estimado em 12 meses. Nunca use travessoes dentro de paragrafos. Use numeros concretos. Max 400 palavras. Portugues.",
-      "SITUACAO ATUAL:\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mes\nPatrimonio atual (investimentos): " + f$(pat.inv) + "\n\nDIVIDAS ATIVAS:\n" + (divInfo||"Nenhuma") + "\n\nPARCELAMENTOS ATIVOS:\n" + (parcList||"Nenhum") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)+" (aporte "+f$(m.aporte)+"/mes, prazo "+m.prazo+")"}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
+      "Você é um planejador patrimonial de longo prazo. Projete os próximos 12 meses, mês a mês, considerando: renda fixa, despesas fixas, parcelas que terminam (liberam orçamento), dívidas sendo pagas, investimentos acumulando, e metas em progresso. Para cada mês mostre: patrimônio líquido projetado (investimentos - dívidas restantes), sobra acumulada, dívidas que se encerram, parcelas que terminam. No final, de o panorama geral: quando ficará livre de dívidas, quando atingirá cada meta, patrimônio estimado em 12 meses. Nunca use travessões dentro de parágrafos. Use números concretos. Max 400 palavras. Português.",
+      "SITUAÇÃO ATUAL:\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio atual (investimentos): " + f$(pat.inv) + "\n\nDÍVIDAS ATIVAS:\n" + (divInfo||"Nenhuma") + "\n\nPARCELAMENTOS ATIVOS:\n" + (parcList||"Nenhum") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)+" (aporte "+f$(m.aporte)+"/mês, prazo "+m.prazo+")"}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
     ).then(function(r){setAiPatrim(r);setAiLoading(false)});
   }
 
   function generateCarPlan() {
     if (aiLoading) return;
     setAiLoading(true);
-    var pv = getPrevisao(db, mes, ano);
+    var pv = getPrevisão(db, mes, ano);
     var divAtivas = (db.dividas||[]).filter(function(d){return !d.quitada});
     var totalDivRest = divAtivas.reduce(function(s,d){return s+(d.total-d.pago)},0);
     var totalParcMes = divAtivas.reduce(function(s,d){return s+d.parcela},0);
     var parcAtivas = (db.lancamentos||[]).filter(function(l){return l.tipo==="parcela"&&l.pT>0&&l.pA<l.pT&&l.mes===mes&&l.ano===ano});
     var totalParcLanc = parcAtivas.reduce(function(s,l){return s+l.valor},0);
     callAI(
-      "Voce e um consultor especializado em compra de veiculos no Brasil. O usuario quer comprar um carro. Com base nos dados financeiros reais, analise detalhadamente:\n\n1) VALOR IDEAL DO CARRO: Qual faixa de preco e compativel com a renda e patrimonio. Regra: parcela nao deve ultrapassar 20% da renda liquida, e o carro nao deve valer mais que 50% da renda anual.\n\n2) MELHOR MOMENTO: Considerando dividas ativas, parcelas terminando, e projecao de sobra, quando seria seguro comprar (mes/ano estimado).\n\n3) COMO COMPRAR: Compare financiamento bancario vs consorcio vs a vista. Calcule cenarios de entrada (20%, 30%, 50%) com parcelas em 36, 48 e 60 meses. Use taxa media de 1.5% a.m. para financiamento.\n\n4) PARCELA IDEAL: Valor maximo de parcela que nao compromete as metas e a saude financeira, considerando as parcelas e dividas ja existentes.\n\n5) SEGURO ESTIMADO: Calcule com base no valor do carro (media 5-8% do valor ao ano para perfil jovem).\n\n6) CUSTOS INDIRETOS MENSAIS: IPVA (parcele em 3x), licenciamento, combustivel (estimativa 1.200km/mes), manutencao preventiva, estacionamento, lavagem, revisoes periodicas, depreciacacao anual estimada (15% no primeiro ano, 10% nos seguintes).\n\n7) IMPACTO TOTAL: Some parcela + seguro + custos indiretos e mostre o comprometimento real mensal. Compare com a sobra atual.\n\n8) RECOMENDACAO FINAL: Comprar agora ou esperar? Qual estrategia seguir?\n\nNunca use travessoes dentro de paragrafos. Seja extremamente especifico com valores em reais. Max 500 palavras. Portugues.",
-      "SITUACAO FINANCEIRA:\nRenda mensal: " + f$(pv.recTotal) + "\nDespesas totais: " + f$(pv.despTotal) + "\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mes\nPatrimonio (investimentos): " + f$(pat.inv) + "\nDividas restantes: " + f$(totalDivRest) + " (parcelas: " + f$(totalParcMes) + "/mes)\nParcelamentos mensais: " + f$(totalParcLanc) + "\nComprometimento atual com parcelas+dividas: " + f$(totalParcMes+totalParcLanc) + "/mes\n\nDIVIDAS DETALHADAS:\n" + divAtivas.map(function(d){return d.nome+": restam "+f$(d.total-d.pago)+", "+f$(d.parcela)+"/mes"}).join("\n") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
+      "Você é um consultor especializado em compra de veículos no Brasil. O usuário quer comprar um carro. Com base nos dados financeiros reais, analise detalhadamente:\n\n1) VALOR IDEAL DO CARRO: Qual faixa de preço é compatível com a renda e patrimônio. Regra: parcela não deve ultrapassar 20% da renda líquida, e o carro não deve valer mais que 50% da renda anual.\n\n2) MELHOR MOMENTO: Considerando dividas ativas, parcelas terminando, e projeção de sobra, quando seria seguro comprar (mes/ano estimado).\n\n3) COMO COMPRAR: Compare financiamento bancário vs consórcio vs à vista. Calcule cenarios de entrada (20%, 30%, 50%) com parcelas em 36, 48 e 60 meses. Use taxa média de 1.5% a.m. para financiamento.\n\n4) PARCELA IDEAL: Valor máximo de parcela que nao compromete as metas e a saúde financeira, considerando as parcelas e dividas já existentes.\n\n5) SEGURO ESTIMADO: Calcule com base no valor do carro (media 5-8% do valor ao ano para perfil jovem).\n\n6) CUSTOS INDIRETOS MENSAIS: IPVA (parcele em 3x), licenciamento, combustível (estimativa 1.200km/mês), manutenção preventiva, estacionamento, lavagem, revisoes periodicas, depreciação anual estimada (15% no primeiro ano, 10% nos seguintes).\n\n7) IMPACTO TOTAL: Some parcela + seguro + custos indiretos e mostre o comprometimento real mensal. Compare com a sobra atual.\n\n8) RECOMENDAÇÃO FINAL: Comprar agora ou esperar? Qual estrategia seguir?\n\nNunca use travessões dentro de parágrafos. Seja extremamente específico com valores em reais. Max 500 palavras. Português.",
+      "SITUAÇÃO FINANCEIRA:\nRenda mensal: " + f$(pv.recTotal) + "\nDespesas totais: " + f$(pv.despTotal) + "\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio (investimentos): " + f$(pat.inv) + "\nDívidas restantes: " + f$(totalDivRest) + " (parcelas: " + f$(totalParcMes) + "/mês)\nParcelamentos mensais: " + f$(totalParcLanc) + "\nComprometimento atual com parcelas+dívidas: " + f$(totalParcMes+totalParcLanc) + "/mês\n\nDÍVIDAS DETALHADAS:\n" + divAtivas.map(function(d){return d.nome+": restam "+f$(d.total-d.pago)+", "+f$(d.parcela)+"/mês"}).join("\n") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
     ).then(function(r){setAiCar(r);setAiLoading(false)});
   }
 
   function generateBankMeeting() {
     if (aiLoading) return;
     setAiLoading(true);
-    var pv = getPrevisao(db, mes, ano);
+    var pv = getPrevisão(db, mes, ano);
     var cartoes = (db.cartoes||[]).map(function(c){return c.nome+": limite "+f$(c.limite)+", fatura media "+f$(c.faturaMedia||0)}).join("\n");
     callAI(
-      "Voce e um assessor financeiro preparando o cliente para uma reuniao com o gerente do banco. O objetivo e conseguir upgrade para Santander Unlimited e/ou Itau The One. Crie um SCRIPT de reuniao completo:\n\n1) ABERTURA: Como iniciar a conversa (frase exata para dizer ao gerente).\n2) ARGUMENTOS DE MOVIMENTACAO: Destaque valores reais de receita, saldo medio, volume de transacoes, tempo de relacionamento. Enfatize pontos fortes.\n3) PEDIDO ESPECIFICO: O que pedir exatamente (cartao, limite, isenção de anuidade, beneficios). Frase exata.\n4) CONTRA-ARGUMENTOS: Se o gerente disser 'voce nao tem perfil ainda', como responder. Se pedir mais movimentacao, o que prometer de concreto.\n5) NEGOCIACAO DE ANUIDADE: Estrategia para pedir isencao ou desconto na anuidade. Mencionar concorrencia.\n6) TIMING: Melhor dia e horario para ir ao banco. Melhor epoca do ano.\n7) PLANO B: Se negar, o que fazer nos proximos 3 meses para voltar e conseguir.\n\nNunca use travessoes dentro de paragrafos. Seja pratico com frases prontas para usar. Max 400 palavras. Portugues.",
-      "PERFIL FINANCEIRO DO CLIENTE:\nRenda: " + f$(pv.recTotal) + "/mes\nSobra: " + f$(pv.sobra) + "/mes\nInvestimentos: " + f$(pat.inv) + "\nCartoes atuais:\n" + cartoes + "\nScore rating: " + ratingScore + "/100\n\nDADOS COMPLETOS:\n" + getFinCtx()
+      "Você é um assessor financeiro preparando o cliente para uma reunião com o gerente do banco. O objetivo é conseguir upgrade para Santander Unlimited e/ou Itaú The One. Crie um SCRIPT de reunião completo:\n\n1) ABERTURA: Como iniciar a conversa (frase exata para dizer ao gerente).\n2) ARGUMENTOS DE MOVIMENTACAO: Destaque valores reais de receita, saldo médio, volume de transações, tempo de relacionamento. Enfatize pontos fortes.\n3) PEDIDO ESPECÍFICO: O que pedir exatamente (cartao, limite, isenção de anuidade, benefícios). Frase exata.\n4) CONTRA-ARGUMENTOS: Se o gerente disser 'você não tem perfil ainda', como responder. Se pedir mais movimentação, o que prometer de concreto.\n5) NEGOCIAÇÃO DE ANUIDADE: Estratégia para pedir isenção ou desconto na anuidade. Mencionar concorrência.\n6) TIMING: Melhor dia e horário para ir ao banco. Melhor época do ano.\n7) PLANO B: Se negar, o que fazer nos próximos 3 meses para voltar e conseguir.\n\nNunca use travessões dentro de parágrafos. Seja prático com frases prontas para usar. Max 400 palavras. Português.",
+      "PERFIL FINANCEIRO DO CLIENTE:\nRenda: " + f$(pv.recTotal) + "/mês\nSobra: " + f$(pv.sobra) + "/mês\nInvestimentos: " + f$(pat.inv) + "\nCartões atuais:\n" + cartoes + "\nScore rating: " + ratingScore + "/100\n\nDADOS COMPLETOS:\n" + getFinCtx()
     ).then(function(r){setAiBankMeet(r);setAiLoading(false)});
   }
 
@@ -2004,23 +2061,23 @@ export default function App() {
     setAiAllProg(1);
     setAiLoading(true);
 
-    callAI("Voce e um assistente financeiro fazendo o resumo semanal. Analise gastos da semana, proximos vencimentos, ritmo de gasto vs orcamento, dica rapida. Nunca use travessoes dentro de paragrafos. Max 200 palavras. Portugues.", "Dia do mes: "+diaHoje+"\n"+ctx)
+    callAI("Você é um assistente financeiro fazendo o resumo semanal. Análise gastos da semana, próximos vencimentos, ritmo de gasto vs orçamento, dica rápida. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.", "Dia do mes: "+diaHoje+"\n"+ctx)
     .then(function(r){ setAiWeekly(r); setAiAllProg(2);
-      return callAI("Voce e um analista financeiro. Gere 4-5 insights curtos e acionaveis. Cada insight em uma linha. Use dados especificos. Nunca use travessoes dentro de paragrafos. Portugues.", "Analise:\n"+ctx);
+      return callAI("Você é um analista financeiro. Gere 4-5 insights curtos e acionaveis. Cada insight em uma linha. Use dados específicos. Nunca use travessões dentro de parágrafos. Português.", "Análise:\n"+ctx);
     }).then(function(r){ setAiInsights(r); setAiAllProg(3);
-      return callAI("Voce e um coach especializado em rating bancario Santander Unlimited e Itau The One. Gere 5 acoes CONCRETAS para HOJE (dia "+diaHoje+"). Nunca use travessoes dentro de paragrafos. Max 200 palavras. Portugues.", "DADOS:\n"+ctx+"\nDia salario: "+(db.salarioDia||25)+"\nHoje: dia "+diaHoje);
+      return callAI("Você é um coach especializado em rating bancário Santander Unlimited e Itaú The One. Gere 5 ações CONCRETAS para HOJE (dia "+diaHoje+"). Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.", "DADOS:\n"+ctx+"\nDia salario: "+(db.salarioDia||25)+"\nHoje: dia "+diaHoje);
     }).then(function(r){ setAiCoach(r); setAiAllProg(4);
-      return callAI("Voce e um planejador financeiro. Crie um plano otimizado para atingir as metas. Considere quitacao vs investimento. Nunca use travessoes dentro de paragrafos. Max 250 palavras. Portugues.", "Plano para metas:\n"+ctx);
+      return callAI("Você é um planejador financeiro. Crie um plano otimizado para atingir as metas. Considere quitacao vs investimento. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.", "Plano para metas:\n"+ctx);
     }).then(function(r){ setAiPlan(r); setAiAllProg(5);
-      return callAI("Voce e um previsor financeiro. Projete o proximo mes: receita, despesas fixas, parcelas que terminam/continuam, sobra estimada. Nunca use travessoes dentro de paragrafos. Max 250 palavras. Portugues.", "DADOS DE "+MSF[mes-1]+":\n"+ctx);
+      return callAI("Você é um previsor financeiro. Projete o proximo mes: receita, despesas fixas, parcelas que terminam/continuam, sobra estimada. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.", "DADOS DE "+MSF[mes-1]+":\n"+ctx);
     }).then(function(r){ setAiPredict(r); setAiAllProg(6);
-      return callAI("Voce e um detector de anomalias. Identifique gastos fora do padrao, valores que subiram, duplicados suspeitos. Nunca use travessoes dentro de paragrafos. Max 200 palavras. Portugues.", "DADOS:\n"+ctx);
+      return callAI("Você é um detector de anomalias. Identifique gastos fora do padrao, valores que subiram, duplicados suspeitos. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.", "DADOS:\n"+ctx);
     }).then(function(r){ setAiAnom(r); setAiAllProg(7);
-      return callAI("Voce e um especialista em economia domestica. Sugira 5-7 cortes concretos com valor estimado de economia/mes. Nunca use travessoes dentro de paragrafos. Max 250 palavras. Portugues.", "GASTOS:\n"+ctx);
+      return callAI("Você é um especialista em economia doméstica. Sugira 5-7 cortes concretos com valor estimado de economia/mes. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.", "GASTOS:\n"+ctx);
     }).then(function(r){ setAiEcon(r); setAiAllProg(8);
-      return callAI("Voce e um medico financeiro. Diagnostico completo: avalie de 0 a 100 cada pilar (liquidez, endividamento, poupanca, investimentos, protecao, planejamento). NOTA GERAL 0-100. Nunca use travessoes dentro de paragrafos. Portugues.", "DADOS:\n"+ctx);
+      return callAI("Você é um médico financeiro. Diagnostico completo: avalie de 0 a 100 cada pilar (liquidez, endividamento, poupanca, investimentos, protecao, planejamento). NOTA GERAL 0-100. Nunca use travessões dentro de parágrafos. Português.", "DADOS:\n"+ctx);
     }).then(function(r){ setAiDiag(r); setAiAllProg(9);
-      return callAI("Voce e um consultor financeiro gerando relatorio mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dividas e Parcelas, Investimentos e Metas, Rating Bancario, Recomendacoes. Nunca use travessoes dentro de paragrafos. Max 400 palavras. Portugues.", "Relatorio de "+MSF[mes-1]+"/"+ano+":\n"+ctx);
+      return callAI("Você é um consultor financeiro gerando relatório mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dívidas e Parcelas, Investimentos e Metas, Rating Bancário, Recomendações. Nunca use travessões dentro de parágrafos. Max 400 palavras. Português.", "Relatório de "+MSF[mes-1]+"/"+ano+":\n"+ctx);
     }).then(function(r){ setAiReport(r); setAiAllProg(0); setAiLoading(false); flash("9 analises concluidas!"); })
     ["catch"](function(e){ setAiAllProg(0); setAiLoading(false); flash("Erro na analise: "+e.message); });
   }
@@ -2045,7 +2102,7 @@ export default function App() {
     }
     var fixasAtuais = (db.fixas||[]).map(function(f){return f.nome+": "+f$(f.valor)}).join(", ");
     callAI(
-      "Voce e um detector de padroes financeiros. Analise os lancamentos dos ultimos 3 meses e identifique despesas que se repetem (mesma descricao ou similar, valores iguais ou proximos) e que NAO estao nas despesas fixas. Liste cada despesa recorrente detectada com: nome, valor medio, frequencia, e sugira se deve ser adicionada como fixa. Nunca use travessoes dentro de paragrafos. Max 250 palavras. Portugues.",
+      "Você é um detector de padroes financeiros. Análise os lancamentos dos ultimos 3 meses e identifique despesas que se repetem (mesma descricao ou similar, valores iguais ou proximos) e que NAO estao nas despesas fixas. Liste cada despesa recorrente detectada com: nome, valor médio, frequencia, e sugira se deve ser adicionada como fixa. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.",
       "LANCAMENTOS 3 MESES:\n" + last3.join("\n") + "\n\nDESPESAS FIXAS JA CADASTRADAS:\n" + (fixasAtuais || "Nenhuma") + "\n\nDADOS:\n" + getFinCtx()
     ).then(function(r){setAiRecur(r);setAiLoading(false)});
   }
@@ -2078,68 +2135,12 @@ export default function App() {
     return notifs.sort(function(a,b){return a.dias - b.dias});
   }
 
-  function getHealthScore() {
-    var score = 0;
-    var pvi = getPrevisao(db, mes, ano);
-    var receita = pvi.receitaMes || 1;
-    var despesas = pvi.despLancadas || 0;
-    var sobra = pvi.sobra || 0;
-    var p = getPat(db);
-
-    // 1. SOBRA (0-20pts): percentual da renda que sobra
-    var pctSobra = sobra / receita * 100;
-    if (pctSobra >= 30) score += 20;
-    else if (pctSobra >= 15) score += 15;
-    else if (pctSobra >= 5) score += 10;
-    else if (pctSobra >= 0) score += 5;
-
-    // 2. ENDIVIDAMENTO (0-20pts): dividas ativas vs renda
-    var divAtivas = (db.dividas || []).filter(function(d){return !d.quitada});
-    var totalDivRest = divAtivas.reduce(function(s,d){return s + Math.max(0, (d.total||0) - (d.pago||0))},0);
-    var parcMensal = divAtivas.reduce(function(s,d){return s + (d.parcela||0)},0);
-    var comprometimento = parcMensal / receita * 100;
-    if (divAtivas.length === 0) score += 20;
-    else if (comprometimento <= 15) score += 15;
-    else if (comprometimento <= 30) score += 10;
-    else if (comprometimento <= 50) score += 5;
-
-    // 3. RESERVA DE EMERGENCIA (0-20pts): investimentos vs despesas
-    var mesesReserva = despesas > 0 ? p.inv / despesas : 0;
-    if (mesesReserva >= 6) score += 20;
-    else if (mesesReserva >= 3) score += 15;
-    else if (mesesReserva >= 1) score += 10;
-    else if (p.inv > 0) score += 5;
-
-    // 4. CARTOES (0-20pts): uso medio dos MEUS cartoes (exclui Barbara e sem limite)
-    var meusCards = (db.cartoes || []).filter(function(c){return (c.titular||"joao")==="joao" && (c.limite||0) > 0 && (c.limite||0) < 999999});
-    var cR = getCardsResumo(db, mes, ano);
-    var meusCardIds = {};
-    meusCards.forEach(function(c){meusCardIds[c.id] = true});
-    var meusCardsResumo = cR.filter(function(c){return meusCardIds[c.id]});
-    var usoMedio = meusCardsResumo.length > 0 ? meusCardsResumo.reduce(function(s,c){return s+c.usoRealPct},0)/meusCardsResumo.length : 0;
-    if (usoMedio <= 15) score += 20;
-    else if (usoMedio <= 30) score += 15;
-    else if (usoMedio <= 50) score += 10;
-    else if (usoMedio <= 70) score += 5;
-
-    // 5. PLANEJAMENTO (0-20pts): metas + consistencia + investimento fixo
-    var temMetas = (db.metas || []).length > 0;
-    var temInvestFixo = (db.investimentoFixo || 0) > 0;
-    var metasProgresso = (db.metas || []).filter(function(m){return (m.atual||0) > 0}).length;
-    if (temMetas && temInvestFixo && metasProgresso > 0) score += 20;
-    else if (temMetas && temInvestFixo) score += 15;
-    else if (temMetas || temInvestFixo) score += 10;
-    else score += 3;
-
-    return Math.min(100, Math.max(0, score));
-  }
-
   function exportReportPDF() {
     var report = aiReport;
-    if (!report) { flash("Gere o relatorio na aba IA primeiro"); return; }
-    var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatorio ' + MSF[mes-1] + ' ' + ano + '</title><style>body{font-family:Inter,Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;color:#1a1a2e;line-height:1.7;font-size:13px}h1{color:#0088DD;border-bottom:3px solid #0088DD;padding-bottom:12px;font-size:22px}h2{color:#00B864;font-size:16px;margin-top:24px}.meta{color:#666;font-size:11px;margin-bottom:20px}.content{white-space:pre-wrap;background:#f8f9fc;padding:20px;border-radius:12px;border:1px solid #e0e4ec}.footer{margin-top:30px;text-align:center;color:#999;font-size:10px;border-top:1px solid #eee;padding-top:12px}</style></head><body>';
+    if (!report) { flash("Gere o relatório na aba IA primeiro"); return; }
+    var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório ' + MSF[mes-1] + ' ' + ano + '</title><style>body{font-family:Inter,Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;color:#1a1a2e;line-height:1.7;font-size:13px}h1{color:#0088DD;border-bottom:3px solid #0088DD;padding-bottom:12px;font-size:22px}h2{color:#00B864;font-size:16px;margin-top:24px}.meta{color:#666;font-size:11px;margin-bottom:20px}.content{white-space:pre-wrap;background:#f8f9fc;padding:20px;border-radius:12px;border:1px solid #e0e4ec}.footer{margin-top:30px;text-align:center;color:#999;font-size:10px;border-top:1px solid #eee;padding-top:12px}</style></head><body>';
     html += '<h1>COJUR Vault</h1>';
-    html += '<div class="meta">Relatorio de ' + MSF[mes-1] + ' ' + ano + ' | Gerado em ' + new Date().toLocaleDateString("pt-BR") + '</div>';
+    html += '<div class="meta">Relatório de ' + MSF[mes-1] + ' ' + ano + ' | Gerado em ' + new Date().toLocaleDateString("pt-BR") + '</div>';
     html += '<h2>Resumo financeiro</h2>';
     html += '<div class="content">' + report.replace(/</g,"&lt;").replace(/>/g,"&gt;") + '</div>';
     html += '<div class="footer">COJUR Vault v' + VER + '</div>';
@@ -2148,18 +2149,18 @@ export default function App() {
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
-    a.download = "relatorio-" + MSF[mes-1].toLowerCase() + "-" + ano + ".html";
+    a.download = "relatório-" + MSF[mes-1].toLowerCase() + "-" + ano + ".html";
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
     setTimeout(function(){URL.revokeObjectURL(url);try{document.body.removeChild(a)}catch(e){}},300);
-    flash("Relatorio exportado!");
+    flash("Relatório exportado!");
   }
 
   function distribuirAporte() {
     var metasAtivas = (db.metas||[]).filter(function(m){return (m.atual||0)<m.valor});
     var totalAp = metasAtivas.reduce(function(s,x){return s+(x.aporte||0)},0);
-    var disp = Math.max(0, (getPrevisao(db,mes,ano).sobra||0) - (db.investimentoFixo||0));
+    var disp = Math.max(0, (getPrevisão(db,mes,ano).sobra||0) - (db.investimentoFixo||0));
     if (disp <= 0 || totalAp <= 0) { flash("Sem sobra disponivel para aportes"); setShowAporteModal(false); return; }
     var novasMetas = (db.metas||[]).map(function(m) {
       if ((m.atual||0) >= m.valor) return m;
@@ -2173,16 +2174,16 @@ export default function App() {
   }
 
   function exportPDF() {
-    var pv = getPrevisao(db, mes, ano);
+    var pv = getPrevisão(db, mes, ano);
     var p = getPat(db);
     var divAtivas = (db.dividas||[]).filter(function(d){return !d.quitada});
     var topDesp = lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&l.tipo!=="receita"}).sort(function(a,b){return b.valor-a.valor}).slice(0,10);
-    var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatorio Financeiro '+MSF[mes-1]+'/'+ano+'</title><style>body{font-family:Inter,Arial,sans-serif;max-width:800px;margin:0 auto;padding:40px;color:#1a1a2e;font-size:13px}h1{color:#0055A4;border-bottom:3px solid #00E5FF;padding-bottom:10px}h2{color:#333;margin-top:30px;border-left:4px solid #00E5FF;padding-left:12px}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #eee}th{background:#f4f6fa;font-weight:700}td.num{text-align:right;font-family:monospace;font-weight:600}.green{color:#00B864}.red{color:#E02040}.gold{color:#E6A800}.footer{margin-top:40px;padding-top:16px;border-top:2px solid #eee;font-size:10px;color:#999;text-align:center}</style></head><body>';
-    html += '<h1>Relatorio Financeiro: '+MSF[mes-1]+' '+ano+'</h1>';
+    var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório Financeiro '+MSF[mes-1]+'/'+ano+'</title><style>body{font-family:Inter,Arial,sans-serif;max-width:800px;margin:0 auto;padding:40px;color:#1a1a2e;font-size:13px}h1{color:#0055A4;border-bottom:3px solid #00E5FF;padding-bottom:10px}h2{color:#333;margin-top:30px;border-left:4px solid #00E5FF;padding-left:12px}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #eee}th{background:#f4f6fa;font-weight:700}td.num{text-align:right;font-family:monospace;font-weight:600}.green{color:#00B864}.red{color:#E02040}.gold{color:#E6A800}.footer{margin-top:40px;padding-top:16px;border-top:2px solid #eee;font-size:10px;color:#999;text-align:center}</style></head><body>';
+    html += '<h1>Relatório Financeiro: '+MSF[mes-1]+' '+ano+'</h1>';
     html += '<h2>Resumo do Mes</h2><table><tr><td>Receita total</td><td class="num green">'+f$(pv.recTotal)+'</td></tr><tr><td>Despesas totais</td><td class="num red">'+f$(pv.despTotal)+'</td></tr><tr><td>Sobra</td><td class="num '+(pv.sobra>=0?'green':'red')+'">'+f$(pv.sobra)+'</td></tr></table>';
-    html += '<h2>Patrimonio</h2><table><tr><td>Saldo em contas</td><td class="num">'+f$(p.sc)+'</td></tr><tr><td>Investimentos</td><td class="num green">'+f$(p.inv)+'</td></tr><tr><td>Dividas</td><td class="num red">'+f$(p.dv)+'</td></tr><tr><td>Patrimonio liquido</td><td class="num '+(p.liq>=0?'green':'red')+'"><strong>'+f$(p.liq)+'</strong></td></tr></table>';
+    html += '<h2>Patrimônio</h2><table><tr><td>Saldo em contas</td><td class="num">'+f$(p.sc)+'</td></tr><tr><td>Investimentos</td><td class="num green">'+f$(p.inv)+'</td></tr><tr><td>Dívidas</td><td class="num red">'+f$(p.dv)+'</td></tr><tr><td>Patrimônio líquido</td><td class="num '+(p.liq>=0?'green':'red')+'"><strong>'+f$(p.liq)+'</strong></td></tr></table>';
     if (divAtivas.length > 0) {
-      html += '<h2>Dividas Ativas</h2><table><tr><th>Nome</th><th>Restante</th><th>Parcela</th><th>Meses</th></tr>';
+      html += '<h2>Dívidas Ativas</h2><table><tr><th>Nome</th><th>Restante</th><th>Parcela</th><th>Meses</th></tr>';
       divAtivas.forEach(function(d){var rest=d.total-d.pago;var mR=d.parcela>0?Math.ceil(rest/d.parcela):0;html+='<tr><td>'+d.nome+'</td><td class="num red">'+f$(rest)+'</td><td class="num">'+f$(d.parcela)+'</td><td class="num">'+mR+'</td></tr>';});
       html += '</table>';
     }
@@ -2194,8 +2195,8 @@ export default function App() {
       (db.metas||[]).forEach(function(m){var pr=m.valor>0?Math.round(m.atual/m.valor*100):0;html+='<tr><td>'+m.nome+'</td><td class="num">'+f$(m.atual)+'</td><td class="num">'+f$(m.valor)+'</td><td class="num '+(pr>=100?'green':'gold')+'">'+pr+'%</td></tr>';});
       html += '</table>';
     }
-    html += '<h2>Rating Bancario</h2><table><tr><td>Score geral</td><td class="num"><strong>'+ratingScore+'/100</strong></td></tr><tr><td>Saude financeira</td><td class="num">'+healthScore+'/100</td></tr></table>';
-    if (aiReport) { html += '<h2>Analise IA</h2><div style="white-space:pre-wrap;line-height:1.7;background:#f9fafb;padding:16px;border-radius:8px;border:1px solid #eee">'+aiReport.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'; }
+    html += '<h2>Rating Bancário</h2><table><tr><td>Score geral</td><td class="num"><strong>'+ratingScore+'/100</strong></td></tr><tr><td>Saúde financeira</td><td class="num">'+healthScore+'/100</td></tr></table>';
+    if (aiReport) { html += '<h2>Análise IA</h2><div style="white-space:pre-wrap;line-height:1.7;background:#f9fafb;padding:16px;border-radius:8px;border:1px solid #eee">'+aiReport.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</div>'; }
     html += '<div class="footer">COJUR Vault v'+VER+' | Gerado em '+new Date().toLocaleDateString("pt-BR")+" "+new Date().toLocaleTimeString("pt-BR")+'</div></body></html>';
     var blob = new Blob([html], {type:"text/html"});
     var url = URL.createObjectURL(blob);
@@ -2224,7 +2225,7 @@ export default function App() {
     var data = [];
     for (var i = -2; i <= 0; i++) {
       var ref = addMesRef(mes, ano, i);
-      var pvi = getPrevisao(db, ref.mes, ref.ano);
+      var pvi = getPrevisão(db, ref.mes, ref.ano);
       var divPagas = (db.dividas||[]).reduce(function(s,d){return s + (d.pago||0)},0);
       data.push({
         nome: MS[ref.mes-1],
@@ -2263,7 +2264,7 @@ export default function App() {
     var catList = (db.categorias||[]).map(function(c){return c.id+":"+c.nome+":"+c.tipo}).join(", ");
     var cardList = (db.cartoes||[]).map(function(c){return c.id+":"+c.nome}).join(", ");
     callAI(
-      "Extraia dados de lancamento financeiro do texto. Responda APENAS com JSON puro (sem markdown). Formato: {\"desc\":\"...\",\"valor\":0,\"tipo\":\"despesa|receita\",\"cat\":\"ID\",\"data\":\"YYYY-MM-DD\",\"status\":\"pago\",\"pg\":\"pix|cartao\",\"cartaoId\":\"\"}. Categorias: " + catList + ". Cartoes: " + cardList + ". Hoje: " + hj() + ". Se nao especificado: tipo=despesa, status=pago, pg=pix, data=hoje.",
+      "Extraia dados de lançamento financeiro do texto. Responda APENAS com JSON puro (sem markdown). Formato: {\"desc\":\"...\",\"valor\":0,\"tipo\":\"despesa|receita\",\"cat\":\"ID\",\"data\":\"YYYY-MM-DD\",\"status\":\"pago\",\"pg\":\"pix|cartao\",\"cartaoId\":\"\"}. Categorias: " + catList + ". Cartoes: " + cardList + ". Hoje: " + hj() + ". Se não especificado: tipo=despesa, status=pago, pg=pix, data=hoje.",
       quickInput
     ).then(function(r){
       setAiLoading(false);
@@ -2282,7 +2283,7 @@ export default function App() {
         flash(l.desc + " " + f$(l.valor) + " adicionado!");
         setQuickInput("");
         setQuickShow(false);
-      } catch(e) { flash("Nao entendi. Tente: '50 uber pix'"); }
+      } catch(e) { flash("Não entendi. Tente: '50 uber pix'"); }
     });
   }
 
@@ -2312,13 +2313,13 @@ export default function App() {
   function nextMes() { if(mes===12){setMes(1);setAno(ano+1)} else setMes(mes+1); }
 
   
-  var lancEx = useMemo(function(){return expandLancamentos(db)}, [db]);
+  var lancEx = useMemo(function(){return expandLançamentos(db)}, [db]);
   var dbEx = useMemo(function(){return Object.assign({}, db, {lancamentos: lancEx})}, [db, lancEx]);
 
   var res = useMemo(function(){return getRes(dbEx,mes,ano)}, [dbEx,mes,ano]);
   var pat = useMemo(function(){return getPat(db)}, [db]);
-  var pv = useMemo(function(){return getPrevisao(dbEx,mes,ano)}, [dbEx,mes,ano]);
-  var assin = useMemo(function(){return lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&l.cat==="c3"})}, [lancEx,mes,ano]);
+  var pv = useMemo(function(){return getPrevisão(dbEx,mes,ano)}, [dbEx,mes,ano]);
+  var assin = useMemo(function(){return lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&(l.cat==="c3"||l.cat==="c15"||(l.cat==="c16"&&l.rec))})}, [lancEx,mes,ano]);
   var fixas = useMemo(function(){return lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&l.rec&&l.tipo!=="receita"})}, [lancEx,mes,ano]);
   var parcelas = useMemo(function(){return lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&(l.tipo==="parcela"||l.pT>0)})}, [lancEx,mes,ano]);
   var metP = useMemo(function(){return getMetP(db)}, [db]);
@@ -2333,15 +2334,11 @@ export default function App() {
   var visAnual = useMemo(function(){return getVisaoAnual(dbEx,ano)}, [dbEx,ano]);
 
   var notifs = getNotifications();
-  var healthScore = getHealthScore();
-  var healthColor = healthScore >= 70 ? T.green : healthScore >= 40 ? T.gold : T.red;
-  var healthLabel = healthScore >= 80 ? "Excelente" : healthScore >= 60 ? "Boa" : healthScore >= 40 ? "Atencao" : "Critica";
-
   function getSparkData(prop) {
     var data = [];
     for (var i = -2; i <= 0; i++) {
       var ref = addMesRef(mes, ano, i);
-      var pvi = getPrevisao(db, ref.mes, ref.ano);
+      var pvi = getPrevisão(db, ref.mes, ref.ano);
       data.push({m:MS[ref.mes-1], v:pvi[prop]||0});
     }
     return data;
@@ -2354,7 +2351,7 @@ export default function App() {
     sv(Object.assign({}, db, {categorias: (db.categorias||[]).map(function(c){
       return c.id===id ? Object.assign({},c,{orc:v}) : c;
     })}));
-    flash("Orcamento atualizado!");
+    flash("Orçamento atualizado!");
   }
 
   function updInvestFixo(v) {
@@ -2374,6 +2371,7 @@ export default function App() {
   var totalParcMes = parcelas.reduce(function(s,l){return s+l.valor},0);
   var rentTotal = (db.investimentos||[]).reduce(function(s,i){return s+i.valor*(i.rent/100)},0);
   var frase = FRASES[Math.floor(Date.now()/86400000) % FRASES.length];
+  var fraseParc = FRASES_PARC[Math.floor(Date.now()/86400000) % FRASES_PARC.length];
   var totalLimites = cardsResumo.reduce(function(s,c){return s + (c.limite||0)},0);
   var totalFaturaAtual = cardsResumo.reduce(function(s,c){return s + (c.faturaAtual||0)},0);
   var totalProxFatura = cardsResumo.reduce(function(s,c){return s + (c.proxFatura||0)},0);
@@ -2400,7 +2398,7 @@ export default function App() {
   var planoItauAnt = useMemo(function(){return getBankPlan(dbEx, refPlanoAnt.mes, refPlanoAnt.ano, "itau", db.salarioDia||25, db.ratingMensal)}, [dbEx, refPlanoAnt.mes, refPlanoAnt.ano, db.salarioDia, db.ratingMensal]);
   var bancoFocoManual = ratingMes._bancoFoco || "";
   var focoEstrategico = useMemo(function(){return getStrategicFocus(planoSantander, planoItau, fluxo, als, cardsResumo, bancoFocoManual)}, [planoSantander, planoItau, fluxo, als, cardsResumo, bancoFocoManual]);
-  var pvAnt = useMemo(function(){var ref = addMesRef(mes, ano, -1); return getPrevisao(dbEx, ref.mes, ref.ano);}, [dbEx, mes, ano]);
+  var pvAnt = useMemo(function(){var ref = addMesRef(mes, ano, -1); return getPrevisão(dbEx, ref.mes, ref.ano);}, [dbEx, mes, ano]);
   var deltaReceita = pv.receitaMes - pvAnt.receitaMes;
   var deltaDespesas = pv.despLancadas - pvAnt.despLancadas;
   var deltaSobra = pv.sobraPrevista - pvAnt.sobraPrevista;
@@ -2424,33 +2422,83 @@ export default function App() {
 
   var saude = useMemo(function() {
     if (!pv || pv.receitaMes <= 0) return {score:0, label:"Sem dados", color:T.dim, emoji:"--", pctFixas:0, pctDiv:0, pctSobra:0, items:[]};
-    var pF = (totalFixas / pv.receitaMes) * 100;
-    var pD = (totalParcMes / pv.receitaMes) * 100;
-    var pS = (pv.sobraPrevista / pv.receitaMes) * 100;
-    var sc = 100;
+    var receita = pv.receitaMes;
+    var pF = (totalFixas / receita) * 100;
+    var pP = (totalParcMes / receita) * 100;
+    var pTotal = ((totalFixas + totalParcMes) / receita) * 100;
+    var pS = (pv.sobraPrevista / receita) * 100;
+    var mesesReserva = pv.despLancadas > 0 ? pat.inv / pv.despLancadas : 0;
+    var divAtivas = (db.dividas || []).filter(function(d){return !d.quitada});
+    var temAcordo = divAtivas.some(function(d){return (d.nome||"").toLowerCase().indexOf("acordo") >= 0 || (d.nome||"").toLowerCase().indexOf("serasa") >= 0});
+    var parcCount = parcelas.length;
+
+    var sc = 0;
     var items = [];
-    if (pF > 50) { sc -= (pF - 50) * 1.5; items.push({t:"Fixas comprometem "+pct(pF)+" da renda (acima de 50%)",s:"danger"}); }
-    else { items.push({t:"Fixas controladas: "+pct(pF)+" da renda",s:"ok"}); }
-    if (pD > 20) { sc -= (pD - 20) * 2; items.push({t:"Parcelas/dividas pesam "+pct(pD)+" da renda (acima de 20%)",s:"danger"}); }
-    else if (pD > 0) { items.push({t:"Parcelas em "+pct(pD)+" da renda",s:"ok"}); }
-    if (pS < 10 && pS >= 0) { sc -= (10 - pS) * 3; items.push({t:"Sobra apertada: "+pct(pS)+" da renda (abaixo de 10%)",s:"warning"}); }
-    else if (pS >= 10) { items.push({t:"Boa sobra: "+pct(pS)+" da renda",s:"ok"}); }
-    if (pv.sobraPrevista < 0) { sc -= 30; items.push({t:"Mes deficitario: "+f$(pv.sobraPrevista),s:"danger"}); }
-    if (pat.liq < 0) { items.push({t:"Patrimonio liquido negativo: "+f$(pat.liq),s:"danger"}); }
-    else if (pat.liq > pv.receitaMes * 3) { items.push({t:"Reserva solida: "+f$(pat.liq)+" ("+pct(pat.liq/pv.receitaMes*100)+" da renda)",s:"ok"}); }
-    else { items.push({t:"Patrimonio: "+f$(pat.liq),s:"warning"}); }
+
+    // 1. COMPROMETIMENTO TOTAL (0-25pts)
+    if (pTotal <= 50) { sc += 25; items.push({t:"Comprometimento saudável: "+pct(pTotal)+" da renda",s:"ok"}); }
+    else if (pTotal <= 60) { sc += 18; items.push({t:"Comprometimento moderado: "+pct(pTotal)+" da renda",s:"ok"}); }
+    else if (pTotal <= 70) { sc += 12; items.push({t:"Comprometimento alto: "+pct(pTotal)+" da renda",s:"warning"}); }
+    else if (pTotal <= 80) { sc += 6; items.push({t:"Comprometimento crítico: "+pct(pTotal)+" da renda",s:"danger"}); }
+    else { sc += 2; items.push({t:"Comprometimento extremo: "+pct(pTotal)+" da renda",s:"danger"}); }
+
+    // 2. SOBRA MENSAL (0-20pts)
+    if (pS >= 30) { sc += 20; items.push({t:"Sobra excelente: "+pct(pS)+" da renda ("+f$(pv.sobraPrevista)+")",s:"ok"}); }
+    else if (pS >= 20) { sc += 16; items.push({t:"Boa sobra: "+pct(pS)+" da renda",s:"ok"}); }
+    else if (pS >= 10) { sc += 12; items.push({t:"Sobra moderada: "+pct(pS)+" da renda",s:"warning"}); }
+    else if (pS >= 0) { sc += 5; items.push({t:"Sobra apertada: "+pct(pS)+" da renda",s:"warning"}); }
+    else { sc += 0; items.push({t:"Mês deficitário: "+f$(pv.sobraPrevista),s:"danger"}); }
+
+    // 3. RESERVA DE EMERGÊNCIA (0-20pts)
+    if (mesesReserva >= 6) { sc += 20; items.push({t:"Reserva sólida: "+mesesReserva.toFixed(1)+" meses de despesas",s:"ok"}); }
+    else if (mesesReserva >= 3) { sc += 14; items.push({t:"Reserva razoável: "+mesesReserva.toFixed(1)+" meses",s:"ok"}); }
+    else if (mesesReserva >= 1) { sc += 8; items.push({t:"Reserva frágil: "+mesesReserva.toFixed(1)+" meses (ideal: 6+)",s:"warning"}); }
+    else if (pat.inv > 0) { sc += 3; items.push({t:"Reserva insuficiente: "+mesesReserva.toFixed(1)+" meses",s:"danger"}); }
+    else { sc += 0; items.push({t:"Sem reserva de emergência",s:"danger"}); }
+
+    // 4. ENDIVIDAMENTO (0-20pts)
+    if (parcCount === 0 && divAtivas.length === 0) { sc += 20; items.push({t:"Livre de dívidas e parcelas",s:"ok"}); }
+    else if (parcCount <= 5 && !temAcordo) { sc += 15; items.push({t:parcCount+" parcelas ativas, sem acordos",s:"ok"}); }
+    else if (parcCount <= 15) { sc += 10; items.push({t:parcCount+" parcelas ativas"+(temAcordo?", com acordos Serasa":""),s:"warning"}); }
+    else if (parcCount <= 25) { sc += 5; items.push({t:parcCount+" parcelas ativas — alto volume",s:"danger"}); }
+    else { sc += 2; items.push({t:parcCount+" parcelas ativas — volume crítico",s:"danger"}); }
+    if (temAcordo) sc -= 3;
+
+    // 5. USO DE CARTÕES (0-10pts)
+    var meusCards2 = (db.cartoes || []).filter(function(c){return (c.titular||"joao")==="joao" && (c.limite||0) > 0 && (c.limite||0) < 999999});
+    var cR2 = cardsResumo.filter(function(c){var isM=false;meusCards2.forEach(function(mc){if(mc.id===c.id)isM=true});return isM});
+    var usoMedio2 = cR2.length > 0 ? cR2.reduce(function(s,c){return s+c.usoRealPct},0)/cR2.length : 0;
+    if (usoMedio2 <= 15) { sc += 10; }
+    else if (usoMedio2 <= 30) { sc += 8; items.push({t:"Uso de cartão: "+pct(usoMedio2)+" (bom)",s:"ok"}); }
+    else if (usoMedio2 <= 50) { sc += 5; items.push({t:"Uso de cartão: "+pct(usoMedio2)+" (atenção)",s:"warning"}); }
+    else { sc += 2; items.push({t:"Uso de cartão elevado: "+pct(usoMedio2),s:"danger"}); }
+
+    // 6. TENDÊNCIA (0-5pts)
+    var parcTerminando = parcelas.filter(function(l){return l.pT > 0 && l.pA > 0 && (l.pT - l.pA) <= 3}).length;
+    if (parcTerminando >= 5) { sc += 5; items.push({t:parcTerminando+" parcelas terminando em 3 meses — alívio chegando",s:"ok"}); }
+    else if (parcTerminando >= 2) { sc += 3; items.push({t:parcTerminando+" parcelas terminando em breve",s:"ok"}); }
+    else { sc += 1; }
+
+    // Patrimônio
+    if (pat.liq < 0) { items.push({t:"Patrimônio líquido negativo: "+f$(pat.liq),s:"danger"}); }
+    else { items.push({t:"Patrimônio líquido: "+f$(pat.liq),s:pat.liq > receita * 3 ? "ok" : "warning"}); }
+
     sc = Math.max(0, Math.min(100, Math.round(sc)));
-    var lb = sc >= 80 ? "Excelente" : sc >= 60 ? "Boa" : sc >= 40 ? "Atencao" : sc >= 20 ? "Critica" : "Emergencia";
-    var cl = sc >= 80 ? T.green : sc >= 60 ? T.greenL : sc >= 40 ? T.gold : sc >= 20 ? T.orange : T.red;
-    var em = sc >= 80 ? "A+" : sc >= 60 ? "B" : sc >= 40 ? "C" : sc >= 20 ? "D" : "E";
-    return {score:sc, label:lb, color:cl, emoji:em, pctFixas:pF, pctDiv:pD, pctSobra:pS, items:items};
-  }, [pv, pat, totalFixas, totalParcMes]);
+    var lb = sc >= 80 ? "Excelente" : sc >= 65 ? "Boa" : sc >= 50 ? "Atenção" : sc >= 35 ? "Crítica" : "Emergência";
+    var cl = sc >= 80 ? T.green : sc >= 65 ? T.greenL : sc >= 50 ? T.gold : sc >= 35 ? T.orange : T.red;
+    var em = sc >= 80 ? "A+" : sc >= 65 ? "B" : sc >= 50 ? "C" : sc >= 35 ? "D" : "E";
+    return {score:sc, label:lb, color:cl, emoji:em, pctFixas:pF, pctDiv:pP, pctSobra:pS, items:items};
+  }, [pv, pat, totalFixas, totalParcMes, parcelas, db, cardsResumo]);
+
+  var healthScore = saude.score;
+  var healthColor = saude.color;
+  var healthLabel = saude.label;
 
   var evolucao = useMemo(function() {
     var acum = 0;
     var data = [];
     for (var m = 1; m <= 12; m++) {
-      var pvM = getPrevisao(dbEx, m, ano);
+      var pvM = getPrevisão(dbEx, m, ano);
       var temD = pvM.receitaMes > 0 || pvM.despLancadas > 0;
       if (temD) {
         acum += pvM.sobraPrevista;
@@ -2542,11 +2590,11 @@ export default function App() {
           </div>
           {modal.type==="lanc" && <LForm lanc={modal.data && modal.data.id ? modal.data : null} cats={db.categorias} cards={db.cartoes} onSave={saveLanc} onClose={function(){setModal(null)}} onSuggestCat={suggestCat} aiCatSug={aiCatSug} />}
           {modal.type==="meta" && <SForm fields={[{key:"nome",label:"Nome"},{key:"valor",label:"Valor (R$)"},{key:"prazo",label:"Prazo",type:"date"},{key:"vinc",label:"Vinculo",type:"select",opts:[{v:"invest",l:"Investimentos"},{v:"conta",l:"Saldo"}]}]} data={modal.data} onSave={function(d){ups("metas",Object.assign({},d,{valor:parseBR(d.valor)}))}} onClose={function(){setModal(null)}} />}
-          {modal.type==="inv" && <SForm fields={[{key:"nome",label:"Nome"},{key:"valor",label:"Valor (R$)"},{key:"rent",label:"Rent. mensal (%)"}]} data={modal.data} onSave={function(d){ups("investimentos",Object.assign({},d,{valor:parseBR(d.valor),rent:parseFloat(String(d.rent).replace(",","."))||0}))}} onClose={function(){setModal(null)}} />}
+          {modal.type==="inv" && <SForm fields={[{key:"nome",label:"Nome"},{key:"valor",label:"Valor (R$)"},{key:"rent",label:"Rent. mensal (%)"},{key:"tipo",label:"Tipo",type:"select",opts:[{v:"cdb",l:"CDB"},{v:"lci",l:"LCI"},{v:"lca",l:"LCA"},{v:"tesouro",l:"Tesouro Direto"},{v:"rf",l:"Renda Fixa"},{v:"rv",l:"Renda Variável"},{v:"fundo",l:"Fundo"},{v:"poupanca",l:"Poupança"},{v:"previdencia",l:"Previdência"},{v:"outro",l:"Outro"}]},{key:"banco",label:"Banco",type:"select",opts:[{v:"santander",l:"Santander"},{v:"itau",l:"Itaú"},{v:"bradesco",l:"Bradesco"},{v:"xp",l:"XP"},{v:"nubank",l:"Nubank"},{v:"btg",l:"BTG"},{v:"inter",l:"Inter"},{v:"outro",l:"Outro"}]},{key:"liquidez",label:"Liquidez",type:"select",opts:[{v:"diaria",l:"Diária"},{v:"90d",l:"90 dias"},{v:"180d",l:"180 dias"},{v:"360d",l:"360 dias"},{v:"vencimento",l:"No vencimento"}]}]} data={modal.data} onSave={function(d){ups("investimentos",Object.assign({},d,{valor:parseBR(d.valor),rent:parseFloat(String(d.rent).replace(",","."))||0,tipo:d.tipo||"cdb",banco:d.banco||"santander",liquidez:d.liquidez||"diaria"}))}} onClose={function(){setModal(null)}} />}
           {modal.type==="div" && <SForm fields={[{key:"nome",label:"Nome"},{key:"total",label:"Total"},{key:"pago",label:"Pago"},{key:"parcela",label:"Parcela"},{key:"pRest",label:"Restantes",type:"number"},{key:"vDia",label:"Dia venc.",type:"number"},{key:"taxa",label:"Taxa %"}]} data={modal.data} onSave={function(d){ups("dividas",Object.assign({},d,{total:parseBR(d.total),pago:parseBR(d.pago),parcela:parseBR(d.parcela),pRest:parseInt(d.pRest)||0,vDia:parseInt(d.vDia)||1,taxa:parseFloat(String(d.taxa).replace(",","."))||0}))}} onClose={function(){setModal(null)}} />}
           {modal.type==="conta" && <SForm fields={[{key:"nome",label:"Nome"},{key:"saldo",label:"Saldo (R$)"}]} data={modal.data} onSave={function(d){ups("contas",Object.assign({},d,{saldo:parseBR(d.saldo)}))}} onClose={function(){setModal(null)}} />}
-          {modal.type==="card" && <SForm fields={[{key:"nome",label:"Nome do cartao"},{key:"bankKey",label:"Banco",type:"select",opts:BANK_OPTIONS},{key:"band",label:"Bandeira"},{key:"limite",label:"Limite (R$)"},{key:"fecha",label:"Fecha dia",type:"number"},{key:"venc",label:"Vence dia",type:"number"},{key:"cor",label:"Cor principal"},{key:"cor2",label:"Cor secundaria"},{key:"visual",label:"Estilo visual",type:"select",opts:[{v:"black",l:"Black"},{v:"metal",l:"Metal"},{v:"executive",l:"Executive"},{v:"classic",l:"Classic"},{v:"fintech",l:"Fintech"}]},{key:"statusEstr",label:"Status estrategico",type:"select",opts:[{v:"foco_mes",l:"Foco do mes"},{v:"usar_moderadamente",l:"Usar moderadamente"},{v:"concentrar_gastos",l:"Concentrar gastos"},{v:"manter_estavel",l:"Manter estavel"},{v:"evitar_uso_alto",l:"Evitar uso alto"},{v:"prioritario",l:"Cartao prioritario"}]},{key:"logoUrl",label:"Logo URL"},{key:"emoji",label:"Emoji"},{key:"obs",label:"Observacao estrategica"}]} data={modal.data} onSave={function(d){ups("cartoes",Object.assign({},d,{limite:parseBR(d.limite),fecha:parseInt(d.fecha)||1,venc:parseInt(d.venc)||1,cor:d.cor||T.blue,cor2:d.cor2||"",band:d.band||"Cartao",obs:d.obs||"",bankKey:d.bankKey||inferBankKey(d.nome||d.band),visual:d.visual||"black",statusEstr:d.statusEstr||"manter_estavel",logoUrl:d.logoUrl||"",emoji:d.emoji||""}))}} onClose={function(){setModal(null)}} />}
-          {modal.type==="cat" && <SForm fields={[{key:"nome",label:"Nome"},{key:"tipo",label:"Tipo",type:"select",opts:[{v:"despesa",l:"Despesa"},{v:"receita",l:"Receita"}]},{key:"orc",label:"Orcamento mensal (R$)"}]} data={modal.data} onSave={function(d){ups("categorias",Object.assign({},d,{orc:parseBR(d.orc)}))}} onClose={function(){setModal(null)}} />}
+          {modal.type==="card" && <SForm fields={[{key:"nome",label:"Nome do cartao"},{key:"bankKey",label:"Banco",type:"select",opts:BANK_OPTIONS},{key:"band",label:"Bandeira"},{key:"limite",label:"Limite (R$)"},{key:"fecha",label:"Fecha dia",type:"number"},{key:"venc",label:"Vence dia",type:"number"},{key:"cor",label:"Cor principal"},{key:"cor2",label:"Cor secundaria"},{key:"visual",label:"Estilo visual",type:"select",opts:[{v:"black",l:"Black"},{v:"metal",l:"Metal"},{v:"executive",l:"Executive"},{v:"classic",l:"Classic"},{v:"fintech",l:"Fintech"}]},{key:"statusEstr",label:"Status estrategico",type:"select",opts:[{v:"foco_mes",l:"Foco do mês"},{v:"usar_moderadamente",l:"Usar moderadamente"},{v:"concentrar_gastos",l:"Concentrar gastos"},{v:"manter_estável",l:"Manter estável"},{v:"evitar_uso_alto",l:"Evitar uso alto"},{v:"prioritario",l:"Cartao prioritario"}]},{key:"logoUrl",label:"Logo URL"},{key:"emoji",label:"Emoji"},{key:"obs",label:"Observacao estrategica"}]} data={modal.data} onSave={function(d){ups("cartoes",Object.assign({},d,{limite:parseBR(d.limite),fecha:parseInt(d.fecha)||1,venc:parseInt(d.venc)||1,cor:d.cor||T.blue,cor2:d.cor2||"",band:d.band||"Cartao",obs:d.obs||"",bankKey:d.bankKey||inferBankKey(d.nome||d.band),visual:d.visual||"black",statusEstr:d.statusEstr||"manter_estável",logoUrl:d.logoUrl||"",emoji:d.emoji||""}))}} onClose={function(){setModal(null)}} />}
+          {modal.type==="cat" && <SForm fields={[{key:"nome",label:"Nome"},{key:"tipo",label:"Tipo",type:"select",opts:[{v:"despesa",l:"Despesa"},{v:"receita",l:"Receita"}]},{key:"orc",label:"Orçamento mensal (R$)"}]} data={modal.data} onSave={function(d){ups("categorias",Object.assign({},d,{orc:parseBR(d.orc)}))}} onClose={function(){setModal(null)}} />}
         </div>
       </div>}
 
@@ -2566,26 +2614,26 @@ export default function App() {
             <button onClick={function(){if(fr.current)fr.current.click()}} style={{padding:"6px 10px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:T.cyan,fontSize:10,fontWeight:600}}><Upload size={12} /></button>
             <div style={{display:"flex",alignItems:"center",gap:3,padding:"5px 8px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)"}}><span style={{fontSize:9,color:T.dim,fontWeight:600}}>Dia</span><input type="number" value={db.salarioDia||25} onChange={function(e){updSalarioDia(e.target.value)}} style={{width:24,background:"transparent",border:"none",color:T.cyan,fontSize:11,fontWeight:700,textAlign:"center",outline:"none",padding:0}} min="1" max="31" /></div>
             {hasBackup() && <button onClick={function(){setCfm({msg:"Restaurar o backup anterior a ultima importacao?",fn:function(){restoreBackup();setCfm(null)}})}} style={{padding:6,borderRadius:8,background:"rgba(255,208,0,0.08)",border:"1px solid rgba(255,208,0,0.15)",cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:T.gold,fontSize:9,fontWeight:600}}><RotateCcw size={11} /> Backup</button>}
-            <button onClick={function(){setCfm({msg:"Restaurar dados padrao?",fn:function(){sv(DEF);setCfm(null);flash("Restaurado!")}})}} style={{padding:6,borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex"}}><RotateCcw size={12} color={T.cyan} /></button>
+            <button onClick={function(){setCfm({msg:"Restaurar dados padrão?",fn:function(){sv(DEF);setCfm(null);flash("Restaurado!")}})}} style={{padding:6,borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex"}}><RotateCcw size={12} color={T.cyan} /></button>
           </div>
         </div>
 
-        <div style={{display:"flex",gap:6,marginBottom:10}}>
+        {tab!=="metas" && tab!=="invest" && tab!=="ia" && <div style={{display:"flex",gap:6,marginBottom:10}}>
           <div style={{flex:1,position:"relative"}}>
             <Zap size={13} color={T.green} style={{position:"absolute",left:10,top:9}} />
-            <input value={quickInput} onChange={function(e){setQuickInput(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")quickEntry()}} placeholder="Lancamento rapido: '50 uber pix'" style={Object.assign({},inp,{paddingLeft:30,fontSize:11,borderRadius:12})} />
+            <input value={quickInput} onChange={function(e){setQuickInput(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")quickEntry()}} placeholder="Lançamento rápido: '50 uber pix'" style={Object.assign({},inp,{paddingLeft:30,fontSize:11,borderRadius:12})} />
           </div>
           <button onClick={quickEntry} disabled={aiLoading || !quickInput.trim()} style={{padding:"8px 14px",borderRadius:12,background:aiLoading?"rgba(255,255,255,0.04)":T.green,border:"none",color:aiLoading?T.dim:"#000",cursor:aiLoading?"wait":"pointer",fontSize:10,fontWeight:800,flexShrink:0}}>{aiLoading?"...":"+"}</button>
-        </div>
+        </div>}
 
-        {consistency.diasSemLanc >= 3 && <div style={{marginBottom:10,padding:"8px 14px",borderRadius:12,background:T.gold+"08",border:"1px solid "+T.gold+"15",display:"flex",alignItems:"center",gap:8,fontSize:10}}>
+        {tab!=="metas" && tab!=="invest" && tab!=="ia" && consistency.diasSemLanc >= 3 && <div style={{marginBottom:10,padding:"8px 14px",borderRadius:12,background:T.gold+"08",border:"1px solid "+T.gold+"15",display:"flex",alignItems:"center",gap:8,fontSize:10}}>
           <AlertTriangle size={14} color={T.gold} />
           <span style={{color:T.text,fontWeight:600}}>{consistency.diasSemLanc} dias sem lancamentos.</span>
           <span style={{color:T.dim}}>Possiveis gastos nao registrados.</span>
           <span style={{marginLeft:"auto",color:T.gold,fontWeight:800,fontFamily:"monospace"}}>{consistency.score}%</span>
         </div>}
 
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:14,marginBottom:16,padding:"10px 12px",borderRadius:14,background:"rgba(8,8,20,0.80)",border:"1px solid rgba(0,229,255,0.06)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)"}}>
+        {tab!=="metas" && tab!=="invest" && tab!=="ia" && <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:14,marginBottom:16,padding:"10px 12px",borderRadius:14,background:"rgba(8,8,20,0.80)",border:"1px solid rgba(0,229,255,0.06)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)"}}>
           <button onClick={prevMes} style={{background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.10)",borderRadius:10,padding:"8px 12px",cursor:"pointer",display:"flex"}}><ChevronLeft size={16} color={T.cyan} /></button>
           <div style={{textAlign:"center",minWidth:140}}>
             <div style={{fontSize:18,fontWeight:800,letterSpacing:-0.3}}>{MSF[mes-1]}</div>
@@ -2594,7 +2642,7 @@ export default function App() {
           <button onClick={nextMes} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"8px 12px",cursor:"pointer",display:"flex"}}><ChevronRight size={16} color={T.muted} /></button>
           {(mes !== new Date().getMonth()+1 || ano !== new Date().getFullYear()) && <button onClick={function(){setMes(new Date().getMonth()+1);setAno(new Date().getFullYear())}} style={{padding:"6px 10px",borderRadius:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",cursor:"pointer",color:T.text,fontSize:10,fontWeight:700}}>HOJE</button>}
           <div style={{position:"relative",padding:7,borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",cursor:"pointer"}} onClick={function(){setTab("alertas")}}><Bell size={14} color={T.muted} />{als.length>0&&<div style={{position:"absolute",top:-3,right:-3,width:14,height:14,borderRadius:7,background:T.red,fontSize:8,fontWeight:800,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid "+T.bg}}>{als.length}</div>}</div>
-        </div>
+        </div>}
 
         {}
         <div style={{marginBottom:14,position:"relative"}}>
@@ -2609,9 +2657,9 @@ export default function App() {
             if (total === 0) return <div style={Object.assign({},bx,{marginTop:8,padding:14,textAlign:"center"})}><div style={{fontSize:11,color:T.dim}}>Nenhum resultado para "{gSearch}"</div></div>;
             return <div style={Object.assign({},bx,{marginTop:8,padding:14})}>
               <div style={{fontSize:10,color:T.dim,marginBottom:8}}>{total} resultado(s) encontrado(s)</div>
-              {rLanc.length > 0 && <div style={{marginBottom:10}}><div style={{fontSize:9,color:T.cyan,fontWeight:800,textTransform:"uppercase",marginBottom:6}}>Lancamentos</div>{rLanc.map(function(l){return <div key={l.id} onClick={function(){setTab("lanc");setBusca(gSearch);setGSearch("")}} style={{display:"flex",justifyContent:"space-between",padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.02)",marginBottom:3,cursor:"pointer",fontSize:10}}><span style={{color:T.muted}}>{l.desc}</span><span style={{fontFamily:"monospace",fontWeight:700,color:l.tipo==="receita"?T.green:T.red}}>{f$(l.valor)}</span></div>;})}</div>}
+              {rLanc.length > 0 && <div style={{marginBottom:10}}><div style={{fontSize:9,color:T.cyan,fontWeight:800,textTransform:"uppercase",marginBottom:6}}>Lançamentos</div>{rLanc.map(function(l){return <div key={l.id} onClick={function(){setTab("lanc");setBusca(gSearch);setGSearch("")}} style={{display:"flex",justifyContent:"space-between",padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.02)",marginBottom:3,cursor:"pointer",fontSize:10}}><span style={{color:T.muted}}>{l.desc}</span><span style={{fontFamily:"monospace",fontWeight:700,color:l.tipo==="receita"?T.green:T.red}}>{f$(l.valor)}</span></div>;})}</div>}
               {rCards.length > 0 && <div style={{marginBottom:10}}><div style={{fontSize:9,color:T.blue,fontWeight:800,textTransform:"uppercase",marginBottom:6}}>Cartoes</div>{rCards.map(function(c){return <div key={c.id} onClick={function(){setTab("cards");setGSearch("")}} style={{display:"flex",justifyContent:"space-between",padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.02)",marginBottom:3,cursor:"pointer",fontSize:10}}><span style={{color:T.muted}}>{c.nome}</span><span style={{fontFamily:"monospace",fontWeight:700}}>{f$(c.limite)}</span></div>;})}</div>}
-              {rDiv.length > 0 && <div style={{marginBottom:10}}><div style={{fontSize:9,color:T.gold,fontWeight:800,textTransform:"uppercase",marginBottom:6}}>Dividas</div>{rDiv.map(function(d){return <div key={d.id} onClick={function(){setTab("parc");setGSearch("")}} style={{display:"flex",justifyContent:"space-between",padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.02)",marginBottom:3,cursor:"pointer",fontSize:10}}><span style={{color:T.muted}}>{d.nome}</span><span style={{fontFamily:"monospace",fontWeight:700,color:T.gold}}>{f$(d.parcela)}/m</span></div>;})}</div>}
+              {rDiv.length > 0 && <div style={{marginBottom:10}}><div style={{fontSize:9,color:T.gold,fontWeight:800,textTransform:"uppercase",marginBottom:6}}>Dívidas</div>{rDiv.map(function(d){return <div key={d.id} onClick={function(){setTab("parc");setGSearch("")}} style={{display:"flex",justifyContent:"space-between",padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.02)",marginBottom:3,cursor:"pointer",fontSize:10}}><span style={{color:T.muted}}>{d.nome}</span><span style={{fontFamily:"monospace",fontWeight:700,color:T.gold}}>{f$(d.parcela)}/m</span></div>;})}</div>}
               {rInv.length > 0 && <div><div style={{fontSize:9,color:T.green,fontWeight:800,textTransform:"uppercase",marginBottom:6}}>Investimentos</div>{rInv.map(function(inv){return <div key={inv.id} onClick={function(){setTab("invest");setGSearch("")}} style={{display:"flex",justifyContent:"space-between",padding:"6px 8px",borderRadius:8,background:"rgba(255,255,255,0.02)",marginBottom:3,cursor:"pointer",fontSize:10}}><span style={{color:T.muted}}>{inv.nome}</span><span style={{fontFamily:"monospace",fontWeight:700,color:T.green}}>{f$(inv.valor)}</span></div>;})}</div>}
             </div>;
           })()}
@@ -2635,10 +2683,10 @@ export default function App() {
         {showAporteModal && <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:800,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={function(){setShowAporteModal(false)}}>
           <div onClick={function(e){e.stopPropagation()}} style={{background:T.card,border:"1px solid "+T.border,borderRadius:20,padding:24,maxWidth:400,width:"100%"}}>
             <div style={{fontSize:15,fontWeight:900,marginBottom:14,color:T.green}}>Distribuir aportes nas metas</div>
-            <div style={{fontSize:11,color:T.muted,marginBottom:14,lineHeight:1.6}}>A sobra do mes ({f$(getPrevisao(db,mes,ano).sobra)}) menos investimento fixo ({f$(db.investimentoFixo||0)}) sera distribuida proporcionalmente entre as metas ativas, conforme o aporte definido em cada uma.</div>
+            <div style={{fontSize:11,color:T.muted,marginBottom:14,lineHeight:1.6}}>A sobra do mês ({f$(getPrevisão(db,mes,ano).sobra)}) menos investimento fixo ({f$(db.investimentoFixo||0)}) sera distribuida proporcionalmente entre as metas ativas, conforme o aporte definido em cada uma.</div>
             {(db.metas||[]).filter(function(m){return (m.atual||0)<m.valor}).map(function(m){
               var totalAp = (db.metas||[]).filter(function(x){return (x.atual||0)<x.valor}).reduce(function(s,x){return s+(x.aporte||0)},0);
-              var disp = Math.max(0, (getPrevisao(db,mes,ano).sobra||0) - (db.investimentoFixo||0));
+              var disp = Math.max(0, (getPrevisão(db,mes,ano).sobra||0) - (db.investimentoFixo||0));
               var val = totalAp > 0 ? Math.round(disp * (m.aporte||0) / totalAp * 100)/100 : 0;
               return <div key={m.id} style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",borderRadius:8,background:T.cardAlt,marginBottom:6,fontSize:11}}>
                 <span style={{color:T.text,fontWeight:600}}>{m.nome}</span>
@@ -2681,9 +2729,9 @@ export default function App() {
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><div style={{padding:5,borderRadius:8,background:T.cyan+"12",display:"flex",border:"1px solid "+T.cyan+"10"}}><Calendar size={14} color={T.cyan} /></div><div style={{fontSize:13,fontWeight:900,letterSpacing:-0.2}}>Hoje, {diaHoje} de {MSF[mesHoje-1]}</div></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))",gap:8}}>
                 {fatProximas.length > 0 && <div style={{padding:"10px 12px",borderRadius:12,background:T.red+"08",border:"1px solid "+T.red+"12"}}><div style={{fontSize:8,color:T.red,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>Faturas proximas</div>{fatProximas.map(function(fp,i){return <div key={i} style={{fontSize:10,color:T.muted,marginTop:3}}>{fp.nome}: {fp.dias === 0 ? "HOJE" : fp.dias + " dia(s)"} - {f$(fp.valor)}</div>;})}</div>}
-                {pendHoje > 0 && <div style={{padding:"10px 12px",borderRadius:12,background:T.gold+"08",border:"1px solid "+T.gold+"12"}}><div style={{fontSize:8,color:T.gold,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>Pendentes hoje</div><div style={{fontSize:16,fontWeight:900,color:T.gold}}>{pendHoje}</div><div style={{fontSize:9,color:T.dim}}>lancamento(s) para hoje</div></div>}
+                {pendHoje > 0 && <div style={{padding:"10px 12px",borderRadius:12,background:T.gold+"08",border:"1px solid "+T.gold+"12"}}><div style={{fontSize:8,color:T.gold,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>Pendentes hoje</div><div style={{fontSize:16,fontWeight:900,color:T.gold}}>{pendHoje}</div><div style={{fontSize:9,color:T.dim}}>lançamento(s) para hoje</div></div>}
                 {wkPend > 0 && <div style={{padding:"10px 12px",borderRadius:12,background:T.cyan+"08",border:"1px solid "+T.cyan+"12"}}><div style={{fontSize:8,color:T.cyan,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>Checklist semanal</div><div style={{fontSize:16,fontWeight:900,color:T.cyan}}>{wkPend}/{checklistSemanal.length}</div><div style={{fontSize:9,color:T.dim}}>itens pendentes</div></div>}
-                {criticos > 0 && <div style={{padding:"10px 12px",borderRadius:12,background:T.red+"08",border:"1px solid "+T.red+"12"}}><div style={{fontSize:8,color:T.red,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>Alertas criticos</div><div style={{fontSize:16,fontWeight:900,color:T.red}}>{criticos}</div><div style={{fontSize:9,color:T.dim}}>requerem atencao</div></div>}
+                {criticos > 0 && <div style={{padding:"10px 12px",borderRadius:12,background:T.red+"08",border:"1px solid "+T.red+"12"}}><div style={{fontSize:8,color:T.red,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>Alertas críticos</div><div style={{fontSize:16,fontWeight:900,color:T.red}}>{criticos}</div><div style={{fontSize:9,color:T.dim}}>requerem atenção</div></div>}
               </div>
             </div>;
           })()}
@@ -2760,7 +2808,7 @@ export default function App() {
               <ScoreGauge value={ratingScore} max={100} color={ratingColor} />
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:6,position:"relative",zIndex:1}}>
-              {[{l:"Score Santander",v:planoSantander.score+"/100",c:"#FF453A"},{l:"Score Itau",v:planoItau.score+"/100",c:"#FF9F0A"},{l:"Sobra realizada",v:f$(fluxo.sobraRealizada),c:fluxo.sobraRealizada>=0?T.green:T.red},{l:"Ate salario",v:f$(fluxo.ateSalario),c:fluxo.ateSalario>=0?T.green:T.red},{l:"Fatura do mes",v:f$(totalFaturaAtual),c:T.blue},{l:"Criticos",v:String(focoEstrategico.criticos),c:focoEstrategico.criticos>0?T.red:T.green}].map(function(x,i){return <div key={i} style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.5,fontWeight:700}}>{x.l}</div><div style={{fontSize:15,fontWeight:800,fontFamily:"'Inter', monospace",color:x.c}}>{x.v}</div></div>;})}
+              {[{l:"Score Santander",v:planoSantander.score+"/100",c:"#FF453A"},{l:"Score Itaú",v:planoItau.score+"/100",c:"#FF9F0A"},{l:"Sobra realizada",v:f$(fluxo.sobraRealizada),c:fluxo.sobraRealizada>=0?T.green:T.red},{l:"Até salário",v:f$(fluxo.ateSalario),c:fluxo.ateSalario>=0?T.green:T.red},{l:"Fatura do mês",v:f$(totalFaturaAtual),c:T.blue},{l:"Críticos",v:String(focoEstrategico.criticos),c:focoEstrategico.criticos>0?T.red:T.green}].map(function(x,i){return <div key={i} style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.5,fontWeight:700}}>{x.l}</div><div style={{fontSize:15,fontWeight:800,fontFamily:"'Inter', monospace",color:x.c}}>{x.v}</div></div>;})}
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))",gap:6,marginTop:8,position:"relative",zIndex:1}}>
               <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.5,fontWeight:700}}>Banco foco</div><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{fontSize:15,fontWeight:800}}>{focoEstrategico.bancoFoco}</div><select value={bancoFocoManual} onChange={function(e){setBancoFoco(e.target.value)}} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"3px 5px",color:T.muted,fontSize:9,outline:"none",cursor:"pointer"}}><option value="">Auto</option><option value="Santander">Santander</option><option value="Itaú">Itaú</option></select></div></div>
@@ -2770,7 +2818,7 @@ export default function App() {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr",gap:14}}>
             <div style={Object.assign({},bx,{padding:18})}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:13,fontWeight:900,letterSpacing:-0.2}}>Visao executiva mensal</div><Bd color={focoEstrategico.cardFoco ? getCardStatusColor(focoEstrategico.cardFoco.statusEstr) : T.blue}>{focoEstrategico.cardFoco ? (focoEstrategico.cardFoco.nome || "Cartao foco") : "Sem cartao foco"}</Bd></div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:13,fontWeight:900,letterSpacing:-0.2}}>Visão executiva mensal</div><Bd color={focoEstrategico.cardFoco ? getCardStatusColor(focoEstrategico.cardFoco.statusEstr) : T.blue}>{focoEstrategico.cardFoco ? (focoEstrategico.cardFoco.nome || "Cartão foco") : "Sem cartão foco"}</Bd></div>
               <div style={{display:"flex",flexDirection:"column",gap:9,fontSize:11,color:T.muted}}>
                 <div style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.03)"}}><span>Meta do mes</span><span style={{color:T.text,fontWeight:700}}>{focoEstrategico.metaMes}</span></div>
                 <div style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.03)"}}><span>Futuro em cartoes</span><span style={{color:T.cyan,fontWeight:700,fontFamily:"monospace"}}>{f$(totalProxFatura + totalSegundaFatura)}</span></div>
@@ -2791,12 +2839,13 @@ export default function App() {
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:1}}>
               <div style={{display:"flex",alignItems:"center",gap:14}}>
                 <div style={{width:52,height:52,borderRadius:14,background:"linear-gradient(135deg, "+saude.color+"25, "+saude.color+"10)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:saude.color,boxShadow:"0 8px 24px "+saude.color+"20, inset 0 1px 0 rgba(255,255,255,0.08)",border:"1px solid "+saude.color+"18"}}>{saude.emoji}</div>
-                <div><div style={{fontSize:9,color:T.dim,textTransform:"uppercase",fontWeight:700,letterSpacing:0.6}}>Saude Financeira</div><div style={{fontSize:20,fontWeight:900,color:saude.color,marginTop:2}}>{saude.label}</div><div style={{fontSize:10,color:T.muted,marginTop:2}}>Score: {saude.score}/100</div></div>
+                <div><div style={{fontSize:9,color:T.dim,textTransform:"uppercase",fontWeight:700,letterSpacing:0.6}}>Saúde Financeira</div><div style={{fontSize:20,fontWeight:900,color:saude.color,marginTop:2}}>{saude.label}</div><div style={{fontSize:10,color:T.muted,marginTop:2}}>Score: {saude.score}/100</div></div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:10,color:T.dim}}>Fixas: {pct(saude.pctFixas)} da renda</div>
-                  <div style={{fontSize:10,color:T.dim,marginTop:2}}>Dividas: {pct(saude.pctDiv)} da renda</div>
+                  <div style={{fontSize:10,color:T.dim,marginTop:2}}>Parcelas: {pct(saude.pctDiv)} da renda</div>
+                  <div style={{fontSize:10,color:T.dim,marginTop:2}}>Total comprometido: {pct(saude.pctFixas + saude.pctDiv)} da renda</div>
                   <div style={{fontSize:10,color:saude.color,fontWeight:700,marginTop:2}}>Sobra: {pct(saude.pctSobra)} da renda</div>
                 </div>
                 <div style={{width:24,height:24,borderRadius:8,background:"rgba(255,255,255,0.04)",display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(255,255,255,0.08)",transform:saudeOpen?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.3s"}}><ChevronDown size={14} color={T.dim} /></div>
@@ -2837,24 +2886,24 @@ export default function App() {
               <Bd color={fluxo.sobraRealizada>=0?T.green:T.red}>Sobra realizada {f$(fluxo.sobraRealizada)}</Bd>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(125px,1fr))",gap:8,position:"relative",zIndex:1}}>
-              {[{l:"Receitas",v:fluxo.receita,c:T.greenL},{l:"PIX / debito",v:fluxo.pix,c:T.orange},{l:"Fatura vence",v:fluxo.faturaDoMes,c:T.purple},{l:"Sobra realizada",v:fluxo.sobraRealizada,c:fluxo.sobraRealizada>=0?T.green:T.red},{l:"Ate salario",v:fluxo.ateSalario,c:fluxo.ateSalario>=0?T.green:T.red}].map(function(x,i){return <div key={i} style={{padding:"11px 13px",borderRadius:14,background:"rgba(255,255,255,0.03)",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.3,fontWeight:700}}>{x.l}</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:x.c}}>{f$(x.v)}</div></div>;})}
+              {[{l:"Receitas",v:fluxo.receita,c:T.greenL},{l:"PIX / débito",v:fluxo.pix,c:T.orange},{l:"Fatura vence",v:fluxo.faturaDoMes,c:T.purple},{l:"Sobra realizada",v:fluxo.sobraRealizada,c:fluxo.sobraRealizada>=0?T.green:T.red},{l:"Até salário",v:fluxo.ateSalario,c:fluxo.ateSalario>=0?T.green:T.red}].map(function(x,i){return <div key={i} style={{padding:"11px 13px",borderRadius:14,background:"rgba(255,255,255,0.03)",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.3,fontWeight:700}}>{x.l}</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:x.c}}>{f$(x.v)}</div></div>;})}
               <div style={{padding:"11px 13px",borderRadius:14,background:"rgba(255,255,255,0.03)",textAlign:"center",border:"1px solid "+T.cyan+"15"}}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.3,fontWeight:700}}>Invest. fixo</div><EV value={fluxo.investFixo} onChange={updInvestFixo} /></div>
             </div>
-            <div style={{marginTop:12,padding:"10px 14px",borderRadius:12,background:"rgba(255,255,255,0.025)",fontSize:10,color:T.dim,position:"relative",zIndex:1,border:"1px solid rgba(255,255,255,0.03)"}}>Receitas ({f$(fluxo.receita)}) - PIX ({f$(fluxo.pix)}) - Fatura ({f$(fluxo.faturaDoMes)}) = Sobra {f$(fluxo.sobraRealizada)} | Ate salario = Sobra - Invest. {f$(fluxo.investFixo)} = {f$(fluxo.ateSalario)}</div>
+            <div style={{marginTop:12,padding:"10px 14px",borderRadius:12,background:"rgba(255,255,255,0.025)",fontSize:10,color:T.dim,position:"relative",zIndex:1,border:"1px solid rgba(255,255,255,0.03)"}}>Receitas ({f$(fluxo.receita)}) - PIX ({f$(fluxo.pix)}) - Fatura ({f$(fluxo.faturaDoMes)}) = Sobra {f$(fluxo.sobraRealizada)} | Até salário = Sobra - Invest. {f$(fluxo.investFixo)} = {f$(fluxo.ateSalario)}</div>
           </div>
 
-          <button onClick={function(){setModal({type:"lanc",title:"Novo Lancamento",data:{}})}} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 16px",borderRadius:12,background:"linear-gradient(135deg, rgba(16,185,129,0.10), rgba(6,182,212,0.06))",border:"1px dashed rgba(16,185,129,0.30)",color:T.green,cursor:"pointer",fontSize:11,fontWeight:700,width:"100%",justifyContent:"center",marginBottom:18,boxShadow:"0 4px 16px rgba(16,185,129,0.08), inset 0 1px 0 rgba(255,255,255,0.03)",letterSpacing:0.2,transition:"all 0.2s"}}><Plus size={14} /> Novo Lancamento</button>
+          <button onClick={function(){setModal({type:"lanc",title:"Novo Lançamento",data:{}})}} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 16px",borderRadius:12,background:"linear-gradient(135deg, rgba(16,185,129,0.10), rgba(6,182,212,0.06))",border:"1px dashed rgba(16,185,129,0.30)",color:T.green,cursor:"pointer",fontSize:11,fontWeight:700,width:"100%",justifyContent:"center",marginBottom:18,boxShadow:"0 4px 16px rgba(16,185,129,0.08), inset 0 1px 0 rgba(255,255,255,0.03)",letterSpacing:0.2,transition:"all 0.2s"}}><Plus size={14} /> Novo Lançamento</button>
 
           {}
           <div style={Object.assign({},bx,{marginBottom:16,background:"linear-gradient(135deg,"+T.card+","+T.cyan+"04)",boxShadow:"0 0 20px rgba(6,182,212,0.04)"})}>
-            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}><Activity size={14} color={T.cyan} /><span style={{fontSize:13,fontWeight:700}}>Previsao do Mes: {MSF[mes-1]}</span></div>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}><Activity size={14} color={T.cyan} /><span style={{fontSize:13,fontWeight:700}}>Previsão do Mes: {MSF[mes-1]}</span></div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8}}>
-              {[{l:"Receita",v:pv.receitaMes,c:T.greenL},{l:"Desp. Lancadas",v:pv.despLancadas,c:T.red},{l:"Total saidas",v:pv.despTotalMes,c:T.orange},{l:"Sobra",v:pv.sobraPrevista,c:pv.sobraPrevista>=0?T.green:T.red},{l:"Invest. fixo",v:pv.investFixo,c:T.cyan},{l:"Ate salario",v:pv.aindaPodeGastar,c:pv.aindaPodeGastar>=0?T.green:T.red}].map(function(x,i) {
+              {[{l:"Receita",v:pv.receitaMes,c:T.greenL},{l:"Desp. Lancadas",v:pv.despLancadas,c:T.red},{l:"Total saidas",v:pv.despTotalMes,c:T.orange},{l:"Sobra",v:pv.sobraPrevista,c:pv.sobraPrevista>=0?T.green:T.red},{l:"Invest. fixo",v:pv.investFixo,c:T.cyan},{l:"Até salário",v:pv.aindaPodeGastar,c:pv.aindaPodeGastar>=0?T.green:T.red}].map(function(x,i) {
                 return <div key={i} style={mc2}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:3}}>{x.l}</div><div style={{fontSize:13,fontWeight:700,fontFamily:"monospace",color:x.c}}>{f$(x.v)}</div></div>;
               })}
             </div>
             <div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:T.cardAlt,fontSize:10,color:T.muted}}>
-              Sobra = Receita ({f$(pv.receitaMes)}) - Lancamentos ({f$(pv.despLancadas)}) = {f$(pv.sobraPrevista)} | Ate salario = Sobra - Invest. {f$(pv.investFixo)} = {f$(pv.aindaPodeGastar)}
+              Sobra = Receita ({f$(pv.receitaMes)}) - Lançamentos ({f$(pv.despLancadas)}) = {f$(pv.sobraPrevista)} | Até salário = Sobra - Invest. {f$(pv.investFixo)} = {f$(pv.aindaPodeGastar)}
             </div>
             <div style={{marginTop:10}}><PB value={pv.despTotalMes} max={pv.receitaMes} color={pv.sobraPrevista>=0?T.cyan:T.red} h={8} /></div>
             <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:9,color:T.dim}}><span>Comprometido: {pct(pv.despTotalMes/(pv.receitaMes||1)*100)} da receita</span><span>Sobra: {f$(pv.sobraPrevista)}</span></div>
@@ -2953,7 +3002,7 @@ export default function App() {
                 <YAxis tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={fK} />
                 <Tooltip content={<Tip />} />
                 <Area type="monotone" dataKey="acum" name="Acumulado" stroke={T.green} fill="url(#gAcum)" strokeWidth={2} />
-                <Area type="monotone" dataKey="sobra" name="Sobra/mes" stroke={T.cyan} fill="none" strokeWidth={1.5} dot={{r:3,fill:T.cyan}} strokeDasharray="4 4" />
+                <Area type="monotone" dataKey="sobra" name="Sobra/mês" stroke={T.cyan} fill="none" strokeWidth={1.5} dot={{r:3,fill:T.cyan}} strokeDasharray="4 4" />
               </AreaChart>
             </ResponsiveContainer>
             <div style={{display:"flex",justifyContent:"space-around",marginTop:8,fontSize:10}}>
@@ -2962,21 +3011,133 @@ export default function App() {
             </div>
           </div>}
         </div>}
-        {tab==="anual" && <div>
-          <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:12}}><Calendar size={14} color={T.blue} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Visao Anual {ano}</h2></div>
-          <div style={Object.assign({},bx,{marginBottom:16})}>
-            <ResponsiveContainer width="100%" height={220}><BarChart data={visAnual} barGap={2}><CartesianGrid strokeDasharray="3 3" stroke={T.border} /><XAxis dataKey="nome" tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} /><YAxis tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={fK} /><Tooltip content={<Tip />} /><Bar dataKey="rc" name="Receita" fill={T.green} radius={[4,4,0,0]} /><Bar dataKey="dp" name="Despesa" fill={T.red} radius={[4,4,0,0]} opacity={0.75} /></BarChart></ResponsiveContainer>
+        {tab==="anual" && (function(){
+          var totalRecAnual = visAnual.reduce(function(s,m){return s+m.rc},0);
+          var totalDespAnual = visAnual.reduce(function(s,m){return s+m.dp},0);
+          var saldoAnual = totalRecAnual - totalDespAnual;
+          var pctComprAnual = totalRecAnual > 0 ? Math.round(totalDespAnual/totalRecAnual*100) : 0;
+          var mesesComDados = visAnual.filter(function(m){return m.temDados}).length;
+          var recMedia = mesesComDados > 0 ? totalRecAnual / mesesComDados : 0;
+          var despMedia = mesesComDados > 0 ? totalDespAnual / mesesComDados : 0;
+          var sobraMedia = recMedia - despMedia;
+
+          // Dados para gráfico com linha ideal
+          var chartData = visAnual.map(function(m){
+            var ideal70 = Math.round(m.rc * 0.70);
+            var ideal80 = Math.round(m.rc * 0.80);
+            var ratio = m.rc > 0 ? Math.round(m.dp / m.rc * 100) : 0;
+            return {nome:m.nome,rc:m.rc,dp:m.dp,ideal70:ideal70,ideal80:ideal80,saldo:m.saldo,ratio:ratio,m:m.m,temDados:m.temDados};
+          });
+
+          // Sobra acumulada
+          var acumData = [];
+          var acum = 0;
+          chartData.forEach(function(m){
+            if (m.temDados) { acum += m.saldo; }
+            acumData.push({nome:m.nome,acum:Math.round(acum)});
+          });
+
+          return <div>
+          <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:12}}><Calendar size={14} color={T.blue} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Visão Anual {ano}</h2></div>
+
+          {/* KPIs anuais */}
+          <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6}}>
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 8px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>RECEITA ANUAL</div>
+                <div style={{fontSize:13,fontWeight:800,color:T.green,fontFamily:"monospace"}}>{fK(totalRecAnual)}</div>
+              </div>
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 8px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>DESPESA ANUAL</div>
+                <div style={{fontSize:13,fontWeight:800,color:T.red,fontFamily:"monospace"}}>{fK(totalDespAnual)}</div>
+              </div>
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 8px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>SOBRA ANUAL</div>
+                <div style={{fontSize:13,fontWeight:800,color:saldoAnual>=0?T.green:T.red,fontFamily:"monospace"}}>{fK(saldoAnual)}</div>
+              </div>
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"10px 8px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>COMPROMETIMENTO</div>
+                <div style={{fontSize:13,fontWeight:800,color:pctComprAnual<=70?T.green:pctComprAnual<=80?T.gold:T.red,fontFamily:"monospace"}}>{pctComprAnual}%</div>
+              </div>
+            </div>
           </div>
+
+          {/* Gráfico receita vs despesa vs ideal */}
+          <div style={Object.assign({},bx,{marginBottom:12})}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <div style={{fontSize:12,fontWeight:800}}>Receita vs Despesa vs Ideal</div>
+              <div style={{display:"flex",gap:8,fontSize:8,color:T.dim}}>
+                <span style={{display:"flex",alignItems:"center",gap:3}}><div style={{width:6,height:6,borderRadius:3,background:T.green}} /> Receita</span>
+                <span style={{display:"flex",alignItems:"center",gap:3}}><div style={{width:6,height:6,borderRadius:3,background:T.red}} /> Despesa</span>
+                <span style={{display:"flex",alignItems:"center",gap:3}}><div style={{width:12,height:2,background:T.cyan}} /> Máx. ideal 70%</span>
+                <span style={{display:"flex",alignItems:"center",gap:3}}><div style={{width:12,height:2,borderTop:"2px dashed "+T.gold}} /> Limite máx. 80%</span>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={220}><ComposedChart data={chartData} barGap={2}><CartesianGrid strokeDasharray="3 3" stroke={T.border} /><XAxis dataKey="nome" tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} /><YAxis tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={fK} /><Tooltip content={<Tip />} /><Bar dataKey="rc" name="Receita" fill={T.green} radius={[4,4,0,0]} /><Bar dataKey="dp" name="Despesa" fill={T.red} radius={[4,4,0,0]} opacity={0.75} /><Line type="monotone" dataKey="ideal70" name="Máx. ideal 70%" stroke={T.cyan} strokeWidth={2} dot={false} /><Line type="monotone" dataKey="ideal80" name="Limite máx. 80%" stroke={T.gold} strokeWidth={1.5} strokeDasharray="6 3" dot={false} /></ComposedChart></ResponsiveContainer>
+            <div style={{marginTop:10,padding:"12px 14px",borderRadius:10,background:"linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,255,136,0.04))",border:"1px solid rgba(0,229,255,0.15)"}}>
+              <div style={{fontSize:12,fontWeight:900,color:T.cyan,marginBottom:6,letterSpacing:-0.2}}>↓ Quanto mais as barras vermelhas ficam ABAIXO das linhas, melhor sua saúde financeira.</div>
+              <div style={{fontSize:8,color:T.dim}}>Linha ciano = máx. 70% (sobra 30% para investir) · Linha dourada = limite 80% (acima é crítico)</div>
+            </div>
+          </div>
+
+          {/* Gráfico ratio despesa/receita por mês */}
+          <div style={Object.assign({},bx,{marginBottom:12})}>
+            <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Comprometimento mensal (despesa/receita)</div>
+            <div style={{display:"flex",gap:3,alignItems:"flex-end",height:100,padding:"0 4px"}}>
+              {chartData.map(function(m,i){
+                var h = Math.min(100, m.ratio);
+                var cor = m.ratio <= 70 ? T.green : m.ratio <= 80 ? T.gold : T.red;
+                return <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                  <div style={{fontSize:7,fontWeight:700,color:cor}}>{m.temDados?m.ratio+"%":""}</div>
+                  <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:cor,opacity:m.temDados?0.7:0.15,transition:"height 0.3s"}} />
+                  <div style={{fontSize:7,color:T.dim}}>{m.nome.slice(0,3)}</div>
+                </div>;
+              })}
+            </div>
+            <div style={{position:"relative",height:2,margin:"6px 0",background:"rgba(255,255,255,0.04)"}}>
+              <div style={{position:"absolute",left:0,right:0,bottom:0,height:1,borderTop:"1px dashed "+T.cyan,opacity:0.4}} />
+              <div style={{position:"absolute",right:0,top:-8,fontSize:7,color:T.cyan}}>70%</div>
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:T.dim,marginTop:4}}>
+              <span>Média: <strong style={{color:totalRecAnual>0?(pctComprAnual<=70?T.green:pctComprAnual<=80?T.gold:T.red):T.dim,fontFamily:"monospace"}}>{pctComprAnual}%</strong></span>
+              <span>Máx. ideal: <strong style={{color:T.cyan}}>≤ 70%</strong> | Limite máx.: <strong style={{color:T.gold}}>≤ 80%</strong></span>
+            </div>
+          </div>
+
+          {/* Sobra acumulada */}
+          <div style={Object.assign({},bx,{marginBottom:12})}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+              <div style={{fontSize:12,fontWeight:800}}>Sobra acumulada {ano}</div>
+              <div style={{fontSize:12,fontWeight:800,color:acum>=0?T.green:T.red,fontFamily:"monospace"}}>{f$(acum)}</div>
+            </div>
+            <ResponsiveContainer width="100%" height={120}><AreaChart data={acumData}><CartesianGrid strokeDasharray="3 3" stroke={T.border} /><XAxis dataKey="nome" tick={{fill:T.dim,fontSize:8}} axisLine={false} tickLine={false} /><YAxis tick={{fill:T.dim,fontSize:8}} axisLine={false} tickLine={false} tickFormatter={fK} /><Tooltip content={<Tip />} /><Area type="monotone" dataKey="acum" name="Acumulado" stroke={T.green} fill={T.green+"15"} strokeWidth={2} /></AreaChart></ResponsiveContainer>
+          </div>
+
+          {/* Média mensal */}
+          <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+            <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Médias mensais ({mesesComDados} meses com dados)</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+              <div style={{textAlign:"center"}}><div style={{fontSize:8,color:T.dim}}>RECEITA MÉDIA</div><div style={{fontSize:14,fontWeight:800,color:T.green,fontFamily:"monospace"}}>{f$(recMedia)}</div></div>
+              <div style={{textAlign:"center"}}><div style={{fontSize:8,color:T.dim}}>DESPESA MÉDIA</div><div style={{fontSize:14,fontWeight:800,color:T.red,fontFamily:"monospace"}}>{f$(despMedia)}</div></div>
+              <div style={{textAlign:"center"}}><div style={{fontSize:8,color:T.dim}}>SOBRA MÉDIA</div><div style={{fontSize:14,fontWeight:800,color:sobraMedia>=0?T.green:T.red,fontFamily:"monospace"}}>{f$(sobraMedia)}</div></div>
+            </div>
+          </div>
+
+          {/* Cards por mês */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>
-            {visAnual.map(function(m,i){return <div key={i} onClick={function(){setMes(m.m);setTab("visao")}} style={Object.assign({},bx,{padding:12,cursor:"pointer",background:m.m===mes?"linear-gradient(135deg,"+T.card+","+T.green+"08)":T.card,borderColor:m.m===mes?T.green+"40":T.border})}>
-              <div style={{fontSize:11,fontWeight:700,marginBottom:6,color:m.m===mes?T.green:T.text}}>{MSF[m.m-1]}</div>
-              {!m.temDados && <Bd color={T.gold}>projecao</Bd>}
+            {visAnual.map(function(m,i){var ratio=m.rc>0?Math.round(m.dp/m.rc*100):0;var corR=ratio<=70?T.green:ratio<=80?T.gold:T.red;return <div key={i} onClick={function(){setMes(m.m);setTab("visao")}} style={Object.assign({},bx,{padding:12,cursor:"pointer",background:m.m===mes?"linear-gradient(135deg,"+T.card+","+T.green+"08)":T.card,borderColor:m.m===mes?T.green+"40":T.border})}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                <span style={{fontSize:11,fontWeight:700,color:m.m===mes?T.green:T.text}}>{MSF[m.m-1]}</span>
+                {m.temDados && <span style={{fontSize:7,fontWeight:700,color:corR,background:corR+"12",padding:"1px 4px",borderRadius:4}}>{ratio}%</span>}
+              </div>
+              {!m.temDados && <Bd color={T.gold}>projeção</Bd>}
               <div style={{display:"flex",justifyContent:"space-between",fontSize:9,marginTop:4}}><span style={{color:T.dim}}>Rec.</span><span style={{color:T.green,fontFamily:"monospace",fontWeight:600}}>{fK(m.rc)}</span></div>
               <div style={{display:"flex",justifyContent:"space-between",fontSize:9,marginTop:2}}><span style={{color:T.dim}}>Desp.</span><span style={{color:T.red,fontFamily:"monospace",fontWeight:600}}>{fK(m.dp)}</span></div>
               <div style={{marginTop:4,paddingTop:4,borderTop:"1px solid "+T.border,display:"flex",justifyContent:"space-between",fontSize:10}}><span style={{color:T.dim}}>Saldo</span><span style={{color:m.saldo>=0?T.green:T.red,fontFamily:"monospace",fontWeight:700}}>{fK(m.saldo)}</span></div>
             </div>})}
           </div>
-        </div>}
+        </div>;
+        })()}
 
         {tab==="cal" && <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
@@ -3019,7 +3180,7 @@ export default function App() {
           </div>
           {calDay > 0 && (function(){
             var dayData = calData.find(function(d){return d.d===calDay});
-            if (!dayData || dayData.lancs.length === 0) return <div style={Object.assign({},bx,{marginTop:12,textAlign:"center",padding:20})}><div style={{fontSize:11,color:T.dim}}>Nenhum lancamento no dia {calDay}</div></div>;
+            if (!dayData || dayData.lancs.length === 0) return <div style={Object.assign({},bx,{marginTop:12,textAlign:"center",padding:20})}><div style={{fontSize:11,color:T.dim}}>Nenhum lançamento no dia {calDay}</div></div>;
             var fixasDia = (db.fixas||[]).filter(function(f){return (f.dia||15)===calDay});
             return <div style={Object.assign({},bx,{marginTop:12})}>
               <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Dia {calDay} de {MSF[mes-1]}</div>
@@ -3032,7 +3193,7 @@ export default function App() {
 
         {tab==="lanc" && <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
-            <h2 style={{margin:0,fontSize:15,fontWeight:700}}>Lancamentos: {MSF[mes-1]} {ano}</h2>
+            <h2 style={{margin:0,fontSize:15,fontWeight:700}}>Lançamentos: {MSF[mes-1]} {ano}</h2>
             <div style={{display:"flex",gap:6}}>
               <button onClick={function(){setBulkMode(!bulkMode);setBulkSel({})}} style={{display:"flex",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:8,background:bulkMode?T.cyan+"18":T.card,border:"1px solid "+(bulkMode?T.cyan+"35":T.border),color:bulkMode?T.cyan:T.muted,cursor:"pointer",fontSize:11,fontWeight:600}}><CheckCircle size={13} /> {bulkMode?"Cancelar":"Selecionar"}</button>
               <button onClick={function(){setModal({type:"lanc",title:"Novo",data:{}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:8,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 4px 12px rgba(16,185,129,0.20)"}}><Plus size={13} /> Novo</button>
@@ -3053,7 +3214,7 @@ export default function App() {
             <select value={fTitular} onChange={function(e){setFTitular(e.target.value)}} style={Object.assign({},inp,{width:"auto",fontSize:10,padding:"5px 8px"})}><option value="">Titular</option><option value="joao">Joao</option><option value="barbara">Barbara</option></select>
           </div>
           <div style={bx}>
-            {lF.length===0 ? <div style={{textAlign:"center",padding:24,color:T.dim}}>Nenhum lancamento</div> :
+            {lF.length===0 ? <div style={{textAlign:"center",padding:24,color:T.dim}}>Nenhum lançamento</div> :
             <div style={{display:"flex",flexDirection:"column",gap:5}}>
               {lF.map(function(l) {
                 var isR = l.tipo==="receita";
@@ -3115,13 +3276,13 @@ export default function App() {
         {tab==="cards" && <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{padding:5,borderRadius:8,background:T.blue+"12",display:"flex",border:"1px solid "+T.blue+"10"}}><CreditCard size={15} color={T.blue} /></div><h2 style={{margin:0,fontSize:17,fontWeight:900,letterSpacing:-0.3}}>Cartoes e Faturas: {MSF[mes-1]} {ano}</h2><Bd color={T.cyan}>premium</Bd></div>
-            <button onClick={function(){setModal({type:"card",title:"Novo Cartao",data:{cor:T.blue,cor2:"#172554",band:"Cartao",fecha:3,venc:27,bankKey:"custom",emoji:"💳",logoUrl:"",visual:"black",statusEstr:"manter_estavel",titular:"joao"}})}} style={{display:"flex",alignItems:"center",gap:5,padding:"8px 14px",borderRadius:12,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 6px 20px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.15)"}}><Plus size={13} /> Cartao</button>
+            <button onClick={function(){setModal({type:"card",title:"Novo Cartão",data:{cor:T.blue,cor2:"#172554",band:"Cartao",fecha:3,venc:27,bankKey:"custom",emoji:"💳",logoUrl:"",visual:"black",statusEstr:"manter_estável",titular:"joao"}})}} style={{display:"flex",alignItems:"center",gap:5,padding:"8px 14px",borderRadius:12,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 6px 20px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.15)"}}><Plus size={13} /> Cartão</button>
           </div>
 
           <div style={Object.assign({},bx,{marginBottom:14,background:"linear-gradient(135deg, rgba(10,18,32,0.97), rgba(59,130,246,0.05))",borderColor:T.blue+"18",position:"relative",overflow:"hidden"})}>
             <div style={{position:"absolute",inset:0,pointerEvents:"none",background:"radial-gradient(ellipse at 100% 50%, rgba(59,130,246,0.06), transparent 50%)"}} />
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(125px,1fr))",gap:8,position:"relative",zIndex:1}}>
-              {[{l:"Fatura atual",v:totalFaturaAtual,c:T.blue},{l:"Proxima",v:totalProxFatura,c:T.cyan},{l:"2a proxima",v:totalSegundaFatura,c:T.purple},{l:"Limite total",v:totalLimites,c:T.greenL},{l:"Comprometido",v:totalComprometidoCartoes,c:T.orange},{l:"Livre real",v:totalLivreReal,c:T.green},{l:"Uso atual",v:usoTotalCartoes,c:T.gold,p:true},{l:"Uso real",v:usoRealCartoes,c:usoRealCartoes<=30?T.green:usoRealCartoes<=50?T.gold:T.red,p:true},{l:"Ate salario",v:proxSal.faturas,c:T.red}].map(function(x,i){return <div key={i} style={{padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.03)",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.3,fontWeight:700}}>{x.l}</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:x.c}}>{x.p ? pct(x.v) : f$(x.v)}</div></div>;})}
+              {[{l:"Fatura atual",v:totalFaturaAtual,c:T.blue},{l:"Proxima",v:totalProxFatura,c:T.cyan},{l:"2a proxima",v:totalSegundaFatura,c:T.purple},{l:"Limite total",v:totalLimites,c:T.greenL},{l:"Comprometido",v:totalComprometidoCartoes,c:T.orange},{l:"Livre real",v:totalLivreReal,c:T.green},{l:"Uso atual",v:usoTotalCartoes,c:T.gold,p:true},{l:"Uso real",v:usoRealCartoes,c:usoRealCartoes<=30?T.green:usoRealCartoes<=50?T.gold:T.red,p:true},{l:"Até salário",v:proxSal.faturas,c:T.red}].map(function(x,i){return <div key={i} style={{padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.03)",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:4,letterSpacing:0.3,fontWeight:700}}>{x.l}</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:x.c}}>{x.p ? pct(x.v) : f$(x.v)}</div></div>;})}
             </div>
           </div>
 
@@ -3129,7 +3290,7 @@ export default function App() {
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
               <select value={fBankCards} onChange={function(e){setFBankCards(e.target.value)}} style={Object.assign({},inp,{width:"auto",fontSize:10,padding:"6px 9px"})}><option value="">Banco</option>{BANK_OPTIONS.map(function(o){return <option key={o.v} value={o.v}>{o.l}</option>})}</select>
               <select value={fFatStatus} onChange={function(e){setFFatStatus(e.target.value)}} style={Object.assign({},inp,{width:"auto",fontSize:10,padding:"6px 9px"})}><option value="">Status da fatura</option><option value="aberta">Em aberto</option><option value="paga">Paga</option><option value="divergencia">Com divergencia</option></select>
-              <select value={fDivCards} onChange={function(e){setFDivCards(e.target.value)}} style={Object.assign({},inp,{width:"auto",fontSize:10,padding:"6px 9px"})}><option value="">Conciliacao</option><option value="com">Com divergencia</option><option value="sem">Sem divergencia</option></select>
+              <select value={fDivCards} onChange={function(e){setFDivCards(e.target.value)}} style={Object.assign({},inp,{width:"auto",fontSize:10,padding:"6px 9px"})}><option value="">Conciliação</option><option value="com">Com divergencia</option><option value="sem">Sem divergencia</option></select>
               {(fBankCards || fFatStatus || fDivCards) && <button onClick={function(){setFBankCards("");setFFatStatus("");setFDivCards("")}} style={{padding:"6px 10px",borderRadius:10,background:T.card,border:"1px solid "+T.border,color:T.muted,cursor:"pointer",fontSize:10,fontWeight:700}}>Limpar filtros</button>}
             </div>
           </div>
@@ -3156,7 +3317,7 @@ export default function App() {
                   <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.3,fontWeight:700}}>Uso do limite</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:c.usoPct<=30?T.green:c.usoPct<=50?T.gold:T.red,marginTop:3}}>{pct(c.usoPct)}</div></div>
                   <div style={mc}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.3,fontWeight:700}}>Uso real</div><div style={{fontSize:14,fontWeight:900,fontFamily:"'Inter', monospace",color:c.usoRealPct<=30?T.green:c.usoRealPct<=50?T.gold:T.red,marginTop:3}}>{pct(c.usoRealPct)}</div></div>
                 </div>
-                {c.faturas.some(function(f){ return !f.conciliado; }) && <div style={{marginBottom:10,padding:"9px 12px",borderRadius:12,background:T.red+"08",border:"1px solid "+T.red+"18",fontSize:10,color:T.muted,position:"relative",zIndex:1}}><strong style={{color:T.red}}>Divergencia:</strong> existe diferenca entre valor manual e lancamentos em ao menos uma fatura.</div>}{c.obs && <div style={{marginBottom:12,padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",fontSize:10,color:T.muted,position:"relative",zIndex:1}}><strong style={{color:T.text}}>Obs.:</strong> {c.obs}</div>}
+                {c.faturas.some(function(f){ return !f.conciliado; }) && <div style={{marginBottom:10,padding:"9px 12px",borderRadius:12,background:T.red+"08",border:"1px solid "+T.red+"18",fontSize:10,color:T.muted,position:"relative",zIndex:1}}><strong style={{color:T.red}}>Divergência:</strong> existe diferença entre valor manual e lancamentos em ao menos uma fatura.</div>}{c.obs && <div style={{marginBottom:12,padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",fontSize:10,color:T.muted,position:"relative",zIndex:1}}><strong style={{color:T.text}}>Obs.:</strong> {c.obs}</div>}
                 <div style={{display:"grid",gap:8}}>
                   {c.faturas.map(function(f) {
                     return <div key={f.key} style={{padding:"13px 14px",borderRadius:16,background:"rgba(255,255,255,0.03)",border:"1px solid "+(f.paga?"rgba(16,185,129,0.20)":"rgba(255,255,255,0.05)"),boxShadow:"inset 0 1px 0 rgba(255,255,255,0.025), 0 4px 12px rgba(0,0,0,0.08)"}}>
@@ -3179,14 +3340,14 @@ export default function App() {
                           <button onClick={function(){askResetFatVenc(c.id, f.mes, f.ano)}} style={{padding:"6px 8px",borderRadius:7,background:T.card,border:"1px solid "+T.border,color:T.muted,cursor:"pointer",fontSize:10}}>Reset venc.</button>
                         </div>
                       </div>
-                      <div style={{display:"flex",justifyContent:"space-between",gap:8,marginBottom:8,fontSize:10,flexWrap:"wrap"}}><span style={{color:f.conciliado?T.green:T.gold}}>Conferir fatura: {f.conciliado ? "ok" : (f.divergencia>0?"+":"") + f$(f.divergencia)}</span>{f.paga && f.pagoEm && <span style={{color:T.green}}>Pago em {fD(f.pagoEm)}</span>}</div>{f.itens.length===0 ? <div style={{fontSize:10,color:T.dim}}>Nenhum lancamento nesta fatura.</div> : <div style={{display:"flex",flexDirection:"column",gap:5}}>{f.itens.map(function(it){return <div key={it.id} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:10}}><span style={{color:T.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.desc}</span><span style={{fontFamily:"monospace",fontWeight:700}}>{f$(it.valor)}</span></div>;})}</div>}
+                      <div style={{display:"flex",justifyContent:"space-between",gap:8,marginBottom:8,fontSize:10,flexWrap:"wrap"}}><span style={{color:f.conciliado?T.green:T.gold}}>Conferir fatura: {f.conciliado ? "ok" : (f.divergencia>0?"+":"") + f$(f.divergencia)}</span>{f.paga && f.pagoEm && <span style={{color:T.green}}>Pago em {fD(f.pagoEm)}</span>}</div>{f.itens.length===0 ? <div style={{fontSize:10,color:T.dim}}>Nenhum lançamento nesta fatura.</div> : <div style={{display:"flex",flexDirection:"column",gap:5}}>{f.itens.map(function(it){return <div key={it.id} style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:10}}><span style={{color:T.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.desc}</span><span style={{fontFamily:"monospace",fontWeight:700}}>{f$(it.valor)}</span></div>;})}</div>}
                     </div>;
                   })}
                 </div>
-                {c.historicoPagas.length>0 && <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid "+T.border}}><div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Historico de faturas pagas</div><div style={{display:"flex",flexDirection:"column",gap:5}}>{c.historicoPagas.slice(0,6).map(function(h){return <div key={h.key} style={{display:"grid",gridTemplateColumns:"1fr auto auto",gap:8,fontSize:10,padding:"7px 8px",borderRadius:8,background:T.cardAlt}}><span style={{color:T.muted}}>{h.ref}</span><span style={{fontFamily:"monospace",fontWeight:700}}>{f$(h.valor)}</span><span style={{color:T.dim}}>{h.pagoEm ? fD(h.pagoEm) : "--"}</span></div>;})}</div></div>}
+                {c.historicoPagas.length>0 && <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid "+T.border}}><div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Histórico de faturas pagas</div><div style={{display:"flex",flexDirection:"column",gap:5}}>{c.historicoPagas.slice(0,6).map(function(h){return <div key={h.key} style={{display:"grid",gridTemplateColumns:"1fr auto auto",gap:8,fontSize:10,padding:"7px 8px",borderRadius:8,background:T.cardAlt}}><span style={{color:T.muted}}>{h.ref}</span><span style={{fontFamily:"monospace",fontWeight:700}}>{f$(h.valor)}</span><span style={{color:T.dim}}>{h.pagoEm ? fD(h.pagoEm) : "--"}</span></div>;})}</div></div>}
               </div>;
             };
-            if (cardsView.length === 0) return <div style={bx}><div style={{textAlign:"center",padding:28,color:T.dim}}><CreditCard size={22} color={T.blue} /><div style={{fontSize:12,fontWeight:700,marginTop:8}}>Nenhum cartao encontrado</div></div></div>;
+            if (cardsView.length === 0) return <div style={bx}><div style={{textAlign:"center",padding:28,color:T.dim}}><CreditCard size={22} color={T.blue} /><div style={{fontSize:12,fontWeight:700,marginTop:8}}>Nenhum cartão encontrado</div></div></div>;
             return <div>
               {meusCards.length > 0 && <div style={{marginBottom:20}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><div style={{padding:4,borderRadius:8,background:T.cyan+"12",border:"1px solid "+T.cyan+"10",display:"flex"}}><CreditCard size={14} color={T.cyan} /></div><div style={{fontSize:14,fontWeight:900,color:T.cyan}}>Meus Cartoes</div><Bd color={T.cyan}>{meusCards.length}</Bd></div>
@@ -3208,7 +3369,7 @@ export default function App() {
             {day:"29",title:"DIA DO PEDIDO",color:T.gold,items:["Almofada R$ 8.000 mantida","Investimento do mês aplicado","Renda cadastrada: R$ 30.000 no app","Open Finance ativo","SOLICITAR cartão Unlimited (1×/mês)"]}
           ];
           var DEBITS_LIST = ["Energia","Água","Internet","Celular","Pl. Saúde","Condomínio","Seguro","Previdência","Stream. 1","Stream. 2","Fixo 1","Fixo 2"];
-          var BOOST_ITEMS = ["20+ transações/mês no Santander","Patrimônio crescente (nunca resgatar)","Liquidez diária além da almofada","Open Finance ativo 90+ dias","Anti-pico avançado (lotes semanais)","Pedido com holerite/IR via gerente Select","90 dias sem pedir crédito em outros bancos","Login diário App Way + App Santander","Gerente Select fixo (tratar pelo nome)","Previdência PGBL R$ 100+/mês contratada","Carteira digital ativa (Apple/Google Pay)","Serasa Premium assinado (R$ 30/mês)","1+ compra internacional/mês no AAdvantage","Gasto progressivo (+R$ 500/mês de escada)","Pagamento pré-fechamento (hack utilização)"];
+          var BOOST_ITEMS = ["20+ transações/mês no Santander","Patrimônio crescente (nunca resgatar)","Liquidez diária além da almofada","Open Finance ativo 90+ dias","Anti-pico avançado (lotes semanais)","Pedido com holerite/IR via gerente Select","90 dias sem pedir crédito em outros bancos","Login diário App Way + App Santander","Gerente Select fixo (tratar pelo nome)","Previdência PGBL R$ 100+/mês contratada","Carteira digital ativa (Apple/Google Pay)","Serasa Premium assinado (R$ 23,90/mês)","1+ compra internacional/mês no AAdvantage","Gasto progressivo (+R$ 500/mês de escada)","Pagamento pré-fechamento (hack utilização)"];
           var PROIBIDO_ITEMS = ["Não atrasei nenhum pagamento","Não entrei no cheque especial","Não usei rotativo (100% sempre)","Não fiz renegociação de dívida","Não estourei limite","Não fiz spam de solicitações","Não pedi crédito em outros bancos","Não fiz simulações repetidas","Santander não virou conta-passagem","Sem pingue-pongue de investimento","Anti-pico aplicado","Sem parcelamentos novos","Cadastro atualizado (renda/endereço/tel)","Sem pendências/boletos esquecidos","Open Finance estável","Não fiz chargeback/contestação","Não fiz saque no crédito","Monitorei 3 birôs (Serasa+BoaVista+Quod)"];
           var PARCELAS_DATA = [
             {n:"Amazon",v:15.40,t:2},{n:"Dock Robô",v:57,t:2},{n:"Lacoste",v:190,t:2},
@@ -3228,7 +3389,7 @@ export default function App() {
           var WEEKLY_TASKS = [{day:"Segunda",tasks:["1 Pix pequeno","1 pagamento (boleto/conta)"]},{day:"Quinta",tasks:["1 Pix pequeno","1 pagamento (boleto/conta)"]}];
           var MELHORIAS = [
             {t:"Renda no app Santander",d:"Cadastrar R$ 30.000 (inclua benefícios, extras). DIRPF justifica.",ic:"💰"},
-            {t:"Open Finance",d:"Conectar Itaú e Bradesco ao Santander. Ele vê patrimônio total e limite R$ 40.500 no Itaú.",ic:"🔗"},
+            {t:"Open Finance",d:"Conectar Itaú e Bradesco ao Santander. Ele vê patrimônio total e limite R$ 18.500 no Itaú.",ic:"🔗"},
             {t:"Gerente Select fixo",d:"Ligar e pedir gerente dedicado. Na hora do upgrade, ele advoga por você.",ic:"🤝"},
             {t:"Previdência PGBL",d:"R$ 100/mês no Santander. Produto + deduz até 12% do IR.",ic:"📈"},
             {t:"Login diário",d:"Abrir App Way + App Santander todo dia. Engajamento digital é rastreado.",ic:"📱"},
@@ -3599,7 +3760,7 @@ export default function App() {
                 {t:"Consultar Serasa Score (serasa.com.br)",d:"Score principal. Gratuito. Consultar toda semana.",k:"coach_biro_1",cor:T.cyan},
                 {t:"Consultar Boa Vista SCPC (boavistaservicos.com.br)",d:"Segundo birô mais consultado. Score pode ser diferente do Serasa.",k:"coach_biro_2",cor:T.purple},
                 {t:"Consultar Quod (quod.com.br)",d:"Birô mais novo, criado pelos 5 maiores bancos. Santander é sócio!",k:"coach_biro_3",cor:T.gold},
-                {t:"Assinar Serasa Premium (R$ 30/mês)",d:"Monitoramento em tempo real, alertas de consulta no CPF, selo premium visível aos bancos.",k:"coach_biro_4",cor:T.green},
+                {t:"Assinar Serasa Premium (R$ 23,90/mês)",d:"Monitoramento em tempo real, alertas de consulta no CPF, selo premium visível aos bancos.",k:"coach_biro_4",cor:T.green},
                 {t:"Acessar Registrato BACEN (mensalmente)",d:"Único lugar que mostra TODAS as dívidas, contas e chaves Pix do CPF.",k:"coach_biro_5",cor:T.cyan}
               ].map(function(item,i){var on=!!(ratingMes[item.k]);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.02)":"none"}}>
                 <button onClick={function(){togRatingTask(item.k)}} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid "+(on?T.green:item.cor),background:on?T.green:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{on&&<Check size={9} color="#020208" />}</button>
@@ -3783,14 +3944,14 @@ export default function App() {
         {}
         {tab==="orc" && <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <div style={{display:"flex",alignItems:"center",gap:7}}><DollarSign size={14} color={T.cyan} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Orcamento: {MSF[mes-1]} {ano}</h2></div>
+            <div style={{display:"flex",alignItems:"center",gap:7}}><DollarSign size={14} color={T.cyan} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Orçamento: {MSF[mes-1]} {ano}</h2></div>
             <button onClick={function(){setModal({type:"cat",title:"Nova Categoria",data:{tipo:"despesa"}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.green,border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:600}}><Plus size={12} /> Categoria</button>
           </div>
 
           {}
           <div style={Object.assign({},bx,{marginBottom:12,background:"linear-gradient(135deg,"+T.card+","+T.cyan+"03)"})}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(115px,1fr))",gap:8}}>
-              {[{l:"Receita",v:pv.receitaMes,c:T.greenL},{l:"Desp. Lancadas",v:pv.despLancadas,c:T.red},{l:"Total saidas",v:pv.despTotalMes,c:T.orange},{l:"Sobra",v:pv.sobraPrevista,c:pv.sobraPrevista>=0?T.green:T.red},{l:"Ate salario",v:pv.aindaPodeGastar,c:pv.aindaPodeGastar>=0?T.green:T.red}].map(function(x,i) {
+              {[{l:"Receita",v:pv.receitaMes,c:T.greenL},{l:"Desp. Lancadas",v:pv.despLancadas,c:T.red},{l:"Total saidas",v:pv.despTotalMes,c:T.orange},{l:"Sobra",v:pv.sobraPrevista,c:pv.sobraPrevista>=0?T.green:T.red},{l:"Até salário",v:pv.aindaPodeGastar,c:pv.aindaPodeGastar>=0?T.green:T.red}].map(function(x,i) {
                 return <div key={i} style={mc2}><div style={{fontSize:8,color:T.dim,textTransform:"uppercase",marginBottom:3}}>{x.l}</div><div style={{fontSize:13,fontWeight:700,fontFamily:"monospace",color:x.c}}>{f$(x.v)}</div></div>;
               })}
             </div>
@@ -3837,14 +3998,236 @@ export default function App() {
         </div>}
 
         {}
+        {tab==="assin" && (function(){
+          var allAssin = lancEx.filter(function(l){return l.mes===mes && l.ano===ano && (l.cat==="c3" || l.cat==="c15" || (l.cat==="c16" && l.rec))});
+          var totalAssin = allAssin.reduce(function(s,l){return s+l.valor},0);
+          var receitaMes = lancEx.filter(function(l){return l.mes===mes&&l.ano===ano&&l.tipo==="receita"}).reduce(function(s,l){return s+l.valor},0);
+          var pctRenda = receitaMes > 0 ? (totalAssin/receitaMes*100) : 0;
+          var anoTotal = totalAssin * 12;
+          var totalPago = allAssin.filter(function(l){return l.status==="pago"}).reduce(function(s,l){return s+l.valor},0);
+          var totalPend = totalAssin - totalPago;
+
+          // Sub-categories
+          var SUB_CATS = [
+            {id:"ia",nome:"Inteligência Artificial",emoji:"🤖",cor:"#8B5CF6",keys:["claude","chatgpt"]},
+            {id:"stream",nome:"Streaming & Entretenimento",emoji:"🎬",cor:"#EC4899",keys:["streaming","cinemark","spotify"]},
+            {id:"fitness",nome:"Fitness & Lazer",emoji:"💪",cor:"#10B981",keys:["totalpass"]},
+            {id:"tech",nome:"Tecnologia",emoji:"📱",cor:"#06B6D4",keys:["icloud"]},
+            {id:"finance",nome:"Serviços Financeiros",emoji:"🏦",cor:"#FFD000",keys:["santander select","revolut ultra","revolut","serasa"]},
+            {id:"milhas",nome:"Milhas",emoji:"✈️",cor:"#0EA5E9",keys:["livelo","smiles","curtai","clube curtai","revpoints"]},
+            {id:"anuidades",nome:"Anuidades",emoji:"💳",cor:"#F59E0B",keys:["anuidade"]},
+          ];
+
+          var grouped = SUB_CATS.map(function(cat){
+            var items = allAssin.filter(function(l){
+              var d = (l.desc||"").toLowerCase();
+              return cat.keys.some(function(k){return d.indexOf(k)>=0});
+            });
+            return {cat:cat, items:items, total:items.reduce(function(s,l){return s+l.valor},0)};
+          }).filter(function(g){return g.items.length > 0});
+
+          var matchedIds = {};
+          grouped.forEach(function(g){g.items.forEach(function(l){matchedIds[l.id]=true})});
+          var unmatched = allAssin.filter(function(l){return !matchedIds[l.id]});
+          if (unmatched.length > 0) {
+            grouped.push({cat:{id:"outros",nome:"Outros",emoji:"📦",cor:"#6B7280",keys:[]}, items:unmatched, total:unmatched.reduce(function(s,l){return s+l.valor},0)});
+          }
+          grouped.sort(function(a,b){return b.total - a.total});
+
+          var pieData = grouped.map(function(g){return {name:g.cat.nome, value:Math.round(g.total*100)/100, fill:g.cat.cor}});
+
+          // Cartão vs Pix
+          var totalCartao = allAssin.filter(function(l){return l.cartaoId}).reduce(function(s,l){return s+l.valor},0);
+          var totalPix = totalAssin - totalCartao;
+
+          // Sorted by value
+          var sorted = allAssin.slice().sort(function(a,b){return b.valor-a.valor});
+
+          return <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <div style={{display:"flex",alignItems:"center",gap:7}}><Repeat size={14} color={T.purple} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Assinaturas</h2></div>
+              <span style={{fontSize:10,fontWeight:700,color:T.purple,fontFamily:"monospace"}}>{MSF[mes-1]} {ano}</span>
+            </div>
+
+            {/* Hero */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:18,background:"linear-gradient(135deg, "+T.card+", "+T.purple+"06)",borderColor:T.purple+"20"})}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:"12px 14px",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:8,color:T.dim,letterSpacing:0.5,fontWeight:600}}>TOTAL MENSAL</div>
+                  <div style={{fontSize:22,fontWeight:900,color:T.purple,fontFamily:"monospace",marginTop:4}}>{f$(totalAssin)}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{allAssin.length} assinaturas ativas</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:"12px 14px",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:8,color:T.dim,letterSpacing:0.5,fontWeight:600}}>CUSTO ANUAL</div>
+                  <div style={{fontSize:22,fontWeight:900,color:T.gold,fontFamily:"monospace",marginTop:4}}>{f$(anoTotal)}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{pctRenda.toFixed(1)}% da renda</div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>PAGO</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.green,fontFamily:"monospace"}}>{f$(totalPago)}</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>PENDENTE</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.gold,fontFamily:"monospace"}}>{f$(totalPend)}</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>POR DIA</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.orange,fontFamily:"monospace"}}>{f$(totalAssin/30)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Impacto na renda */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Impacto na Renda</div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                <span style={{fontSize:9,color:T.muted}}>Assinaturas vs Renda ({f$(receitaMes)})</span>
+                <span style={{fontSize:9,fontWeight:700,color:pctRenda>15?T.red:pctRenda>10?T.gold:T.green,fontFamily:"monospace"}}>{pctRenda.toFixed(1)}%</span>
+              </div>
+              <div style={{height:8,borderRadius:8,background:"rgba(255,255,255,0.04)",overflow:"hidden",marginBottom:8}}>
+                <div style={{height:"100%",borderRadius:8,background:"linear-gradient(90deg, "+T.purple+", "+(pctRenda>15?T.red:pctRenda>10?T.gold:T.green)+")",width:Math.min(pctRenda,100)+"%",transition:"width 0.5s"}} />
+              </div>
+              <div style={{padding:"8px 10px",borderRadius:8,background:T.green+"06",border:"1px solid "+T.green+"10"}}>
+                <div style={{fontSize:8,color:T.dim}}>Sobra após assinaturas</div>
+                <div style={{fontSize:14,fontWeight:800,color:T.green,fontFamily:"monospace"}}>{f$(receitaMes - totalAssin)}</div>
+              </div>
+            </div>
+
+            {/* Pie Chart */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Distribuição por Categoria</div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:"45%"}}>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie data={pieData} dataKey="value" cx="50%" cy="50%" outerRadius={55} innerRadius={28} paddingAngle={2} strokeWidth={0}>
+                        {pieData.map(function(entry,idx){return <Cell key={idx} fill={entry.fill} />})}
+                      </Pie>
+                      <Tooltip contentStyle={{background:"rgba(18,18,22,0.96)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,fontSize:10}} formatter={function(v){return [f$(v),"Valor"]}} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div style={{flex:1}}>
+                  {grouped.map(function(g,i){
+                    var pctCat = totalAssin>0?(g.total/totalAssin*100):0;
+                    return <div key={i} style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
+                      <div style={{width:8,height:8,borderRadius:4,background:g.cat.cor,flexShrink:0}} />
+                      <span style={{fontSize:9,color:T.muted,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.cat.nome}</span>
+                      <span style={{fontSize:9,fontWeight:700,color:g.cat.cor,fontFamily:"monospace"}}>{pctCat.toFixed(0)}%</span>
+                    </div>;
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Category cards */}
+            {grouped.map(function(g,gi){
+              return <div key={gi} style={Object.assign({},bx,{marginBottom:10,padding:0,overflow:"hidden"})}>
+                <div style={{padding:"12px 16px",background:"linear-gradient(135deg, "+g.cat.cor+"08, transparent)",borderBottom:"1px solid "+g.cat.cor+"10",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:16}}>{g.cat.emoji}</span>
+                    <div>
+                      <div style={{fontSize:11,fontWeight:800,color:g.cat.cor}}>{g.cat.nome}</div>
+                      <div style={{fontSize:8,color:T.dim}}>{g.items.length} item{g.items.length>1?"s":""}</div>
+                    </div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:14,fontWeight:800,color:g.cat.cor,fontFamily:"monospace"}}>{f$(g.total)}</div>
+                    <div style={{fontSize:7,color:T.dim}}>{f$(g.total*12)}/ano</div>
+                  </div>
+                </div>
+                <div style={{padding:"4px 12px 8px"}}>
+                  {g.items.sort(function(a,b){return b.valor-a.valor}).map(function(l,li){
+                    var cardObj = null;
+                    if (l.cartaoId) { for (var ci=0;ci<db.cartoes.length;ci++){if(db.cartoes[ci].id===l.cartaoId){cardObj=db.cartoes[ci];break;}} }
+                    return <div key={li} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 4px",borderBottom:li<g.items.length-1?"1px solid rgba(255,255,255,0.02)":"none"}}>
+                      <div style={{width:3,height:20,borderRadius:2,background:l.status==="pago"?T.green:T.gold,flexShrink:0}} />
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:10,fontWeight:600,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.desc}</div>
+                        <div style={{display:"flex",alignItems:"center",gap:4,marginTop:2}}>
+                          <span style={{fontSize:7,color:l.status==="pago"?T.green:T.gold,fontWeight:600}}>{l.status==="pago"?"PAGO":"PENDENTE"}</span>
+                          {cardObj && <span style={{fontSize:7,color:cardObj.cor,background:cardObj.cor+"12",padding:"0px 4px",borderRadius:3}}>{cardObj.nome.length>18?cardObj.nome.slice(0,18)+"…":cardObj.nome}</span>}
+                          {!l.cartaoId && <span style={{fontSize:7,color:T.cyan,background:T.cyan+"12",padding:"0px 4px",borderRadius:3}}>Pix/Boleto</span>}
+                        </div>
+                      </div>
+                      <div style={{textAlign:"right",flexShrink:0}}>
+                        <div style={{fontSize:11,fontWeight:700,color:T.text,fontFamily:"monospace"}}>{f$(l.valor)}</div>
+                        <div style={{fontSize:7,color:T.dim}}>{f$(l.valor*12)}/ano</div>
+                      </div>
+                    </div>;
+                  })}
+                </div>
+              </div>;
+            })}
+
+            {/* Ranking */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10,color:T.red}}>🔥 Ranking por Valor</div>
+              {sorted.map(function(l,i){
+                var pctItem = totalAssin>0?(l.valor/totalAssin*100):0;
+                return <div key={i} style={{marginBottom:8}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:10,fontWeight:600,color:T.text}}>{i+1}. {l.desc}</span>
+                    <span style={{fontSize:10,fontWeight:700,color:i<3?T.red:T.muted,fontFamily:"monospace"}}>{f$(l.valor)} <span style={{fontSize:8,color:T.dim}}>({pctItem.toFixed(1)}%)</span></span>
+                  </div>
+                  <div style={{height:4,borderRadius:4,background:"rgba(255,255,255,0.03)",overflow:"hidden"}}>
+                    <div style={{height:"100%",borderRadius:4,background:i<3?T.red:T.purple,width:pctItem+"%",opacity:1-i*0.06}} />
+                  </div>
+                </div>;
+              })}
+            </div>
+
+            {/* Cartão vs Pix */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>💳 Método de Pagamento</div>
+              <div style={{display:"flex",gap:8}}>
+                <div style={{flex:1,padding:"12px 14px",borderRadius:12,background:T.green+"08",border:"1px solid "+T.green+"15",textAlign:"center"}}>
+                  <CreditCard size={16} color={T.green} style={{marginBottom:4}} />
+                  <div style={{fontSize:8,color:T.dim}}>No Cartão</div>
+                  <div style={{fontSize:16,fontWeight:800,color:T.green,fontFamily:"monospace"}}>{f$(totalCartao)}</div>
+                  <div style={{fontSize:8,color:T.dim}}>{allAssin.filter(function(l){return l.cartaoId}).length} itens</div>
+                </div>
+                <div style={{flex:1,padding:"12px 14px",borderRadius:12,background:T.cyan+"08",border:"1px solid "+T.cyan+"15",textAlign:"center"}}>
+                  <Wallet size={16} color={T.cyan} style={{marginBottom:4}} />
+                  <div style={{fontSize:8,color:T.dim}}>Pix / Boleto</div>
+                  <div style={{fontSize:16,fontWeight:800,color:T.cyan,fontFamily:"monospace"}}>{f$(totalPix)}</div>
+                  <div style={{fontSize:8,color:T.dim}}>{allAssin.filter(function(l){return !l.cartaoId}).length} itens</div>
+                </div>
+              </div>
+              {totalPix > 0 && <div style={{marginTop:8,padding:"8px 10px",borderRadius:8,background:T.gold+"06",border:"1px solid "+T.gold+"10",fontSize:9,color:T.gold}}>💡 Migrar assinaturas de Pix para cartão aumenta transações e constrói rating bancário.</div>}
+            </div>
+
+            {/* Projeção anual */}
+            <div style={Object.assign({},bx,{padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>📅 Projeção Anual</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+                {grouped.map(function(g,i){return <div key={i} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.03)"}}>
+                  <span style={{fontSize:14}}>{g.cat.emoji}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:8,color:T.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.cat.nome}</div>
+                    <div style={{fontSize:10,fontWeight:700,color:g.cat.cor,fontFamily:"monospace"}}>{f$(g.total*12)}</div>
+                  </div>
+                </div>;})}
+              </div>
+              <div style={{marginTop:10,padding:"10px 12px",borderRadius:10,background:"linear-gradient(135deg, "+T.purple+"10, "+T.gold+"05)",border:"1px solid "+T.purple+"15",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:11,fontWeight:700,color:T.text}}>Total Anual</span>
+                <span style={{fontSize:18,fontWeight:900,color:T.purple,fontFamily:"monospace"}}>{f$(anoTotal)}</span>
+              </div>
+            </div>
+          </div>;
+        })()}
+
         {tab==="parc" && <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <div style={{display:"flex",alignItems:"center",gap:7}}><Landmark size={14} color={T.gold} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Parcelamentos: {MSF[mes-1]}</h2></div>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <button onClick={function(){setModal({type:"div",title:"Nova Divida",data:{}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:8,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 4px 12px rgba(16,185,129,0.20)"}}><Plus size={12} /> Nova Divida</button>
+              <button onClick={function(){setModal({type:"div",title:"Nova Dívida",data:{}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:8,background:"linear-gradient(135deg, "+T.green+", "+T.emerald+")",border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:700,boxShadow:"0 4px 12px rgba(16,185,129,0.20)"}}><Plus size={12} /> Nova Dívida</button>
               <div style={{fontSize:18,fontWeight:800,fontFamily:"monospace",color:T.gold}}>{f$(totalParcMes)}</div>
             </div>
           </div>
+          <div style={{padding:"10px 16px",borderRadius:10,background:"linear-gradient(135deg,"+T.card+","+T.gold+"06)",border:"1px solid "+T.gold+"15",marginBottom:12,textAlign:"center"}}><span style={{fontSize:12,fontStyle:"italic",color:T.gold}}>"{fraseParc}"</span></div>
           <div style={bx}>
             {parcelas.length===0 ? <div style={{textAlign:"center",padding:24,color:T.dim}}>Nenhuma parcela</div> :
             <div style={{display:"flex",flexDirection:"column",gap:5}}>
@@ -3878,15 +4261,15 @@ export default function App() {
                   <XAxis dataKey="nome" tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} />
                   <YAxis tick={{fill:T.dim,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={fK} />
                   <Tooltip content={<Tip />} />
-                  <Area type="monotone" dataKey="total" name="Parcelas/mes" stroke={T.gold} fill="url(#gParc)" strokeWidth={2} dot={{r:3,fill:T.gold}} />
+                  <Area type="monotone" dataKey="total" name="Parcelas/mês" stroke={T.gold} fill="url(#gParc)" strokeWidth={2} dot={{r:3,fill:T.gold}} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>;
           })()}
 
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:16,marginBottom:8}}>
-            <div style={{fontSize:13,fontWeight:700}}>Dividas Ativas</div>
-            <button onClick={function(){setModal({type:"div",title:"Nova Divida",data:{}})}} style={{background:"none",border:"none",cursor:"pointer",color:T.green,fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:3}}><Plus size={12} />Nova</button>
+            <div style={{fontSize:13,fontWeight:700}}>Dívidas Ativas</div>
+            <button onClick={function(){setModal({type:"div",title:"Nova Dívida",data:{}})}} style={{background:"none",border:"none",cursor:"pointer",color:T.green,fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:3}}><Plus size={12} />Nova</button>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10}}>
             {(db.dividas||[]).map(function(d) {
@@ -3905,88 +4288,406 @@ export default function App() {
                   <span>Quitacao estimada: <strong style={{color:T.cyan}}>{MSF[quitRef.mes-1]}/{quitRef.ano}</strong></span>
                   <span style={{color:T.dim}}>{mesesRest} mes(es)</span>
                 </div>}
-                {rest <= 0 && <div style={{marginTop:8,padding:"7px 10px",borderRadius:8,background:T.green+"12",border:"1px solid "+T.green+"20",fontSize:10,color:T.green,fontWeight:700,textAlign:"center"}}>Divida quitada!</div>}
+                {rest <= 0 && <div style={{marginTop:8,padding:"7px 10px",borderRadius:8,background:T.green+"12",border:"1px solid "+T.green+"20",fontSize:10,color:T.green,fontWeight:700,textAlign:"center"}}>Dívida quitada!</div>}
               </div>;
             })}
           </div>
         </div>}
 
         {}
-        {tab==="metas" && <div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-            <div style={{display:"flex",alignItems:"center",gap:7}}><Target size={14} color={T.green} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Metas de Investimento</h2></div>
-            <div style={{display:"flex",gap:6}}>
-              <button onClick={function(){setShowAporteModal(true)}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.gold+"15",border:"1px solid "+T.gold+"25",color:T.gold,cursor:"pointer",fontSize:10,fontWeight:700}}><Zap size={11} /> Aportar</button>
-              <button onClick={function(){setModal({type:"meta",title:"Nova Meta",data:{vinc:"invest"}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.green,border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:600}}><Plus size={12} /> Nova</button>
-            </div>
-          </div>
-          <div style={{padding:"10px 16px",borderRadius:10,background:"linear-gradient(135deg,"+T.card+","+T.green+"06)",border:"1px solid "+T.green+"15",marginBottom:16,textAlign:"center"}}><span style={{fontSize:12,fontStyle:"italic",color:T.greenL}}>"{frase}"</span></div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:12}}>
-            {metP.map(function(m) {
-              var cor = m.pr>=100 ? T.green : m.dr<30&&m.pr<80 ? T.red : m.pr>=70 ? T.greenL : T.blue;
-              return <div key={m.id} style={{background:"linear-gradient(135deg,"+T.card+","+(m.pr>=100?T.green:T.gold)+"04)",borderRadius:14,padding:16,border:"1px solid "+T.border}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
-                  <div><div style={{fontSize:14,fontWeight:800}}>{m.nome}</div><div style={{fontSize:10,color:T.dim,marginTop:3}}>Prazo: {fD(m.prazo)} - {m.dr} dias</div></div>
-                  <div style={{display:"flex",gap:3,alignItems:"flex-start"}}><div style={{padding:"3px 10px",borderRadius:6,fontSize:12,fontWeight:800,background:cor+"20",color:cor}}>{pct(m.pr)}</div><IBtn icon={Edit3} onClick={function(){setModal({type:"meta",title:"Editar",data:m})}} /><IBtn icon={Trash2} color={T.red} onClick={function(){del("metas",m.id)}} /></div>
-                </div>
-                <PB value={m.at} max={m.valor} color={cor} h={10} />
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4,marginTop:10,fontSize:11}}>
-                  <div style={{color:T.dim}}>Investido: <span style={{color:T.gold,fontWeight:700,fontFamily:"monospace"}}>{f$(m.at)}</span></div>
-                  <div style={{color:T.dim,textAlign:"right"}}>Meta: <span style={{fontWeight:700,fontFamily:"monospace"}}>{f$(m.valor)}</span></div>
-                  <div style={{color:cor}}>Faltam: <span style={{fontWeight:700,fontFamily:"monospace"}}>{f$(m.ft)}</span></div>
-                  <div style={{color:T.dim,textAlign:"right"}}>Aporte: <span style={{color:T.gold,fontWeight:700,fontFamily:"monospace"}}>{f$(m.aporte)}/mes</span></div>
-                </div>
-                {m.pr>=100 && <div style={{position:"relative",marginTop:8,padding:"8px 10px",borderRadius:8,background:T.green+"15",border:"1px solid "+T.green+"25",fontSize:11,color:T.green,textAlign:"center",fontWeight:700,overflow:"hidden"}}>
-                  <div style={{position:"absolute",inset:0,pointerEvents:"none",overflow:"hidden"}}>{[0,1,2,3,4,5,6,7,8,9,10,11].map(function(p){var colors=[T.green,T.gold,T.cyan,T.pink,T.purple,T.blue];return <div key={p} style={{position:"absolute",width:6,height:6,borderRadius:p%2===0?3:1,background:colors[p%6],left:(8+p*8)+"%",top:"-10px",animation:"confettiFall "+(1.5+p*0.2)+"s ease-in infinite",animationDelay:(p*0.15)+"s",opacity:0.8}} />})}</div>
-                  Meta atingida! Parabens!
-                </div>}
-                {m.pr<100 && m.dr<30 && <div style={{marginTop:8,padding:"5px 8px",borderRadius:7,background:T.red+"10",fontSize:10,color:T.red,display:"flex",alignItems:"center",gap:4}}><AlertTriangle size={11} /> Prazo apertado!</div>}
-              </div>;
-            })}
-          </div>
-        </div>}
+        {tab==="metas" && (function(){
+          var totalInvAtual = (db.investimentos||[]).reduce(function(s,i){return s+i.valor},0);
+          var aporteFixo = db.investimentoFixo || 5000;
+          var rendMensal = (db.investimentos||[]).reduce(function(s,i){return s+(i.valor*(i.rent||0)/100)},0);
+          var totalMetas = metP.length;
+          var metasAtingidas = metP.filter(function(m){return m.pr>=100}).length;
+          var metaFinal = metP.length > 0 ? Math.max.apply(null,metP.map(function(m){return m.valor})) : 0;
+          var progressoGeral = metaFinal > 0 ? Math.min(100,Math.round(totalInvAtual/metaFinal*100)) : 0;
+          var proximaMeta = metP.filter(function(m){return m.pr<100}).sort(function(a,b){return a.valor-b.valor})[0];
 
-        {}
-        {tab==="invest" && <div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <div style={{display:"flex",alignItems:"center",gap:7}}><TrendingUp size={14} color={T.blue} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Investimentos</h2></div>
-            <button onClick={function(){setModal({type:"inv",title:"Novo",data:{}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.green,border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:600}}><Plus size={12} /> Novo</button>
-          </div>
-          <div style={Object.assign({},bx,{marginBottom:16,background:"linear-gradient(135deg,"+T.card+","+T.gold+"06)",textAlign:"center"})}>
-            <div style={{fontSize:11,color:T.dim,marginBottom:4}}>Rentabilidade Mensal Total</div>
-            <div style={{fontSize:28,fontWeight:900,fontFamily:"monospace",color:rentTotal>=0?T.green:T.red}}>{rentTotal>=0?"+":""}{f$(rentTotal)}</div>
-            <div style={{fontSize:11,color:T.muted,marginTop:4}}>sobre {f$(pat.inv)} investidos</div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:12}}>
-            <div style={bx}>
-              <div style={{fontSize:12,fontWeight:700,marginBottom:10}}>Distribuicao</div>
-              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <div style={{width:130,height:130}}><ResponsiveContainer><PieChart><Pie data={(db.investimentos||[]).map(function(x){return{name:x.nome,value:x.valor}})} dataKey="value" cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={2} strokeWidth={0}>{(db.investimentos||[]).map(function(_,i){return <Cell key={i} fill={PC[i]} />})}</Pie><Tooltip content={<Tip />} /></PieChart></ResponsiveContainer></div>
-                <div style={{flex:1}}>{(db.investimentos||[]).map(function(x,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:10}}><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:6,height:6,borderRadius:3,background:PC[i]}} /><span style={{color:T.muted}}>{x.nome}</span></div><span style={{fontFamily:"monospace",fontWeight:600}}>{pat.inv>0?pct(x.valor/pat.inv*100):"0%"}</span></div>})}</div>
+          return <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+              <div style={{display:"flex",alignItems:"center",gap:7}}><Target size={14} color={T.green} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Metas de Investimento</h2></div>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={function(){setShowAporteModal(true)}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.gold+"15",border:"1px solid "+T.gold+"25",color:T.gold,cursor:"pointer",fontSize:10,fontWeight:700}}><Zap size={11} /> Aportar</button>
+                <button onClick={function(){setModal({type:"meta",title:"Nova Meta",data:{vinc:"invest"}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.green,border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:600}}><Plus size={12} /> Nova</button>
               </div>
             </div>
-            <div style={bx}>
-              <div style={{fontSize:12,fontWeight:700,marginBottom:10}}>Rentabilidade por Ativo</div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                {(db.investimentos||[]).map(function(x,i) {
-                  var rend = x.valor*x.rent/100;
-                  return <div key={x.id} style={{padding:"10px 12px",borderRadius:10,background:PC[i]+"08",border:"1px solid "+PC[i]+"12"}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <div style={{flex:1}}>
-                        <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:3}}><span style={{fontSize:12,fontWeight:700}}>{x.nome}</span><IBtn icon={Edit3} onClick={function(){setModal({type:"inv",title:"Editar",data:x})}} /><IBtn icon={Trash2} color={T.red} onClick={function(){del("investimentos",x.id)}} /></div>
-                        <EV value={x.valor} onChange={function(v){ups("investimentos",Object.assign({},x,{valor:v}))}} />
+            <div style={{padding:"10px 16px",borderRadius:10,background:"linear-gradient(135deg,"+T.card+","+T.green+"06)",border:"1px solid "+T.green+"15",marginBottom:12,textAlign:"center"}}><span style={{fontSize:12,fontStyle:"italic",color:T.greenL}}>"{frase}"</span></div>
+
+            {/* KPI Summary */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:18,background:"linear-gradient(135deg, "+T.card+", "+T.green+"06)",borderColor:T.green+"20"})}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:"12px 14px",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:8,color:T.dim,letterSpacing:0.5,fontWeight:600}}>PATRIMÔNIO ATUAL</div>
+                  <div style={{fontSize:22,fontWeight:900,color:T.cyan,fontFamily:"monospace",marginTop:4}}>{f$(totalInvAtual)}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{metasAtingidas}/{totalMetas} metas atingidas</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:"12px 14px",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:8,color:T.dim,letterSpacing:0.5,fontWeight:600}}>PRÓXIMA META</div>
+                  <div style={{fontSize:22,fontWeight:900,color:T.gold,fontFamily:"monospace",marginTop:4}}>{proximaMeta ? f$(proximaMeta.valor) : "Todas atingidas!"}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{proximaMeta ? "Faltam "+f$(proximaMeta.ft) : ""}</div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>APORTE MENSAL</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.green,fontFamily:"monospace"}}>{f$(aporteFixo)}</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>RENDIMENTO</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.purple,fontFamily:"monospace"}}>+{f$(rendMensal)}/m</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>CRESCIMENTO</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.cyan,fontFamily:"monospace"}}>{f$(aporteFixo+rendMensal)}/m</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline visual */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:12}}>Timeline das metas</div>
+              <div style={{position:"relative",paddingLeft:20}}>
+                <div style={{position:"absolute",left:6,top:0,bottom:0,width:2,background:"rgba(255,255,255,0.04)",borderRadius:1}} />
+                {metP.sort(function(a,b){return a.valor-b.valor}).map(function(m,i){
+                  var atingido = m.pr >= 100;
+                  var emRisco = m.dr < 30 && m.pr < 80;
+                  var status = atingido ? "ATINGIDA" : emRisco ? "EM RISCO" : m.pr >= 70 ? "QUASE" : "EM PROGRESSO";
+                  var statusCor = atingido ? T.green : emRisco ? T.red : m.pr >= 70 ? T.gold : T.cyan;
+                  var mesesParaAtingir = m.ft > 0 && (aporteFixo + rendMensal) > 0 ? Math.ceil(m.ft / (aporteFixo + rendMensal)) : 0;
+                  var mesEstimado = mesesParaAtingir > 0 ? MSF[Math.min(11,(new Date().getMonth() + mesesParaAtingir)%12)] + "/" + (2026 + Math.floor((new Date().getMonth() + mesesParaAtingir)/12)) : "";
+                  return <div key={m.id} style={{position:"relative",paddingBottom:i<metP.length-1?16:0,paddingLeft:20}}>
+                    <div style={{position:"absolute",left:-14,top:4,width:14,height:14,borderRadius:"50%",background:atingido?T.green:statusCor+"20",border:"2px solid "+statusCor,display:"flex",alignItems:"center",justifyContent:"center",zIndex:1}}>
+                      {atingido && <Check size={8} color="#020208" />}
+                    </div>
+                    <div style={{padding:"12px 14px",borderRadius:12,background:"linear-gradient(135deg, "+statusCor+"06, rgba(0,0,0,0.1))",border:"1px solid "+statusCor+"15"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                        <span style={{fontSize:12,fontWeight:800,color:atingido?T.green:T.text}}>{m.nome}</span>
+                        <span style={{fontSize:7,fontWeight:700,color:statusCor,background:statusCor+"15",padding:"2px 6px",borderRadius:4}}>{status}</span>
                       </div>
-                      <div style={{textAlign:"right",minWidth:100}}>
-                        <div style={{fontSize:20,fontWeight:900,fontFamily:"monospace",color:x.rent>=0?T.green:T.red,display:"flex",alignItems:"center",gap:3,justifyContent:"flex-end"}}>{x.rent>=0?<ArrowUpRight size={16} />:<ArrowDownRight size={16} />}{x.rent>=0?"+":""}{x.rent}%</div>
-                        <div style={{fontSize:12,fontWeight:700,fontFamily:"monospace",color:rend>=0?T.green:T.red}}>{rend>=0?"+":""}{f$(rend)}/mes</div>
+                      <PB value={m.at} max={m.valor} color={statusCor} h={6} />
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4,marginTop:8}}>
+                        <div><div style={{fontSize:7,color:T.dim}}>ATUAL</div><div style={{fontSize:10,fontWeight:700,color:T.cyan,fontFamily:"monospace"}}>{f$(m.at)}</div></div>
+                        <div style={{textAlign:"center"}}><div style={{fontSize:7,color:T.dim}}>META</div><div style={{fontSize:10,fontWeight:700,color:T.text,fontFamily:"monospace"}}>{f$(m.valor)}</div></div>
+                        <div style={{textAlign:"right"}}><div style={{fontSize:7,color:T.dim}}>FALTAM</div><div style={{fontSize:10,fontWeight:700,color:statusCor,fontFamily:"monospace"}}>{atingido?"R$ 0":f$(m.ft)}</div></div>
                       </div>
+                      <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingTop:6,borderTop:"1px solid rgba(255,255,255,0.03)"}}>
+                        <div style={{fontSize:8,color:T.dim}}>Prazo: <strong style={{color:T.muted}}>{fD(m.prazo)}</strong> ({m.dr} dias)</div>
+                        {!atingido && mesesParaAtingir > 0 && <div style={{fontSize:8,color:T.dim}}>Estimativa: <strong style={{color:statusCor}}>{mesEstimado}</strong></div>}
+                        {atingido && <div style={{fontSize:8,color:T.green,fontWeight:700}}>Meta concluída ✓</div>}
+                      </div>
+                      {!atingido && <div style={{marginTop:6,display:"flex",gap:6}}>
+                        <div style={{flex:1,padding:"5px 8px",borderRadius:6,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)"}}>
+                          <div style={{fontSize:7,color:T.dim}}>APORTE NECESSÁRIO</div>
+                          <div style={{fontSize:9,fontWeight:700,color:m.aporte > aporteFixo ? T.red : T.green,fontFamily:"monospace"}}>{f$(m.aporte)}/mês</div>
+                        </div>
+                        <div style={{flex:1,padding:"5px 8px",borderRadius:6,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)"}}>
+                          <div style={{fontSize:7,color:T.dim}}>SEU APORTE ATUAL</div>
+                          <div style={{fontSize:9,fontWeight:700,color:T.green,fontFamily:"monospace"}}>{f$(aporteFixo)}/mês</div>
+                        </div>
+                        <div style={{flex:1,padding:"5px 8px",borderRadius:6,background:m.aporte > aporteFixo ? "rgba(239,68,68,0.04)" : "rgba(0,255,136,0.04)",border:"1px solid "+(m.aporte > aporteFixo ? T.red : T.green)+"10"}}>
+                          <div style={{fontSize:7,color:T.dim}}>STATUS</div>
+                          <div style={{fontSize:9,fontWeight:700,color:m.aporte > aporteFixo ? T.red : T.green}}>{m.aporte > aporteFixo ? "Insuficiente" : "OK ✓"}</div>
+                        </div>
+                      </div>}
                     </div>
                   </div>;
                 })}
               </div>
             </div>
-          </div>
-        </div>}
+
+            {/* Projeção: quando atinge cada meta */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Projeção de atingimento</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:10}}>Com aporte de {f$(aporteFixo)}/mês + rendimento de {f$(rendMensal)}/mês = {f$(aporteFixo+rendMensal)}/mês de crescimento</div>
+              {(function(){
+                var projData = [];
+                var acum = totalInvAtual;
+                for (var pm2 = 0; pm2 <= 18; pm2++) {
+                  var mIdx = (new Date().getMonth() + pm2) % 12;
+                  projData.push({mes:pm2===0?"Hoje":MSF[mIdx].slice(0,3),valor:Math.round(acum)});
+                  acum = acum * (1 + (rendMensal > 0 && totalInvAtual > 0 ? rendMensal/totalInvAtual : 0.0087)) + aporteFixo;
+                }
+                return <div>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <AreaChart data={projData}><CartesianGrid strokeDasharray="3 3" stroke={T.border} /><XAxis dataKey="mes" tick={{fill:T.dim,fontSize:7}} axisLine={false} tickLine={false} /><YAxis tick={{fill:T.dim,fontSize:7}} axisLine={false} tickLine={false} tickFormatter={function(v){return (v/1000).toFixed(0)+"k"}} /><Tooltip content={<Tip />} /><Area type="monotone" dataKey="valor" name="Patrimônio" stroke={T.cyan} fill={T.cyan+"18"} strokeWidth={2} /></AreaChart>
+                  </ResponsiveContainer>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:8}}>
+                    {metP.filter(function(m){return m.pr<100}).sort(function(a,b){return a.valor-b.valor}).map(function(m,i){
+                      var mesesP = m.ft > 0 && (aporteFixo + rendMensal) > 0 ? Math.ceil(m.ft / (aporteFixo + rendMensal)) : 0;
+                      var mesLabel = mesesP > 0 ? MSF[Math.min(11,(new Date().getMonth()+mesesP)%12)].slice(0,3)+"/"+String(2026+Math.floor((new Date().getMonth()+mesesP)/12)).slice(2) : "?";
+                      return <div key={i} style={{padding:"4px 8px",borderRadius:6,background:T.gold+"08",border:"1px solid "+T.gold+"12",fontSize:8}}>
+                        <span style={{color:T.gold,fontWeight:700}}>{m.nome}</span>
+                        <span style={{color:T.dim,marginLeft:4}}>→ {mesLabel} (~{mesesP}m)</span>
+                      </div>;
+                    })}
+                  </div>
+                </div>;
+              })()}
+            </div>
+
+            {/* Progresso geral */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Progresso geral → R$ {(metaFinal/1000).toFixed(0)}k</div>
+              <div style={{position:"relative",height:10,borderRadius:8,background:"rgba(255,255,255,0.04)",overflow:"hidden",marginBottom:6}}>
+                <div style={{height:"100%",borderRadius:8,background:"linear-gradient(90deg, "+T.cyan+", "+T.green+")",width:progressoGeral+"%",transition:"width 0.5s"}} />
+                {metP.map(function(m,i){var pos=Math.round(m.valor/metaFinal*100);return pos<100?<div key={i} style={{position:"absolute",top:0,left:pos+"%",width:2,height:"100%",background:T.gold,opacity:0.5}} />:null;})}
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",position:"relative"}}>
+                <span style={{fontSize:8,color:T.cyan,fontWeight:700}}>{f$(totalInvAtual)}</span>
+                {metP.map(function(m,i){var pos=Math.round(m.valor/metaFinal*100);return <span key={i} style={{position:"absolute",left:pos+"%",transform:"translateX(-50%)",fontSize:7,color:totalInvAtual>=m.valor?T.green:T.dim,fontWeight:600}}>{(m.valor/1000).toFixed(0)}k</span>;})}
+                <span style={{fontSize:8,color:T.dim}}>{f$(metaFinal)}</span>
+              </div>
+            </div>
+
+            {/* Simulador rápido */}
+            <div style={Object.assign({},bx,{padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10,color:T.purple}}>💡 O que acontece se você aumentar o aporte?</div>
+              {[
+                {extra:0,label:"Atual ("+f$(aporteFixo)+"/m)"},
+                {extra:1000,label:"+R$ 1.000 ("+f$(aporteFixo+1000)+"/m)"},
+                {extra:2000,label:"+R$ 2.000 ("+f$(aporteFixo+2000)+"/m)"},
+                {extra:3000,label:"+R$ 3.000 ("+f$(aporteFixo+3000)+"/m)"}
+              ].map(function(sim,i){
+                var crescMensal = aporteFixo + sim.extra + rendMensal;
+                var mesesPara100k = metaFinal > totalInvAtual && crescMensal > 0 ? Math.ceil((metaFinal - totalInvAtual) / crescMensal) : 0;
+                var mesLabel = mesesPara100k > 0 ? MSF[Math.min(11,(new Date().getMonth()+mesesPara100k)%12)]+"/"+String(2026+Math.floor((new Date().getMonth()+mesesPara100k)/12)) : "Já atingido";
+                return <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:i<3?"1px solid rgba(255,255,255,0.03)":"none"}}>
+                  <div style={{width:4,height:24,borderRadius:2,background:i===0?T.cyan:T.purple,flexShrink:0,opacity:1-i*0.2}} />
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:10,fontWeight:600,color:i===0?T.cyan:T.text}}>{sim.label}</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:T.green,fontFamily:"monospace"}}>{mesesPara100k}m</div>
+                    <div style={{fontSize:8,color:T.dim}}>{mesLabel}</div>
+                  </div>
+                </div>;
+              })}
+            </div>
+          </div>;
+        })()}
+
+        {}
+        {tab==="invest" && (function(){
+          var invs = db.investimentos || [];
+          var totalInv = invs.reduce(function(s,i){return s+i.valor},0);
+          var rendMensal = invs.reduce(function(s,i){return s+(i.valor*(i.rent||0)/100)},0);
+          var rendAnual = rendMensal * 12;
+          var cdiMensal = 0.87;
+          var rendCdi = totalInv * cdiMensal / 100;
+          var vsCdi = rendCdi > 0 ? Math.round(rendMensal / rendCdi * 100) : 0;
+          var aporteFixo = db.investimentoFixo || 5000;
+          var divAtivas = (db.dividas || []).filter(function(d){return !d.quitada});
+          var totalDiv = divAtivas.reduce(function(s,d){return s + Math.max(0,(d.total||0)-(d.pago||0))},0);
+          var patLiq = totalInv - totalDiv;
+          var despMes = pv.despLancadas || 1;
+          var mesesReserva = despMes > 0 ? totalInv / despMes : 0;
+
+          // Agrupar por tipo
+          var porTipo = {};
+          invs.forEach(function(i){var t=i.tipo||"outro";if(!porTipo[t])porTipo[t]={tipo:t,total:0,items:[]};porTipo[t].total+=i.valor;porTipo[t].items.push(i);});
+          var tipoLabels = {cdb:"CDB",lci:"LCI",lca:"LCA",tesouro:"Tesouro",rf:"Renda Fixa",rv:"Renda Variável",fundo:"Fundo",poupanca:"Poupança",previdencia:"Previdência",outro:"Outro"};
+          var tipoCores = {cdb:T.cyan,lci:T.green,lca:T.emerald||T.green,tesouro:T.gold,rf:T.blue,rv:T.red,fundo:T.purple,poupanca:T.orange,previdencia:T.pink||T.purple,outro:T.dim};
+          var tipoData = Object.keys(porTipo).map(function(k){return{name:tipoLabels[k]||k,value:porTipo[k].total,fill:tipoCores[k]||T.blue}});
+
+          // Agrupar por banco
+          var porBanco = {};
+          invs.forEach(function(i){var b=i.banco||"outro";if(!porBanco[b])porBanco[b]={banco:b,total:0,items:[]};porBanco[b].total+=i.valor;porBanco[b].items.push(i);});
+          var bancoLabels = {santander:"Santander",itau:"Itaú",bradesco:"Bradesco",xp:"XP",nubank:"Nubank",btg:"BTG",inter:"Inter",outro:"Outro"};
+          var bancoCores = {santander:"#E11931",itau:"#FF7A00",bradesco:"#CC092F",xp:"#00C853",nubank:"#8A05BE",btg:"#0055A4",inter:"#FF6A00",outro:T.dim};
+          var bancoData = Object.keys(porBanco).map(function(k){return{name:bancoLabels[k]||k,value:porBanco[k].total,fill:bancoCores[k]||T.blue}});
+          var santanderTotal = porBanco.santander ? porBanco.santander.total : 0;
+          var pctSantander = totalInv > 0 ? Math.round(santanderTotal / totalInv * 100) : 0;
+
+          // Liquidez breakdown
+          var liqMap = {diaria:0,"90d":0,"180d":0,"360d":0,vencimento:0};
+          invs.forEach(function(i){var l=i.liquidez||"diaria";liqMap[l]=(liqMap[l]||0)+i.valor;});
+          var liqLabels = {diaria:"Liquidez diária","90d":"90 dias","180d":"180 dias","360d":"360 dias",vencimento:"No vencimento"};
+          var liqCores = {diaria:T.cyan,"90d":T.green,"180d":T.gold,"360d":T.orange,vencimento:T.red};
+
+          // Projeção 12 meses
+          var proj = [];
+          var acum = totalInv;
+          for (var pm = 0; pm <= 12; pm++) {
+            proj.push({mes:pm===0?"Hoje":["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][(new Date().getMonth()+pm)%12],valor:Math.round(acum)});
+            acum = acum * (1 + (rendMensal > 0 ? rendMensal/totalInv : cdiMensal/100)) + aporteFixo;
+          }
+
+          // Metas
+          var metaFinal = 100000;
+          var marcos = [{v:35000,l:"R$ 35k"},{v:52000,l:"R$ 52k"},{v:100000,l:"R$ 100k"}];
+
+          return <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <div style={{display:"flex",alignItems:"center",gap:7}}><TrendingUp size={14} color={T.blue} /><h2 style={{margin:0,fontSize:15,fontWeight:700}}>Investimentos</h2></div>
+              <button onClick={function(){setModal({type:"inv",title:"Novo",data:{tipo:"cdb",banco:"santander",liquidez:"diaria"}})}} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:7,background:T.green,border:"none",color:"#fff",cursor:"pointer",fontSize:11,fontWeight:600}}><Plus size={12} /> Novo</button>
+            </div>
+
+            {/* Hero KPIs */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:18,background:"linear-gradient(135deg, "+T.card+", "+T.blue+"06)",borderColor:T.blue+"20"})}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:"12px 14px",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:8,color:T.dim,letterSpacing:0.5,fontWeight:600}}>TOTAL INVESTIDO</div>
+                  <div style={{fontSize:22,fontWeight:900,color:T.cyan,fontFamily:"monospace",marginTop:4}}>{f$(totalInv)}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{invs.length} ativo{invs.length!==1?"s":""}</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:14,padding:"12px 14px",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:8,color:T.dim,letterSpacing:0.5,fontWeight:600}}>RENDIMENTO MENSAL</div>
+                  <div style={{fontSize:22,fontWeight:900,color:rendMensal>=0?T.green:T.red,fontFamily:"monospace",marginTop:4}}>{rendMensal>=0?"+":""}{f$(rendMensal)}</div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{rendAnual>=0?"+":""}{f$(rendAnual)}/ano</div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>PATRIMÔNIO LÍQ.</div>
+                  <div style={{fontSize:13,fontWeight:800,color:patLiq>=0?T.green:T.red,fontFamily:"monospace"}}>{f$(patLiq)}</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>VS CDI ({cdiMensal}%/M)</div>
+                  <div style={{fontSize:13,fontWeight:800,color:vsCdi>=100?T.green:T.gold,fontFamily:"monospace"}}>{vsCdi}%</div>
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:10,padding:"8px 10px",textAlign:"center",border:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{fontSize:7,color:T.dim,letterSpacing:0.5}}>RESERVA</div>
+                  <div style={{fontSize:13,fontWeight:800,color:mesesReserva>=6?T.green:mesesReserva>=3?T.gold:T.red,fontFamily:"monospace"}}>{mesesReserva.toFixed(1)} meses</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Meta R$ 100k */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Meta: R$ 100.000</div>
+              <PB value={totalInv} max={metaFinal} color={T.cyan} h={8} />
+              <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:9,color:T.dim}}>
+                <span>{f$(totalInv)}</span>
+                <span>{Math.round(totalInv/metaFinal*100)}%</span>
+                <span>{f$(metaFinal)}</span>
+              </div>
+              <div style={{display:"flex",gap:4,marginTop:8}}>
+                {marcos.map(function(m,i){var atingido=totalInv>=m.v;return <div key={i} style={{flex:1,padding:"6px 8px",borderRadius:8,background:atingido?"rgba(0,255,136,0.06)":"rgba(255,255,255,0.02)",border:"1px solid "+(atingido?T.green+"15":"rgba(255,255,255,0.04)"),textAlign:"center"}}>
+                  <div style={{fontSize:9,fontWeight:700,color:atingido?T.green:T.dim}}>{m.l}</div>
+                  <div style={{fontSize:7,color:atingido?T.green:T.dim,marginTop:2}}>{atingido?"Atingido ✓":"Pendente"}</div>
+                </div>;})}
+              </div>
+              {totalInv < metaFinal && aporteFixo > 0 && <div style={{marginTop:8,padding:"8px 10px",borderRadius:8,background:"rgba(0,229,255,0.04)",border:"1px solid rgba(0,229,255,0.08)",fontSize:9,color:T.cyan}}>
+                Com aporte de {f$(aporteFixo)}/mês + rendimento, atingirá R$ 100k em ~{Math.ceil((metaFinal - totalInv) / (aporteFixo + rendMensal))} meses ({MSF[Math.min(11,(new Date().getMonth() + Math.ceil((metaFinal - totalInv) / (aporteFixo + rendMensal)))%12)]}/{2026 + Math.floor((new Date().getMonth() + Math.ceil((metaFinal - totalInv) / (aporteFixo + rendMensal)))/12)}).
+              </div>}
+            </div>
+
+            {/* Concentração Santander */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16,background:"linear-gradient(135deg, "+T.card+", #E1193106)",borderColor:"#E1193120"})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:8,color:"#E11931"}}>🏦 Concentração Santander</div>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <div style={{position:"relative",width:60,height:60}}>
+                  <svg viewBox="0 0 36 36" style={{width:60,height:60,transform:"rotate(-90deg)"}}><circle cx="18" cy="18" r="14" fill="none" stroke={T.border} strokeWidth="3" /><circle cx="18" cy="18" r="14" fill="none" stroke="#E11931" strokeWidth="3" strokeDasharray={String(pctSantander*0.88)+" 88"} strokeLinecap="round" /></svg>
+                  <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:"#E11931",fontFamily:"monospace"}}>{pctSantander}%</div>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:10,color:T.muted}}>No Santander: <strong style={{color:"#E11931",fontFamily:"monospace"}}>{f$(santanderTotal)}</strong></div>
+                  <div style={{fontSize:10,color:T.dim,marginTop:2}}>Fora: <strong style={{fontFamily:"monospace"}}>{f$(totalInv - santanderTotal)}</strong></div>
+                  <div style={{marginTop:6,fontSize:9,padding:"4px 8px",borderRadius:6,background:pctSantander>=80?"rgba(0,255,136,0.06)":"rgba(255,208,0,0.06)",color:pctSantander>=80?T.green:T.gold,border:"1px solid "+(pctSantander>=80?T.green:T.gold)+"15"}}>{pctSantander>=80?"Concentração ideal para upgrade ✓":"Ideal: 80%+ no Santander para maximizar rating"}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Distribuição por tipo + por banco */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+              <div style={bx}>
+                <div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Por tipo</div>
+                {tipoData.length > 0 ? <div>
+                  <ResponsiveContainer width="100%" height={100}><PieChart><Pie data={tipoData} dataKey="value" cx="50%" cy="50%" outerRadius={40} innerRadius={20} paddingAngle={2} strokeWidth={0}>{tipoData.map(function(e,idx){return <Cell key={idx} fill={e.fill} />})}</Pie><Tooltip contentStyle={{background:"rgba(18,18,22,0.96)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,fontSize:10}} formatter={function(v){return [f$(v),"Valor"]}} /></PieChart></ResponsiveContainer>
+                  {tipoData.map(function(t,i){return <div key={i} style={{display:"flex",alignItems:"center",gap:4,marginBottom:2}}><div style={{width:6,height:6,borderRadius:3,background:t.fill}} /><span style={{fontSize:8,color:T.muted,flex:1}}>{t.name}</span><span style={{fontSize:8,fontWeight:700,color:T.text,fontFamily:"monospace"}}>{totalInv>0?Math.round(t.value/totalInv*100):"0"}%</span></div>;})}
+                </div> : <div style={{fontSize:9,color:T.dim,textAlign:"center",padding:20}}>Sem dados</div>}
+              </div>
+              <div style={bx}>
+                <div style={{fontSize:11,fontWeight:700,marginBottom:8}}>Por banco</div>
+                {bancoData.length > 0 ? <div>
+                  <ResponsiveContainer width="100%" height={100}><PieChart><Pie data={bancoData} dataKey="value" cx="50%" cy="50%" outerRadius={40} innerRadius={20} paddingAngle={2} strokeWidth={0}>{bancoData.map(function(e,idx){return <Cell key={idx} fill={e.fill} />})}</Pie><Tooltip contentStyle={{background:"rgba(18,18,22,0.96)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,fontSize:10}} formatter={function(v){return [f$(v),"Valor"]}} /></PieChart></ResponsiveContainer>
+                  {bancoData.map(function(b,i){return <div key={i} style={{display:"flex",alignItems:"center",gap:4,marginBottom:2}}><div style={{width:6,height:6,borderRadius:3,background:b.fill}} /><span style={{fontSize:8,color:T.muted,flex:1}}>{b.name}</span><span style={{fontSize:8,fontWeight:700,color:T.text,fontFamily:"monospace"}}>{totalInv>0?Math.round(b.value/totalInv*100):"0"}%</span></div>;})}
+                </div> : <div style={{fontSize:9,color:T.dim,textAlign:"center",padding:20}}>Sem dados</div>}
+              </div>
+            </div>
+
+            {/* Liquidez */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Liquidez</div>
+              <div style={{height:10,borderRadius:8,background:"rgba(255,255,255,0.04)",overflow:"hidden",display:"flex",marginBottom:8}}>
+                {Object.keys(liqMap).filter(function(k){return liqMap[k]>0}).map(function(k,i){return <div key={i} style={{width:(liqMap[k]/Math.max(totalInv,1)*100)+"%",height:"100%",background:liqCores[k]}} />;})}
+              </div>
+              {Object.keys(liqMap).filter(function(k){return liqMap[k]>0}).map(function(k,i){return <div key={i} style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
+                <div style={{width:8,height:8,borderRadius:4,background:liqCores[k],flexShrink:0}} />
+                <span style={{fontSize:9,color:T.muted,flex:1}}>{liqLabels[k]}</span>
+                <span style={{fontSize:9,fontWeight:700,color:T.text,fontFamily:"monospace"}}>{f$(liqMap[k])}</span>
+                <span style={{fontSize:8,color:T.dim}}>{totalInv>0?Math.round(liqMap[k]/totalInv*100):"0"}%</span>
+              </div>;})}
+              {liqMap.diaria < despMes * 3 && <div style={{marginTop:8,padding:"6px 10px",borderRadius:8,background:T.gold+"06",border:"1px solid "+T.gold+"10",fontSize:9,color:T.gold}}>⚠ Liquidez diária ({f$(liqMap.diaria)}) cobre apenas {(liqMap.diaria/despMes).toFixed(1)} meses de despesas. Ideal: 3+ meses.</div>}
+            </div>
+
+            {/* Projeção 12 meses */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Projeção 12 meses</div>
+              <div style={{fontSize:9,color:T.dim,marginBottom:8}}>Aporte: {f$(aporteFixo)}/mês + rendimento {rendMensal>0?pct(rendMensal/totalInv*100):pct(cdiMensal)}/mês</div>
+              <ResponsiveContainer width="100%" height={140}>
+                <AreaChart data={proj}><CartesianGrid strokeDasharray="3 3" stroke={T.border} /><XAxis dataKey="mes" tick={{fill:T.dim,fontSize:8}} axisLine={false} tickLine={false} /><YAxis tick={{fill:T.dim,fontSize:8}} axisLine={false} tickLine={false} tickFormatter={function(v){return "R$"+(v/1000).toFixed(0)+"k"}} /><Tooltip content={<Tip />} /><Area type="monotone" dataKey="valor" name="Patrimônio" stroke={T.cyan} fill={T.cyan+"18"} strokeWidth={2} /></AreaChart>
+              </ResponsiveContainer>
+              <div style={{display:"flex",justifyContent:"space-between",marginTop:6}}>
+                <div style={{fontSize:9,color:T.dim}}>Hoje: <strong style={{color:T.cyan,fontFamily:"monospace"}}>{f$(totalInv)}</strong></div>
+                <div style={{fontSize:9,color:T.dim}}>Em 12m: <strong style={{color:T.green,fontFamily:"monospace"}}>{f$(proj[proj.length-1].valor)}</strong></div>
+              </div>
+            </div>
+
+            {/* Alocação ideal */}
+            <div style={Object.assign({},bx,{marginBottom:12,padding:16})}>
+              <div style={{fontSize:12,fontWeight:800,marginBottom:10,color:T.gold}}>💡 Alocação ideal para rating</div>
+              {[
+                {nome:"CDB Liquidez Diária",pct:"40%",desc:"Almofada + emergência. Rendimento ~100% CDI. Resgate imediato.",cor:T.cyan,valor:Math.round(aporteFixo*0.4)},
+                {nome:"LCI / LCA (prazo)",pct:"50%",desc:"Maior rendimento. Isento de IR. Prazo mínimo 90 dias.",cor:T.green,valor:Math.round(aporteFixo*0.5)},
+                {nome:"Previdência PGBL",pct:"10%",desc:"+1 produto de relacionamento. Deduz até 12% do IR.",cor:T.purple,valor:Math.round(aporteFixo*0.1)}
+              ].map(function(a,i){return <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<2?"1px solid rgba(255,255,255,0.03)":"none"}}>
+                <div style={{width:4,height:32,borderRadius:2,background:a.cor,flexShrink:0,marginTop:2}} />
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                    <span style={{fontSize:10,fontWeight:700,color:T.text}}>{a.nome}</span>
+                    <span style={{fontSize:10,fontWeight:700,color:a.cor,fontFamily:"monospace"}}>{a.pct} ({f$(a.valor)}/mês)</span>
+                  </div>
+                  <div style={{fontSize:8,color:T.dim,marginTop:2}}>{a.desc}</div>
+                </div>
+              </div>;})}
+              <div style={{marginTop:8,padding:"8px 10px",borderRadius:8,background:"rgba(225,25,49,0.04)",border:"1px solid rgba(225,25,49,0.08)",fontSize:9,color:"#E11931"}}>🎯 Tudo no Santander. Cada real investido no banco constrói patrimônio e fortalece o caso para upgrade.</div>
+            </div>
+
+            {/* Cards por ativo */}
+            <div style={{fontSize:12,fontWeight:800,marginBottom:10}}>Ativos ({invs.length})</div>
+            {invs.map(function(x,i) {
+              var rend = x.valor*(x.rent||0)/100;
+              var corBanco = bancoCores[x.banco||"outro"]||T.blue;
+              return <div key={x.id} style={Object.assign({},bx,{marginBottom:10,padding:0,overflow:"hidden"})}>
+                <div style={{padding:"12px 16px",background:"linear-gradient(135deg, "+corBanco+"06, transparent)",borderBottom:"1px solid "+corBanco+"10",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      <span style={{fontSize:12,fontWeight:700}}>{x.nome}</span>
+                      <IBtn icon={Edit3} onClick={function(){setModal({type:"inv",title:"Editar",data:x})}} />
+                      <IBtn icon={Trash2} color={T.red} onClick={function(){del("investimentos",x.id)}} />
+                    </div>
+                    <div style={{display:"flex",gap:4,marginTop:4}}>
+                      <span style={{fontSize:7,padding:"1px 5px",borderRadius:4,background:corBanco+"15",color:corBanco,fontWeight:600}}>{bancoLabels[x.banco||"outro"]||x.banco}</span>
+                      <span style={{fontSize:7,padding:"1px 5px",borderRadius:4,background:"rgba(255,255,255,0.05)",color:T.muted}}>{tipoLabels[x.tipo||"outro"]||x.tipo}</span>
+                      <span style={{fontSize:7,padding:"1px 5px",borderRadius:4,background:"rgba(255,255,255,0.05)",color:T.muted}}>{liqLabels[x.liquidez||"diaria"]||x.liquidez}</span>
+                    </div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:18,fontWeight:900,fontFamily:"monospace",color:x.rent>=0?T.green:T.red}}>{x.rent>=0?"+":""}{x.rent}%</div>
+                    <div style={{fontSize:10,fontWeight:700,fontFamily:"monospace",color:rend>=0?T.green:T.red}}>{rend>=0?"+":""}{f$(rend)}/mês</div>
+                  </div>
+                </div>
+                <div style={{padding:"8px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <EV value={x.valor} onChange={function(v){ups("investimentos",Object.assign({},x,{valor:v}))}} />
+                  <span style={{fontSize:9,color:T.dim}}>{totalInv>0?Math.round(x.valor/totalInv*100):"0"}% do total</span>
+                </div>
+              </div>;
+            })}
+          </div>;
+        })()}
 
         {}
         {tab==="alertas" && <div>
@@ -4017,17 +4718,17 @@ export default function App() {
 
           {/* ANALISAR TUDO */}
           <div style={Object.assign({},bx,{marginBottom:14,background:"linear-gradient(135deg,"+T.cyan+"08,"+T.purple+"06)",borderColor:T.cyan+"20",textAlign:"center"})}>
-            <button onClick={analyzeAll} disabled={aiLoading} style={{width:"100%",padding:"12px 20px",borderRadius:10,background:aiLoading?"rgba(255,255,255,0.04)":"linear-gradient(135deg,"+T.cyan+","+T.purple+")",border:"none",color:aiLoading?T.dim:"#000",cursor:aiLoading?"wait":"pointer",fontSize:13,fontWeight:900,letterSpacing:0.5,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:aiLoading?"none":"0 0 24px "+T.cyan+"30"}}><Activity size={16} />{aiAllProg>0 ? "Analisando... ("+aiAllProg+"/9)" : "Analisar tudo"}</button>
+            <button onClick={analyzeAll} disabled={aiLoading} style={{width:"100%",padding:"12px 20px",borderRadius:10,background:aiLoading?"rgba(255,255,255,0.04)":"linear-gradient(135deg,"+T.cyan+","+T.purple+")",border:"none",color:aiLoading?T.dim:"#000",cursor:aiLoading?"wait":"pointer",fontSize:13,fontWeight:900,letterSpacing:0.5,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:aiLoading?"none":"0 0 24px "+T.cyan+"30"}}><Activity size={16} />{aiAllProg>0 ? "Análisando... ("+aiAllProg+"/9)" : "Análisar tudo"}</button>
             {aiAllProg > 0 && <div style={{marginTop:10}}>
               <div style={{height:4,borderRadius:2,background:"rgba(255,255,255,0.06)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:2,background:"linear-gradient(90deg,"+T.cyan+","+T.purple+")",width:Math.round(aiAllProg/9*100)+"%",transition:"width 0.5s ease"}} /></div>
-              <div style={{fontSize:9,color:T.cyan,marginTop:4}}>{["","Resumo semanal","Insights","Coach rating","Plano metas","Previsao","Anomalias","Economia","Diagnostico","Relatorio"][aiAllProg]||""}</div>
+              <div style={{fontSize:9,color:T.cyan,marginTop:4}}>{["","Resumo semanal","Insights","Coach rating","Plano metas","Previsão","Anomalias","Economia","Diagnostico","Relatório"][aiAllProg]||""}</div>
             </div>}
-            {aiAllProg === 0 && <div style={{fontSize:9,color:T.dim,marginTop:6}}>Gera 9 analises completas com um clique: resumo semanal, insights, coach, plano, previsao, anomalias, economia, diagnostico e relatorio.</div>}
+            {aiAllProg === 0 && <div style={{fontSize:9,color:T.dim,marginTop:6}}>Gera 9 analises completas com um clique: resumo semanal, insights, coach, plano, previsao, anomalias, economia, diagnostico e relatório.</div>}
           </div>
 
           {/* ENTRADA POR TEXTO LIVRE */}
           <div style={Object.assign({},bx,{marginBottom:14,borderColor:T.green+"15"})}>
-            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}><Plus size={13} color={T.green} /><div style={{fontSize:13,fontWeight:800}}>Lancamento por voz</div></div>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}><Plus size={13} color={T.green} /><div style={{fontSize:13,fontWeight:800}}>Lançamento por voz</div></div>
             <div style={{fontSize:10,color:T.dim,marginBottom:8}}>Digite naturalmente: "paguei 150 de luz ontem no pix" ou "parcela 3/9 serasa 96,36 pendente"</div>
             <div style={{display:"flex",gap:6}}>
               <input value={aiNlpInput} onChange={function(e){setAiNlpInput(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")parseNaturalLanc()}} placeholder="Ex: gastei 50 no uber ontem..." style={Object.assign({},inp,{flex:1,fontSize:12})} />
@@ -4039,9 +4740,9 @@ export default function App() {
           <div style={Object.assign({},bx,{marginBottom:14,borderColor:T.cyan+"15",background:"linear-gradient(135deg,"+T.card+","+T.cyan+"04)"})}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}><Calendar size={13} color={T.cyan} /><div style={{fontSize:13,fontWeight:800}}>Resumo semanal</div></div>
-              <button onClick={generateWeekly} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.cyan+"18",border:"1px solid "+T.cyan+"20",color:aiLoading?T.dim:T.cyan,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",gap:3}}><Activity size={10} />{aiLoading?"Analisando...":"Atualizar"}</button>
+              <button onClick={generateWeekly} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.cyan+"18",border:"1px solid "+T.cyan+"20",color:aiLoading?T.dim:T.cyan,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",gap:3}}><Activity size={10} />{aiLoading?"Análisando...":"Atualizar"}</button>
             </div>
-            {aiWeekly ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiWeekly}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Resumo da semana: gastos, vencimentos proximos, ritmo de gasto vs orcamento.</div>}
+            {aiWeekly ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiWeekly}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Resumo da semana: gastos, vencimentos proximos, ritmo de gasto vs orçamento.</div>}
           </div>
 
           {/* GRID: INSIGHTS + COACH */}
@@ -4059,7 +4760,7 @@ export default function App() {
                 <div style={{display:"flex",alignItems:"center",gap:6}}><Shield size={12} color={T.gold} /><span style={{fontSize:13,fontWeight:800}}>Coach de rating</span></div>
                 <button onClick={getRatingCoach} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.gold+"18",border:"1px solid "+T.gold+"20",color:aiLoading?T.dim:T.gold,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Hoje</button>
               </div>
-              {aiCoach ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiCoach}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Acoes concretas para hoje baseadas no ciclo do mes.</div>}
+              {aiCoach ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiCoach}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Acoes concretas para hoje baseadas no ciclo do mês.</div>}
             </div>
           </div>
 
@@ -4085,18 +4786,18 @@ export default function App() {
 
             <div style={Object.assign({},bx,{borderColor:T.sky+"12"})}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{display:"flex",alignItems:"center",gap:6}}><TrendingUp size={12} color={T.sky} /><span style={{fontSize:13,fontWeight:800}}>Previsao proximo mes</span></div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}><TrendingUp size={12} color={T.sky} /><span style={{fontSize:13,fontWeight:800}}>Previsão proximo mes</span></div>
                 <button onClick={predictNextMonth} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.sky+"18",border:"1px solid "+T.sky+"20",color:aiLoading?T.dim:T.sky,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Prever</button>
               </div>
-              {aiPredict ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiPredict}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Projeta receitas, despesas e sobra do mes seguinte.</div>}
+              {aiPredict ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiPredict}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Projeta receitas, despesas e sobra do mês seguinte.</div>}
             </div>
 
             <div style={Object.assign({},bx,{borderColor:T.orange+"12"})}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}><DollarSign size={12} color={T.orange} /><span style={{fontSize:13,fontWeight:800}}>Dicas de economia</span></div>
-                <button onClick={suggestEconomy} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.orange+"18",border:"1px solid "+T.orange+"20",color:aiLoading?T.dim:T.orange,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Analisar</button>
+                <button onClick={suggestEconomy} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.orange+"18",border:"1px solid "+T.orange+"20",color:aiLoading?T.dim:T.orange,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Análisar</button>
               </div>
-              {aiEcon ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiEcon}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Sugere cortes e otimizacoes com valor estimado.</div>}
+              {aiEcon ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiEcon}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Sugere cortes e otimizações com valor estimado.</div>}
             </div>
 
             <div style={Object.assign({},bx,{borderColor:T.red+"12"})}>
@@ -4124,12 +4825,12 @@ export default function App() {
                 <div style={{display:"flex",alignItems:"center",gap:6}}><Landmark size={12} color={T.ruby} /><span style={{fontSize:13,fontWeight:800}}>Comparador de dividas</span></div>
                 <button onClick={compareDebts} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.ruby+"18",border:"1px solid "+T.ruby+"20",color:aiLoading?T.dim:T.ruby,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Comparar</button>
               </div>
-              {aiDebtCmp ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiDebtCmp}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Avalanche vs bola de neve: qual divida quitar primeiro.</div>}
+              {aiDebtCmp ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiDebtCmp}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Avalanche vs bola de neve: qual dívida quitar primeiro.</div>}
             </div>
 
             <div style={Object.assign({},bx,{borderColor:T.amber+"12"})}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{display:"flex",alignItems:"center",gap:6}}><Wallet size={12} color={T.amber} /><span style={{fontSize:13,fontWeight:800}}>Orcamento inteligente</span></div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}><Wallet size={12} color={T.amber} /><span style={{fontSize:13,fontWeight:800}}>Orçamento inteligente</span></div>
                 <button onClick={generateBudget} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.amber+"18",border:"1px solid "+T.amber+"20",color:aiLoading?T.dim:T.amber,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Criar</button>
               </div>
               {aiBudget ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiBudget}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Alocacao ideal por categoria baseada na sua renda.</div>}
@@ -4147,10 +4848,10 @@ export default function App() {
           {/* PROJECAO PATRIMONIAL 12 MESES */}
           <div style={Object.assign({},bx,{marginBottom:14,borderColor:T.sky+"15",background:"linear-gradient(135deg,"+T.card+","+T.sky+"04)"})}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div style={{display:"flex",alignItems:"center",gap:6}}><TrendingUp size={13} color={T.sky} /><div style={{fontSize:13,fontWeight:800}}>Projecao patrimonial 12 meses</div></div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}><TrendingUp size={13} color={T.sky} /><div style={{fontSize:13,fontWeight:800}}>Projeção patrimonial 12 meses</div></div>
               <button onClick={generatePatrimonial} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.sky+"18",border:"1px solid "+T.sky+"20",color:aiLoading?T.dim:T.sky,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Projetar</button>
             </div>
-            {aiPatrim ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiPatrim}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Projeta mes a mes: patrimonio liquido, dividas que encerram, parcelas que terminam, metas atingidas.</div>}
+            {aiPatrim ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiPatrim}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Projeta mês a mês: patrimonio liquido, dividas que encerram, parcelas que terminam, metas atingidas.</div>}
           </div>
 
           {/* PLANEJADOR DE COMPRA DE CARRO */}
@@ -4159,25 +4860,25 @@ export default function App() {
               <div style={{display:"flex",alignItems:"center",gap:6}}><Wallet size={13} color={T.purple} /><div style={{fontSize:13,fontWeight:800}}>Planejador de compra de carro</div></div>
               <button onClick={generateCarPlan} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.purple+"18",border:"1px solid "+T.purple+"20",color:aiLoading?T.dim:T.purple,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",gap:3}}><Activity size={10} />{aiLoading?"Calculando...":"Planejar"}</button>
             </div>
-            {aiCar ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiCar}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Analise completa: valor ideal do carro, melhor momento, financiamento vs consorcio vs a vista, parcela ideal, seguro, IPVA, combustivel, manutencao, depreciacao e impacto total no orcamento.</div>}
+            {aiCar ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiCar}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Análise completa: valor ideal do carro, melhor momento, financiamento vs consórcio vs à vista, parcela ideal, seguro, IPVA, combustível, manutenção, depreciação e impacto total no orçamento.</div>}
           </div>
 
           {/* PREPARADOR REUNIAO COM GERENTE */}
           <div style={Object.assign({},bx,{marginBottom:14,borderColor:T.gold+"15",background:"linear-gradient(135deg,"+T.card+","+T.gold+"04)"})}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div style={{display:"flex",alignItems:"center",gap:6}}><Landmark size={13} color={T.gold} /><div style={{fontSize:13,fontWeight:800}}>Preparador para reuniao com gerente</div></div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}><Landmark size={13} color={T.gold} /><div style={{fontSize:13,fontWeight:800}}>Preparador para reunião com gerente</div></div>
               <button onClick={generateBankMeeting} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.gold+"18",border:"1px solid "+T.gold+"20",color:aiLoading?T.dim:T.gold,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",gap:3}}><Activity size={10} />{aiLoading?"Preparando...":"Gerar script"}</button>
             </div>
-            {aiBankMeet ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiBankMeet}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Script completo para reuniao com gerente: como abrir a conversa, argumentos de movimentacao, pedido de upgrade (Unlimited/The One), contra-argumentos, negociacao de anuidade e plano B.</div>}
+            {aiBankMeet ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiBankMeet}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Script completo para reunião com gerente: como abrir a conversa, argumentos de movimentação, pedido de upgrade (Unlimited/The One), contra-argumentos, negociacao de anuidade e plano B.</div>}
           </div>
 
           {/* RELATORIO MENSAL */}
           <div style={Object.assign({},bx,{marginBottom:14,borderColor:T.blue+"12"})}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div style={{display:"flex",alignItems:"center",gap:6}}><BarChart3 size={12} color={T.blue} /><span style={{fontSize:13,fontWeight:800}}>Relatorio mensal completo</span></div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}><BarChart3 size={12} color={T.blue} /><span style={{fontSize:13,fontWeight:800}}>Relatório mensal completo</span></div>
               <div style={{display:"flex",gap:6}}>
                 {aiReport && <button onClick={exportReportPDF} style={{padding:"5px 10px",borderRadius:8,background:T.green+"18",border:"1px solid "+T.green+"20",color:T.green,cursor:"pointer",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",gap:3}}><Download size={10} /> Exportar</button>}
-                <button onClick={generateReport} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.blue+"18",border:"1px solid "+T.blue+"20",color:aiLoading?T.dim:T.blue,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Gerar relatorio</button>
+                <button onClick={generateReport} disabled={aiLoading} style={{padding:"5px 10px",borderRadius:8,background:aiLoading?"rgba(255,255,255,0.04)":T.blue+"18",border:"1px solid "+T.blue+"20",color:aiLoading?T.dim:T.blue,cursor:aiLoading?"wait":"pointer",fontSize:9,fontWeight:700}}>Gerar relatório</button>
               </div>
             </div>
             {aiReport ? <div style={{fontSize:10,color:T.muted,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiReport}</div> : <div style={{fontSize:10,color:T.dim,textAlign:"center",padding:12}}>Parecer financeiro completo de {MSF[mes-1]} com analise detalhada.</div>}
@@ -4203,7 +4904,7 @@ export default function App() {
         </div>}
 
         </div>
-        <div style={{textAlign:"center",paddingTop:16,marginTop:24,borderTop:"1px solid rgba(255,255,255,0.04)",color:T.dim,fontSize:9,letterSpacing:0.3}}>COJUR Vault v{VER} • {db.lancamentos.length} lancamentos + {lancEx.length - db.lancamentos.length} projetados</div>
+        <div style={{textAlign:"center",paddingTop:16,marginTop:24,borderTop:"1px solid rgba(255,255,255,0.04)",color:T.dim,fontSize:9,letterSpacing:0.3}}>COJUR Vault v{VER} • {db.lancamentos.length} lançamentos + {lancEx.length - db.lancamentos.length} projetados</div>
       </div>
 
       <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(2,2,8,0.92)",borderTop:"1px solid rgba(0,229,255,0.10)",display:"flex",alignItems:"center",padding:"5px 4px",paddingBottom:"max(5px, env(safe-area-inset-bottom))",zIndex:900,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",overflowX:"auto",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",gap:1}}>
