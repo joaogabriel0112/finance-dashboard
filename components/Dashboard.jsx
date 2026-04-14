@@ -2,15 +2,16 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle, PiggyBank, Wallet, BarChart3, ArrowUpRight, ArrowDownRight, Edit3, Check, Bell, Shield, Activity, Landmark, RotateCcw, CheckCircle, Download, Plus, Trash2, X, Search, Calendar, Filter, ChevronLeft, ChevronRight, ChevronDown, Copy, Upload, Sun, Moon, Heart, Repeat, Zap } from "lucide-react";
 
-var T_DARK = { bg:"#020208", surface:"#080814", card:"#0A0A1A", cardAlt:"#0F0F22", border:"rgba(0,229,255,0.10)", text:"#E8F0FF", muted:"#7B8DA6", dim:"#4A5A72", green:"#00FF88", greenL:"#39FFAD", gold:"#FFD000", amber:"#FF9F0A", red:"#FF2E5B", ruby:"#FF1A4A", blue:"#00AAFF", bluePremium:"#00C6FF", purple:"#B84DFF", cyan:"#00E5FF", pink:"#FF3CA0", orange:"#FF7A00", sky:"#00D4FF", steel:"#6A7A90", emerald:"#00FF88", whiteA:"rgba(0,229,255,0.04)", whiteB:"rgba(0,229,255,0.08)", glass:"rgba(0,229,255,0.03)", shadow:"0 0 40px rgba(0,229,255,0.08)" };
-var T_LIGHT = { bg:"#F4F6FA", surface:"#FFFFFF", card:"#FFFFFF", cardAlt:"#F0F2F8", border:"rgba(0,0,0,0.08)", text:"#1A1A2E", muted:"#5A6478", dim:"#9AA0B0", green:"#00B864", greenL:"#00D474", gold:"#E6A800", amber:"#E68A00", red:"#E02040", ruby:"#D01040", blue:"#0088DD", bluePremium:"#009EF0", purple:"#8838EE", cyan:"#00A8CC", pink:"#E0308A", orange:"#E06800", sky:"#00A8CC", steel:"#8A94A6", emerald:"#00B864", whiteA:"rgba(0,0,0,0.02)", whiteB:"rgba(0,0,0,0.04)", glass:"rgba(0,0,0,0.02)", shadow:"0 2px 12px rgba(0,0,0,0.08)" };
-var T = T_DARK;
-var PC = [T.green,T.blue,T.gold,T.purple,T.cyan,T.pink,T.orange,"#FF6B6B",T.greenL,"#00AAFF"];
-var MS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-var MSF = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-var VER = 13;
-var SK = "findash8";
-var FRASES = [
+const T_DARK = { bg:"#020208", surface:"#080814", card:"#0A0A1A", cardAlt:"#0F0F22", border:"rgba(0,229,255,0.10)", text:"#E8F0FF", muted:"#7B8DA6", dim:"#4A5A72", green:"#00FF88", greenL:"#39FFAD", gold:"#FFD000", amber:"#FF9F0A", red:"#FF2E5B", ruby:"#FF1A4A", blue:"#00AAFF", bluePremium:"#00C6FF", purple:"#B84DFF", cyan:"#00E5FF", pink:"#FF3CA0", orange:"#FF7A00", sky:"#00D4FF", steel:"#6A7A90", emerald:"#00FF88", whiteA:"rgba(0,229,255,0.04)", whiteB:"rgba(0,229,255,0.08)", glass:"rgba(0,229,255,0.03)", shadow:"0 0 40px rgba(0,229,255,0.08)" };
+const T_LIGHT = { bg:"#F4F6FA", surface:"#FFFFFF", card:"#FFFFFF", cardAlt:"#F0F2F8", border:"rgba(0,0,0,0.08)", text:"#1A1A2E", muted:"#5A6478", dim:"#9AA0B0", green:"#00B864", greenL:"#00D474", gold:"#E6A800", amber:"#E68A00", red:"#E02040", ruby:"#D01040", blue:"#0088DD", bluePremium:"#009EF0", purple:"#8838EE", cyan:"#00A8CC", pink:"#E0308A", orange:"#E06800", sky:"#00A8CC", steel:"#8A94A6", emerald:"#00B864", whiteA:"rgba(0,0,0,0.02)", whiteB:"rgba(0,0,0,0.04)", glass:"rgba(0,0,0,0.02)", shadow:"0 2px 12px rgba(0,0,0,0.08)" };
+let T = T_DARK;
+let PC = [T.green,T.blue,T.gold,T.purple,T.cyan,T.pink,T.orange,"#FF6B6B",T.greenL,"#00AAFF"];
+const MS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const MSF = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const VER = 14;
+const SK = "findash8";
+const BACKUP_SLOTS = 3;
+const FRASES = [
 "Cada real investido hoje é liberdade amanhã.",
 "Disciplina financeira constrói tranquilidade.",
 "Pequenos aportes consistentes constroem fortunas.",
@@ -62,7 +63,7 @@ var FRASES = [
 "O dinheiro é um ótimo servo, mas um péssimo mestre.",
 "Sua jornada financeira é única. Compare-se apenas com quem você era ontem."
 ];
-var FRASES_PARC = [
+const FRASES_PARC = [
 "Não é o seu salário que te faz rico, é o seu hábito de gastar. — Charles A. Jaffe",
 "Cuidado com pequenas despesas: um pequeno vazamento afunda um grande navio. — Benjamin Franklin",
 "O preço de qualquer coisa é a quantidade de vida que você troca por ela. — Henry David Thoreau",
@@ -105,7 +106,7 @@ var FRASES_PARC = [
 "A riqueza não é fruto de grandes rendas, mas de hábitos inteligentes. — Nathalia Arcuri"
 ];
 
-var BANK_LOGOS = {
+const BANK_LOGOS = {
   itau: "data:image/png;base64,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",
   santander: "data:image/png;base64,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",
   bradesco: "data:image/png;base64,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",
@@ -429,7 +430,7 @@ function mkL() {
   return L;
 }
 
-var DEF = {
+const DEF = {
   v: VER,
   investimentoFixo: 5000,
   contas: [{id:"ct1",nome:"Itaú Conta Corrente",saldo:0},{id:"ct2",nome:"Santander Conta Corrente",saldo:0},{id:"ct3",nome:"Bradesco Conta Corrente",saldo:0},{id:"ct4",nome:"Revolut Ultra",saldo:0}],
@@ -486,17 +487,17 @@ function expandLançamentos(db) {
   var extras = [];
   var existeChave = {};
   
-  for (var i=0; i<base.length; i++) {
+  for (let i =0; i<base.length; i++) {
     var key = base[i].desc + "|" + base[i].mes + "|" + base[i].ano;
     existeChave[key] = true;
   }
 
-  for (var j=0; j<base.length; j++) {
+  for (let j =0; j<base.length; j++) {
     var l = base[j];
 
     
     if (l.rec && l.tipo !== "receita") {
-      for (var offset=1; offset<=12; offset++) {
+      for (let offset =1; offset<=12; offset++) {
         var nm = l.mes + offset;
         var na = l.ano;
         while (nm > 12) { nm -= 12; na++; }
@@ -511,7 +512,7 @@ function expandLançamentos(db) {
 
     
     if (l.rec && l.tipo === "receita") {
-      for (var ro=1; ro<=12; ro++) {
+      for (let ro =1; ro<=12; ro++) {
         var rm = l.mes + ro;
         var ra = l.ano;
         while (rm > 12) { rm -= 12; ra++; }
@@ -526,7 +527,7 @@ function expandLançamentos(db) {
 
     
     if (l.pT > 0 && l.pA > 0 && l.pA < l.pT) {
-      for (var pk = l.pA + 1; pk <= l.pT; pk++) {
+      for (let pk = l.pA + 1; pk <= l.pT; pk++) {
         var pm = l.mes + (pk - l.pA);
         var pa = l.ano;
         while (pm > 12) { pm -= 12; pa++; }
@@ -545,7 +546,7 @@ function expandLançamentos(db) {
 
 function getRes(db, m, a) {
   var rc=0, dp=0, pc=0, porC={};
-  for (var i=0; i<db.lancamentos.length; i++) {
+  for (let i =0; i<db.lancamentos.length; i++) {
     var l = db.lancamentos[i];
     if (l.mes !== m || l.ano !== a) continue;
     if (l.tipo === "receita") rc += l.valor;
@@ -555,17 +556,30 @@ function getRes(db, m, a) {
   return { rc:rc, dp:dp, saldo:rc-dp, pc:pc, porC:porC };
 }
 
+function getDebtPayoffProjection(dividas, parcelas) {
+  var projections = [];
+  (dividas || []).forEach(function(d) {
+    if (d.quitada) return;
+    var rest = Math.max(0, (d.total || 0) - (d.pago || 0));
+    var meses = d.parcela > 0 ? Math.ceil(rest / d.parcela) : 0;
+    var dataQuit = new Date();
+    dataQuit.setMonth(dataQuit.getMonth() + meses);
+    projections.push({nome: d.nome, restante: rest, parcela: d.parcela, mesesRestantes: meses, dataQuitacao: dataQuit.getFullYear() + "-" + String(dataQuit.getMonth()+1).padStart(2,"0"), taxa: d.taxa || 0});
+  });
+  return projections.sort(function(a,b) { return a.mesesRestantes - b.mesesRestantes; });
+}
+
 function getPat(db) {
   var sc=0, inv=0, dv=0;
-  for (var i=0; i<db.contas.length; i++) sc += db.contas[i].saldo || 0;
-  for (var j=0; j<db.investimentos.length; j++) inv += db.investimentos[j].valor || 0;
-  for (var k=0; k<db.dividas.length; k++) dv += Math.max(0, (db.dividas[k].total||0) - (db.dividas[k].pago||0));
+  for (let i =0; i<db.contas.length; i++) sc += db.contas[i].saldo || 0;
+  for (let j =0; j<db.investimentos.length; j++) inv += db.investimentos[j].valor || 0;
+  for (let k =0; k<db.dividas.length; k++) dv += Math.max(0, (db.dividas[k].total||0) - (db.dividas[k].pago||0));
   return { sc:sc, inv:inv, bruto:sc+inv, liq:sc+inv-dv, dv:dv };
 }
 
 function getVisaoAnual(db, anoRef) {
   var result = [];
-  for (var m=1; m<=12; m++) {
+  for (let m =1; m<=12; m++) {
     var pvM = getPrevisão(db, m, anoRef);
     var temDados = pvM.receitaMes > 0 || pvM.despLancadas > 0;
     result.push({ m:m, nome:MS[m-1], rc:pvM.receitaMes, dp:pvM.despTotalMes, saldo:pvM.sobraPrevista, temDados:temDados });
@@ -575,7 +589,7 @@ function getVisaoAnual(db, anoRef) {
 
 function getMetP(db) {
   var inv = 0;
-  for (var i=0; i<db.investimentos.length; i++) inv += db.investimentos[i].valor || 0;
+  for (let i =0; i<db.investimentos.length; i++) inv += db.investimentos[i].valor || 0;
   return (db.metas||[]).map(function(m) {
     var pr = m.valor > 0 ? Math.min((inv/m.valor)*100, 100) : 0;
     var ft = Math.max(0, m.valor - inv);
@@ -589,7 +603,7 @@ function getAl(db, m, a) {
   var pv = getPrevisão(db, m, a);
   var al = [];
   var tFixas = 0;
-  for (var i=0; i<db.lancamentos.length; i++) {
+  for (let i =0; i<db.lancamentos.length; i++) {
     var l = db.lancamentos[i];
     if (l.mes === m && l.ano === a && l.rec && l.tipo !== "receita") tFixas += l.valor;
   }
@@ -624,19 +638,19 @@ function getPrevisão(db, m, a) {
   var lancMes = (db.lancamentos||[]).filter(function(l){return l.mes===m && l.ano===a && l.tipo!=="receita"});
 
   var receitaMes = 0;
-  for (var i=0; i<db.lancamentos.length; i++) {
+  for (let i =0; i<db.lancamentos.length; i++) {
     if (db.lancamentos[i].mes===m && db.lancamentos[i].ano===a && db.lancamentos[i].tipo==="receita") receitaMes += db.lancamentos[i].valor;
   }
 
   var orcTotal = 0;
-  for (var j=0; j<cats.length; j++) orcTotal += cats[j].orc || 0;
+  for (let j =0; j<cats.length; j++) orcTotal += cats[j].orc || 0;
 
   var despLancadas = 0;
-  for (var t=0; t<lancMes.length; t++) despLancadas += lancMes[t].valor;
+  for (let t =0; t<lancMes.length; t++) despLancadas += lancMes[t].valor;
 
   var porCat = cats.map(function(c) {
     var realizado = 0, pendente = 0;
-    for (var k=0; k<lancMes.length; k++) {
+    for (let k =0; k<lancMes.length; k++) {
       if (lancMes[k].cat === c.id) {
         if (lancMes[k].status === "pago") realizado += lancMes[k].valor;
         else pendente += lancMes[k].valor;
@@ -706,7 +720,7 @@ function hasFatManualValor(meta) {
 
 function getFluxoFinanceiro(db, m, a) {
   var receita = 0, receitaPaga = 0, pix = 0, pixPago = 0, cartaoLanc = 0, cartaoLancPago = 0;
-  for (var i=0; i<db.lancamentos.length; i++) {
+  for (let i =0; i<db.lancamentos.length; i++) {
     var l = db.lancamentos[i];
     if (l.mes !== m || l.ano !== a) continue;
     if (l.tipo === "receita") {
@@ -787,14 +801,14 @@ function getCardsResumo(db, m, a) {
         divergencia:0
       };
     });
-    for (var i=0; i<db.lancamentos.length; i++) {
+    for (let i =0; i<db.lancamentos.length; i++) {
       var l = db.lancamentos[i];
       if (l.tipo === "receita") continue;
       if (getMetodoPg(l) !== "cartao") continue;
       if ((l.cartaoId || "") !== card.id) continue;
       if (l.mes === m && l.ano === a) gastosMes += l.valor || 0;
       var refFat = getFaturaRef(l, card);
-      for (var g=0; g<grupos.length; g++) {
+      for (let g =0; g<grupos.length; g++) {
         var grp = grupos[g];
         if (grp.mes === refFat.mes && grp.ano === refFat.ano) {
           grp.totalAuto += l.valor || 0;
@@ -863,7 +877,7 @@ function getProxSalarioInfo(db, m, a, salarioDia) {
   var prox = mkDt(ref.getFullYear(), ref.getMonth()+1, sd);
   if (ref.getDate() >= sd) prox = mkDt(ref.getMonth()===11 ? ref.getFullYear()+1 : ref.getFullYear(), ref.getMonth()===11 ? 1 : ref.getMonth()+2, sd);
   var caixaBase = 0, receitas = 0, despDiretas = 0;
-  for (var i=0; i<db.lancamentos.length; i++) {
+  for (let i =0; i<db.lancamentos.length; i++) {
     var l = db.lancamentos[i];
     var dt = new Date((l.data || hj()) + "T12:00:00");
     var isCartaoVinculado = getMetodoPg(l) === "cartao" && (l.cartaoId || "");
@@ -959,7 +973,7 @@ function somaBanco(lista, bankKey) {
   }, 0);
 }
 function getCardBanco(cards, bankKey) {
-  for (var i=0; i<(cards||[]).length; i++) {
+  for (let i =0; i<(cards||[]).length; i++) {
     var c = cards[i];
     if ((c.bankKey || inferBankKey(c.nome)) === bankKey) return c;
   }
@@ -1156,8 +1170,48 @@ function doLoad() {
   return null;
 }
 
+function saveBackup(data) {
+  try {
+    var s = getStorageSafe();
+    if (!s) return;
+    var slots = [SK+"_bk1", SK+"_bk2", SK+"_bk3"];
+    var oldest = slots[0];
+    var oldestTime = Infinity;
+    for (var i = 0; i < slots.length; i++) {
+      var raw = s.getItem(slots[i]);
+      if (!raw) { oldest = slots[i]; break; }
+      try { var d = JSON.parse(raw); if ((d._bkTime||0) < oldestTime) { oldestTime = d._bkTime||0; oldest = slots[i]; } } catch(e) { oldest = slots[i]; break; }
+    }
+    s.setItem(oldest, JSON.stringify(Object.assign({}, data, {_bkTime: Date.now(), _bkDate: new Date().toISOString().slice(0,10)})));
+  } catch(e) {}
+}
+
+function listBackups() {
+  return new Promise(function(resolve) {
+    var slots = [];
+    try {
+      var s = getStorageSafe();
+      if (!s) { resolve([]); return; }
+      var keys = [SK+"_bk1", SK+"_bk2", SK+"_bk3"];
+      for (var i = 0; i < keys.length; i++) {
+        var raw = s.getItem(keys[i]);
+        if (raw) {
+          try { var d = JSON.parse(raw); slots.push({slot: keys[i], date: d._bkDate || "?", time: d._bkTime || 0, data: d}); } catch(e) {}
+        }
+      }
+      slots.sort(function(a,b) { return b.time - a.time; });
+    } catch(e) {}
+    resolve(slots);
+  });
+}
+
 function norm(r) {
   if (!r || typeof r !== "object") return null;
+  if (r.lancamentos && !Array.isArray(r.lancamentos)) return null;
+  if (r.cartoes && !Array.isArray(r.cartoes)) return null;
+  if (r.dividas && !Array.isArray(r.dividas)) return null;
+  if (r.investimentos && !Array.isArray(r.investimentos)) return null;
+  if (r.metas && !Array.isArray(r.metas)) return null;
   var d = Object.assign({}, DEF, r);
   var oldVer = r.v || 0;
   d.v = VER;
@@ -1174,7 +1228,7 @@ function norm(r) {
   var savedCats = r.categorias || [];
   d.categorias = CATS.map(function(cat) {
     var saved = null;
-    for (var sc = 0; sc < savedCats.length; sc++) {
+    for (let sc = 0; sc < savedCats.length; sc++) {
       if (savedCats[sc].id === cat.id) { saved = savedCats[sc]; break; }
     }
     return Object.assign({}, cat, { orc: saved ? (saved.orc || 0) : (cat.orc || 0), emoji: (saved && saved.emoji) || cat.emoji || "📦", cor: (saved && saved.cor) || cat.cor || "#6B7280" });
@@ -1186,12 +1240,12 @@ function norm(r) {
     var descL = (out.desc||"").toLowerCase();
     var pixForce = ["acordo serasa","empr. barbara","unip"];
     var isPix = false;
-    for (var pf = 0; pf < pixForce.length; pf++) { if (descL.indexOf(pixForce[pf]) >= 0) { isPix = true; break; } }
+    for (let pf = 0; pf < pixForce.length; pf++) { if (descL.indexOf(pixForce[pf]) >= 0) { isPix = true; break; } }
     if (isPix) { out.pg = "pix"; out.cartaoId = ""; }
     else if ((out.tipo === "parcela" || out.cat === "c14") && !out.cartaoId) { out.pg = "cartao"; out.cartaoId = "cd1"; }
     var brbFixas = ["anuidade brb","faculdade barbara","faculdade bárbara","claude","spotify","icloud","chatgpt","tec concursos","legis","medicamentos","ritalina","venvanse","cinemark","streaming","totalpass barbara","totalpass","total pass","spike","clube curtai","curtai","supermercado","cafe capsulas","café cápsulas","gastos saidas","gastos saídas","gasolina","barbeiro","lavagem carro","pós-graduação","pos graduacao","estratégia concursos","estrategia concursos","boticário","boticario","dock robô","dock robo","aspirador robô","aspirador robo","revpoints"];
     if (!isPix && (!out.cartaoId || out.pg !== "cartao")) {
-      for (var bf = 0; bf < brbFixas.length; bf++) {
+      for (let bf = 0; bf < brbFixas.length; bf++) {
         if (descL.indexOf(brbFixas[bf]) >= 0) { out.pg = "cartao"; out.cartaoId = "cd1"; break; }
       }
     }
@@ -1217,14 +1271,14 @@ function norm(r) {
   });
   var novasParc = [
     {desc:"Rack",valor:81.77,pT:12,data:"2026-05-01"},
-    {desc:"SSD PS5",valor:97.91,pT:12,data:"2026-05-01"}
+    {desc:"SSD PS5",valor:97.91,pT:12,data:"2026-05-01"},
   ];
   novasParc.forEach(function(np){
     var npL = np.desc.toLowerCase();
     var existe = d.lancamentos.some(function(l){return l.desc.toLowerCase()===npL && l.tipo==="parcela"});
     if (!existe) {
       var ma = gMA(np.data);
-      d.lancamentos.push({id:uid(),data:np.data,mes:ma.mes,ano:ma.ano,tipo:"parcela",cat:"c8",desc:np.desc,valor:np.valor,status:"pendente",cartaoId:"cd1",pg:"cartao",rec:false,pT:np.pT,pA:1,totalCompra:0});
+      d.lancamentos.push({id:uid(),data:np.data,mes:ma.mes,ano:ma.ano,tipo:"parcela",cat:"c8",desc:np.desc,valor:np.valor,status:"pendente",cartaoId:np.cartaoId||"cd1",pg:"cartao",rec:false,pT:np.pT,pA:1,totalCompra:0});
     }
   });
   if (!Array.isArray(d.contas) || !d.contas.length) d.contas = DEF.contas;
@@ -1241,11 +1295,24 @@ function norm(r) {
 }
 
 
-var bx = {background:"rgba(8,8,22,0.82)", borderRadius:18, padding:16, border:"1px solid rgba(0,229,255,0.08)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", boxShadow:"0 0 30px rgba(0,229,255,0.03), 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)"};
-var inp = {width:"100%", background:"rgba(0,229,255,0.03)", border:"1px solid rgba(0,229,255,0.10)", borderRadius:12, padding:"10px 14px", color:T.text, fontSize:12, outline:"none", fontFamily:"inherit", boxSizing:"border-box", transition:"border-color 0.2s, box-shadow 0.2s"};
-var mc = {padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.05)",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)"};
-var mc2 = {padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)"};
-var lb = {fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.4,fontWeight:700};
+const bx = {background:"rgba(8,8,22,0.82)", borderRadius:18, padding:16, border:"1px solid rgba(0,229,255,0.08)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", boxShadow:"0 0 30px rgba(0,229,255,0.03), 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)"};
+const inp = {width:"100%", background:"rgba(0,229,255,0.03)", border:"1px solid rgba(0,229,255,0.10)", borderRadius:12, padding:"10px 14px", color:T.text, fontSize:12, outline:"none", fontFamily:"inherit", boxSizing:"border-box", transition:"border-color 0.2s, box-shadow 0.2s"};
+const mc = {padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.05)",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)"};
+const mc2 = {padding:"8px 10px",borderRadius:10,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)"};
+const lb = {fontSize:8,color:T.dim,textTransform:"uppercase",letterSpacing:0.4,fontWeight:700};
+
+
+
+function Skeleton(props) {
+  var w = props.w || "100%";
+  var h = props.h || 16;
+  return <div style={{width:w, height:h, borderRadius:8, background:"rgba(255,255,255,0.06)", animation:"pulse 1.5s infinite"}} />;
+}
+function SkeletonCard() {
+  return <div style={{padding:16,borderRadius:16,background:"rgba(8,8,22,0.82)",border:"1px solid rgba(0,229,255,0.08)"}}>
+    <Skeleton h={12} w="40%" /><div style={{height:8}} /><Skeleton h={24} w="60%" /><div style={{height:8}} /><Skeleton h={8} w="80%" />
+  </div>;
+}
 
 function EV(props) {
   var _s = useState(false); var ed = _s[0]; var setEd = _s[1];
@@ -1327,7 +1394,7 @@ function LForm(props) {
   var f = _s[0]; var setF = _s[1];
   var _err = useState({}); var errs = _err[0]; var setErrs = _err[1];
   var catTimer = useRef(null);
-  function u(k,v) { setF(function(prev) { var n = Object.assign({},prev); n[k]=v; return n; }); setErrs(function(prev){ var n = Object.assign({},prev); delete n[k]; return n; }); }
+  function u(k,v) { setF(function(prev) { var n = {...prev}; n[k]=v; return n; }); setErrs(function(prev){ var n = {...prev}; delete n[k]; return n; }); }
   var fc = props.cats.filter(function(c) { return f.tipo === "receita" ? c.tipo === "receita" : c.tipo === "despesa"; });
   var numP = parseInt(f.pT) || 0;
   var numA = parseInt(f.pA) || 1;
@@ -1382,7 +1449,7 @@ function LForm(props) {
 
 function SForm(props) {
   var _s = useState(props.data || {}); var f = _s[0]; var setF = _s[1];
-  function u(k,v) { setF(function(prev) { var n = Object.assign({},prev); n[k]=v; return n; }); }
+  function u(k,v) { setF(function(prev) { var n = {...prev}; n[k]=v; return n; }); }
   return (
     <div>
       {props.fields.map(function(fd) {
@@ -1396,7 +1463,7 @@ function SForm(props) {
   );
 }
 
-var TABS = [
+const TABS = [
   {id:"visao",lb:"Geral",ic:BarChart3},
   {id:"anual",lb:"Ano",ic:Calendar},
   {id:"cal",lb:"Calend.",ic:Calendar},
@@ -1419,7 +1486,7 @@ function callAI(sys, msg) {
     body: JSON.stringify({model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:[{role:"user",content:msg}]})
   }).then(function(r){return r.json()}).then(function(d){
     var txt = "";
-    if (d && d.content) { for (var i=0;i<d.content.length;i++) { if (d.content[i].type==="text") txt += d.content[i].text; } }
+    if (d && d.content) { for (let i =0;i<d.content.length;i++) { if (d.content[i].type==="text") txt += d.content[i].text; } }
     return txt || "Sem resposta.";
   })["catch"](function(){return "Erro de conexao."});
 }
@@ -1431,9 +1498,65 @@ function callAIChat(sys, msgs) {
     body: JSON.stringify({model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:msgs})
   }).then(function(r){return r.json()}).then(function(d){
     var txt = "";
-    if (d && d.content) { for (var i=0;i<d.content.length;i++) { if (d.content[i].type==="text") txt += d.content[i].text; } }
+    if (d && d.content) { for (let i =0;i<d.content.length;i++) { if (d.content[i].type==="text") txt += d.content[i].text; } }
     return txt || "Sem resposta.";
   })["catch"](function(){return "Erro de conexao."});
+}
+
+// v14: Streaming SSE for progressive text rendering
+async function callAIStream(sys, msg, onChunk) {
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({model:"claude-sonnet-4-20250514", max_tokens:1000, stream: true, system:sys, messages:[{role:"user",content:msg}]})
+    });
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let full = "";
+    let buffer = "";
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, {stream: true});
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === "content_block_delta" && parsed.delta && parsed.delta.text) {
+              full += parsed.delta.text;
+              if (onChunk) onChunk(full);
+            }
+          } catch(e) {}
+        }
+      }
+    }
+    return full || "Sem resposta.";
+  } catch(e) { return "Erro de conexão."; }
+}
+
+// v14: MoneyInput component with mask
+function MoneyInput({value, onChange, style: customStyle}) {
+  var _v = useState(value !== undefined && value !== null ? String(value).replace(".",",") : "");
+  var display = _v[0]; var setDisplay = _v[1];
+  function handleChange(e) {
+    var raw = e.target.value.replace(/[^0-9,]/g, "");
+    var parts = raw.split(",");
+    if (parts.length > 2) raw = parts[0] + "," + parts.slice(1).join("");
+    setDisplay(raw);
+    if (onChange) onChange(parseBR(raw));
+  }
+  function handleBlur() {
+    if (display && onChange) {
+      var v = parseBR(display);
+      setDisplay(v > 0 ? v.toFixed(2).replace(".",",") : "");
+    }
+  }
+  return <input value={display} onChange={handleChange} onBlur={handleBlur} inputMode="decimal" placeholder="0,00" style={Object.assign({},inp,customStyle||{})} />;
 }
 
 
@@ -1459,8 +1582,13 @@ export default function App() {
   var _bulkSel = useState({}); var bulkSel = _bulkSel[0]; var setBulkSel = _bulkSel[1];
   var _bulkMode = useState(false); var bulkMode = _bulkMode[0]; var setBulkMode = _bulkMode[1];
   var _aiChat = useState([]); var aiChat = _aiChat[0]; var setAiChat = _aiChat[1];
+  var chatEndRef = useRef(null);
+  useEffect(function() { if (chatEndRef.current) chatEndRef.current.scrollIntoView({behavior:"smooth"}); }, [aiChat]);
   var _aiInput = useState(""); var aiInput = _aiInput[0]; var setAiInput = _aiInput[1];
-  var _aiLoading = useState(false); var aiLoading = _aiLoading[0]; var setAiLoading = _aiLoading[1];
+  var _aiLoading = useState({}); var aiLoadMap = _aiLoading[0]; var setAiLoadMap = _aiLoading[1];
+  function isAiLoading(key) { return key ? !!aiLoadMap[key] : Object.values(aiLoadMap).some(Boolean); }
+  function setAiLoad(key, v) { setAiLoadMap(function(prev){ var n = {...prev}; n[key]=v; return n; }); }
+  var aiLoading = Object.values(aiLoadMap).some(Boolean);
   var _aiInsights = useState(""); var aiInsights = _aiInsights[0]; var setAiInsights = _aiInsights[1];
   var _aiPlan = useState(""); var aiPlan = _aiPlan[0]; var setAiPlan = _aiPlan[1];
   var _aiCatSug = useState(""); var aiCatSug = _aiCatSug[0]; var setAiCatSug = _aiCatSug[1];
@@ -1480,6 +1608,11 @@ export default function App() {
   var _aiCar = useState(""); var aiCar = _aiCar[0]; var setAiCar = _aiCar[1];
   var _aiBankMeet = useState(""); var aiBankMeet = _aiBankMeet[0]; var setAiBankMeet = _aiBankMeet[1];
   var _aiAllProg = useState(0); var aiAllProg = _aiAllProg[0]; var setAiAllProg = _aiAllProg[1];
+  var _aiCache = useState({}); var aiCache = _aiCache[0]; var setAiCache = _aiCache[1];
+  function getAiCacheKey(prefix) { return prefix + "_" + mes + "_" + ano; }
+  function getCachedAi(prefix) { return aiCache[getAiCacheKey(prefix)] || null; }
+  function setCachedAi(prefix, val) { setAiCache(function(prev) { var n = {...prev}; n[getAiCacheKey(prefix)] = val; return n; }); }
+  var _aiHistory = useState([]); var aiHistory = _aiHistory[0]; var setAiHistory = _aiHistory[1];
   var _darkMode = useState(true); var darkMode = _darkMode[0]; var setDarkMode = _darkMode[1];
   var _fTitular = useState(""); var fTitular = _fTitular[0]; var setFTitular = _fTitular[1];
   var _swipeId = useState(""); var swipeId = _swipeId[0]; var setSwipeId = _swipeId[1];
@@ -1508,7 +1641,8 @@ export default function App() {
     var diff = touchStart.current - touchEnd.current;
     if (Math.abs(diff) > 60) {
       var idx = -1;
-      for (var ti = 0; ti < TABS.length; ti++) { if (TABS[ti].id === tab) { idx = ti; break; } }
+      var idx = -1;
+      for (let ti = 0; ti < TABS.length; ti++) { if (TABS[ti].id === tab) { idx = ti; break; } }
       if (diff > 0 && idx < TABS.length - 1) setTab(TABS[idx + 1].id);
       else if (diff < 0 && idx > 0) setTab(TABS[idx - 1].id);
     }
@@ -1516,6 +1650,11 @@ export default function App() {
   }
 
   function flash(m) { setSt(m); setTimeout(function(){setSt(null)}, 2200); }
+
+  // v14: Auto-scroll chat
+  useEffect(function() {
+    if (chatEndRef.current) chatEndRef.current.scrollIntoView({behavior:"smooth"});
+  }, [aiChat]);
 
   useEffect(function() {
     var r = doLoad();
@@ -1535,6 +1674,9 @@ export default function App() {
     meta3.name = "theme-color";
     meta3.content = "#020208";
     document.head.appendChild(meta3);
+    var styleTag = document.createElement("style");
+    styleTag.textContent = "@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}} @keyframes tabFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}} @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes slideIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}} .tab-content{animation:tabFade 0.25s ease-out}";
+    document.head.appendChild(styleTag);
     var link = document.createElement("link");
     link.rel = "manifest";
     link.href = "data:application/json;base64," + btoa(JSON.stringify({
@@ -1585,7 +1727,7 @@ export default function App() {
       nL.push(base);
       if (totalParc > 1) {
         var pA = base.pA || 1;
-        for (var k=pA+1; k<=totalParc; k++) {
+        for (let k =pA+1; k<=totalParc; k++) {
           var nm = r.mes + (k - pA);
           var na = r.ano;
           while (nm > 12) { nm -= 12; na++; }
@@ -1599,6 +1741,7 @@ export default function App() {
   }
 
   function togPago(id) {
+    if (navigator.vibrate) navigator.vibrate(10);
     var lanc = (db.lancamentos||[]).find(function(l){return l.id===id});
     if (!lanc) return;
     var novoStatus = lanc.status === "pago" ? "pendente" : "pago";
@@ -1758,10 +1901,13 @@ export default function App() {
     var reader = new FileReader();
     reader.onload = function(e) {
       try {
-        var n = norm(JSON.parse(e.target.result));
+        var parsed = JSON.parse(e.target.result);
+        var validation = validateSchema(parsed);
+        if (!validation.valid) { flash("Erro: " + validation.error); return; }
+        var n = norm(parsed);
         if (!n) { flash("Arquivo inválido"); return; }
         setCfm({msg:"Substituir todos os dados? Um backup automático será salvo.", fn:function(){
-          try { var s = getStorageSafe(); if (s) s.setItem(SK + "_backup", JSON.stringify(db)); } catch(bkErr) {}
+          saveBackup(db);
           sv(n);
           flash("Importado! Backup salvo.");
           setCfm(null);
@@ -1771,19 +1917,24 @@ export default function App() {
     reader.readAsText(file);
   }
 
-  function restoreBackup() {
+  var _backupList = useState([]); var backupList = _backupList[0]; var setBackupList = _backupList[1];
+  
+  function loadBackupList() {
+    listBackups().then(function(list) { setBackupList(list); });
+  }
+
+  function restoreBackup(slot) {
+    var bk = backupList.find(function(b){ return b.slot === slot; });
+    if (!bk || !bk.data) { flash("Backup não encontrado"); return; }
     try {
-      var s = getStorageSafe();
-      var bk = s ? s.getItem(SK + "_backup") : null;
-      if (!bk) { flash("Nenhum backup encontrado"); return; }
-      var n = norm(JSON.parse(bk));
-      if (n) { sv(n); flash("Backup restaurado!"); }
+      var n = norm(bk.data);
+      if (n) { sv(n); flash("Backup restaurado! (" + bk.date + ")"); }
       else { flash("Backup corrompido"); }
     } catch(e) { flash("Erro ao restaurar"); }
   }
 
   function hasBackup() {
-    try { var s = getStorageSafe(); return s && !!s.getItem(SK + "_backup"); } catch(e) { return false; }
+    return backupList.length > 0;
   }
 
   function getFinCtx() {
@@ -1806,13 +1957,13 @@ export default function App() {
   var aiSysPrompt = "Você é um consultor financeiro pessoal integrado ao app COJUR Vault. Responda em portugues brasileiro, de forma direta e pratica. Use os dados reais fornecidos. Nunca use travessões dentro de parágrafos. Seja conciso (max 200 palavras). Formate com parágrafos curtos.";
 
   function sendAiMsg() {
-    if (!aiInput.trim() || aiLoading) return;
+    if (!aiInput.trim() || isAiLoading("chat")) return;
     var userMsg = aiInput.trim();
     var ctx = getFinCtx();
     var newMsgs = aiChat.concat([{role:"user",content:userMsg}]);
     setAiChat(newMsgs);
     setAiInput("");
-    setAiLoading(true);
+    setAiLoad("chat", true);
     var apiMsgs = [{role:"user",content:"CONTEXTO FINANCEIRO:\n"+ctx+"\n\nPERGUNTA: "+userMsg}];
     if (newMsgs.length > 2) {
       apiMsgs = newMsgs.map(function(m,i){
@@ -1822,32 +1973,82 @@ export default function App() {
     }
     callAIChat(aiSysPrompt, apiMsgs).then(function(resp){
       setAiChat(function(prev){return prev.concat([{role:"assistant",content:resp}])});
-      setAiLoading(false);
+      setAiLoad("chat", false);
     });
   }
 
-  function generateInsights() {
+  function generateAllParallel() {
     if (aiLoading) return;
-    setAiLoading(true);
+    setAiLoadMap({insights:true, plan:true, report:true, diagnosis:true});
+    setAiAllProg(0);
+    var ctx = getFinCtx();
+    var calls = [
+      callAI("Você é um analista financeiro. Gere 4-5 insights curtos e acionaveis baseados nos dados. Cada insight em uma linha. Use dados específicos. Nunca use travessões dentro de parágrafos. Responda em portugues.", "Análise estes dados e gere insights práticos:\n" + ctx),
+      callAI("Você é um planejador financeiro. Crie um plano otimizado para atingir as metas. Considere quitacao de dividas vs investimento. Seja específico com valores e prazos. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.", "Com estes dados, crie um plano otimizado para as metas:\n" + ctx),
+      callAI("Você é um consultor financeiro gerando um relatório mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dívidas e Parcelas, Investimentos e Metas, Rating Bancário, Recomendações. Use dados específicos. Nunca use travessões dentro de parágrafos. Max 400 palavras. Português.", "Gere o relatório financeiro de " + MSF[mes-1] + "/" + ano + ":\n" + ctx),
+      callAI("Você é um médico financeiro. Faça um diagnóstico completo da saúde financeira. Avalie de 0 a 100 cada pilar: 1) Liquidez 2) Endividamento 3) Poupanca 4) Investimentos. Dê uma NOTA GERAL de 0 a 100. Nunca use travessões dentro de parágrafos. Português.", "DADOS:\n" + ctx)
+    ];
+    var done = 0;
+    calls[0].then(function(r) { setAiInsights(r); done++; setAiAllProg(Math.round(done/4*100)); setAiLoad("insights",false); });
+    calls[1].then(function(r) { setAiPlan(r); done++; setAiAllProg(Math.round(done/4*100)); setAiLoad("plan",false); });
+    calls[2].then(function(r) { setAiReport(r); done++; setAiAllProg(Math.round(done/4*100)); setAiLoad("report",false); });
+    calls[3].then(function(r) { setAiDiag(r); done++; setAiAllProg(Math.round(done/4*100)); setAiLoad("diagnosis",false); });
+    Promise.all(calls).then(function() { setAiLoadMap({}); setAiAllProg(100); });
+  }
+
+  function generateInsights() {
+    if (isAiLoading("insights")) return;
+    var cached = getCachedAi("insights");
+    if (cached) { setAiInsights(cached); return; }
+    setAiLoad("insights", true);
     var ctx = getFinCtx();
     callAI(
       "Você é um analista financeiro. Gere 4-5 insights curtos e acionaveis baseados nos dados. Cada insight em uma linha. Use dados específicos. Nunca use travessões dentro de parágrafos. Responda em portugues.",
       "Análise estes dados e gere insights práticos:\n" + ctx
-    ).then(function(r){setAiInsights(r);setAiLoading(false)});
+    ).then(function(r){setAiInsights(r);setCachedAi("insights",r);setAiLoad("insights",false)});
   }
 
   function generatePlan() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("plan")) return;
+    setAiLoad("plan", true);
     var ctx = getFinCtx();
     callAI(
       "Você é um planejador financeiro. Crie um plano otimizado para atingir as metas. Considere quitacao de dividas vs investimento. Seja específico com valores e prazos. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.",
       "Com estes dados, crie um plano otimizado para as metas:\n" + ctx
-    ).then(function(r){setAiPlan(r);setAiLoading(false)});
+    ).then(function(r){setAiPlan(r);setAiLoad("plan",false)});
   }
 
-  function suggestCat(desc) {
+  var LOCAL_CAT_PATTERNS = {
+    c1: /sal[aá]rio|vencimento|remunera|proventos/i,
+    c2: /aluguel|condom[ií]nio|iptu|energia|[aá]gua|g[aá]s|internet|celular/i,
+    c3: /spotify|netflix|disney|hbo|prime|amazon prime|icloud|chatgpt|claude|streaming/i,
+    c4: /faculdade|curso|escola|livro|tec concursos|estrat[eé]gia/i,
+    c5: /mercado|supermercado|hortifruti|a[cç][oó]ugue|padaria|ifood|rappi/i,
+    c6: /uber|99|gasolina|combustivel|estacionamento|pedagio|onibus/i,
+    c7: /farmacia|remedio|ritalina|venvanse|medicamento|consulta|exame/i,
+    c8: /parcela|acordo|emprestimo|financiamento/i,
+    c9: /barbeiro|cabeleireiro|perfume|boticario|renner|reserva|dudalina|lacoste|levis/i,
+    c10: /cinema|teatro|show|ingresso|bar|restaurante|lanche/i,
+    c14: /amazon|shopee|mercado livre|aliexpress|magalu|presente|compra/i,
+    c15: /anuidade|tarifa|taxa|iof/i,
+    c16: /milhas|pontos|livelo|smiles|revpoints/i
+  };
+  function localCatMatch(desc) {
+    var d = (desc || "").toLowerCase();
+    var keys = Object.keys(LOCAL_CAT_PATTERNS);
+    for (var i = 0; i < keys.length; i++) {
+      if (LOCAL_CAT_PATTERNS[keys[i]].test(d)) return keys[i];
+    }
+    return "";
+  }
+
+    function suggestCat(desc) {
     if (!desc || desc.length < 3) { setAiCatSug(""); return; }
+    var localMatch = localCatMatch(desc);
+    if (localMatch) { setAiCatSug(localMatch); return; }
+    // v14: Try local regex first
+    var localCat = autoCategorize(desc);
+    if (localCat) { setAiCatSug(localCat); return; }
     var catNames = (db.categorias||[]).filter(function(c){return c.tipo==="despesa"}).map(function(c){return c.id+":"+c.nome}).join(", ");
     callAI(
       "Responda APENAS com o ID da categoria mais provavel. Nada mais. Categorias: " + catNames,
@@ -1861,43 +2062,51 @@ export default function App() {
 
   function simulateWhatIf() {
     if (!aiSimQ.trim() || aiLoading) return;
-    setAiLoading(true);
+    setAiLoad("active", true);
     callAI(
       "Você é um simulador financeiro. Receba os dados reais e a pergunta 'E se...'. Calcule o impacto numerico na sobra mensal, prazo das metas, dividas e rating. Seja específico com valores. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.",
       "DADOS:\n" + getFinCtx() + "\n\nSIMULACAO: " + aiSimQ
-    ).then(function(r){setAiSim(r);setAiLoading(false)});
+    ).then(function(r){setAiSim(r);setAiLoad("active", false)});
   }
 
   function generateReport() {
-    if (aiLoading) return;
-    setAiLoading(true);
-    callAI(
+    if (isAiLoading("report")) return;
+    var cached = getCachedAi("report");
+    if (cached) { setAiReport(cached); return; }
+    setAiLoad("report", true);
+    callAIStream(
       "Você é um consultor financeiro gerando um relatório mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dívidas e Parcelas, Investimentos e Metas, Rating Bancário, Recomendações. Use dados específicos. Nunca use travessões dentro de parágrafos. Max 400 palavras. Português.",
-      "Gere o relatório financeiro de " + MSF[mes-1] + "/" + ano + ":\n" + getFinCtx()
-    ).then(function(r){setAiReport(r);setAiLoading(false)});
+      "Gere o relatório financeiro de " + MSF[mes-1] + "/" + ano + ":\n" + getFinCtx(),
+      function(partial) { setAiReport(partial); }
+    ).then(function(r){
+      setAiReport(r);
+      setCachedAi("report", r);
+      setAiHistory(function(prev){ return [{mes:mes,ano:ano,date:new Date().toLocaleString("pt-BR"),text:r}].concat(prev).slice(0,12); });
+      setAiLoad("report", false);
+    });
   }
 
   function getRatingCoach() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("coach")) return;
+    setAiLoad("coach", true);
     var hoje = new Date();
     var diaHoje = hoje.getDate();
     callAI(
       "Você é um coach especializado em rating bancário Santander Unlimited e Itaú The One. Gere 5 ações CONCRETAS para HOJE (dia " + diaHoje + "), considerando onde estamos no ciclo do mês: proximidade de fechamento, vencimento, salário, janela de pedido. Nunca use travessões dentro de parágrafos. Seja direto. Max 200 palavras. Português.",
       "DADOS ATUAIS:\n" + getFinCtx() + "\nDia de salario: " + (db.salarioDia||25) + "\nHoje: dia " + diaHoje + " de " + MSF[mes-1]
-    ).then(function(r){setAiCoach(r);setAiLoading(false)});
+    ).then(function(r){setAiCoach(r);setAiLoad("active", false)});
   }
 
   function parseNaturalLanc() {
-    if (!aiNlpInput.trim() || aiLoading) return;
-    setAiLoading(true);
+    if (!aiNlpInput.trim() || isAiLoading("nlp")) return;
+    setAiLoad("nlp", true);
     var catList = (db.categorias||[]).map(function(c){return c.id+":"+c.nome+":"+c.tipo}).join(", ");
     var cardList = (db.cartoes||[]).map(function(c){return c.id+":"+c.nome}).join(", ");
     callAI(
       "Extraia dados de lançamento financeiro do texto. Responda APENAS com JSON puro (sem markdown, sem ```). Formato: {\"desc\":\"...\",\"valor\":0,\"tipo\":\"despesa|receita|parcela\",\"cat\":\"ID\",\"data\":\"YYYY-MM-DD\",\"status\":\"pago|pendente\",\"pg\":\"pix|cartao\",\"cartaoId\":\"\",\"pT\":0,\"pA\":1}. Categorias: " + catList + ". Cartoes: " + cardList + ". Hoje: " + hj() + ". Se não especificado: tipo=despesa, status=pendente, pg=pix, data=hoje.",
       aiNlpInput
     ).then(function(r){
-      setAiLoading(false);
+      setAiLoad("active", false);
       try {
         var clean = r.replace(/```json/g,"").replace(/```/g,"").trim();
         var parsed = JSON.parse(clean);
@@ -1910,10 +2119,10 @@ export default function App() {
   }
 
   function detectAnomalies() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("anom")) return;
+    setAiLoad("anom", true);
     var last3 = [];
-    for (var off = -2; off <= 0; off++) {
+    for (let off = -2; off <= 0; off++) {
       var ref = addMesRef(mes, ano, off);
       var mLancs = lancEx.filter(function(l){return l.mes===ref.mes && l.ano===ref.ano && l.tipo!=="receita"});
       var total = mLancs.reduce(function(s,l){return s+l.valor},0);
@@ -1923,30 +2132,30 @@ export default function App() {
     callAI(
       "Você é um detector de anomalias financeiras. Compare os 3 meses e identifique: gastos que apareceram de repente, valores que subiram muito, categorias fora do padrao, despesas duplicadas suspeitas. Seja específico. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.",
       "ULTIMOS 3 MESES:\n" + last3.join("\n") + "\n\nDADOS COMPLETOS DO MES ATUAL:\n" + getFinCtx()
-    ).then(function(r){setAiAnom(r);setAiLoading(false)});
+    ).then(function(r){setAiAnom(r);setAiLoad("active", false)});
   }
 
   function predictNextMonth() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("predict")) return;
+    setAiLoad("predict", true);
     callAI(
       "Você é um previsor financeiro. Com base nos dados atuais (fixas, parcelas, receita recorrente, tendencias), projete o proximo mes: receita esperada, despesas fixas, parcelas (quais terminam, quais continuam), sobra estimada, eventos importantes. Nunca use travessões dentro de parágrafos. Seja específico com valores. Max 250 palavras. Português.",
       "DADOS DE " + MSF[mes-1] + ":\n" + getFinCtx()
-    ).then(function(r){setAiPredict(r);setAiLoading(false)});
+    ).then(function(r){setAiPredict(r);setAiLoad("active", false)});
   }
 
   function suggestEconomy() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("econ")) return;
+    setAiLoad("econ", true);
     callAI(
       "Você é um especialista em economia doméstica. Análise os gastos e sugira 5-7 cortes ou otimizações concretas, com o valor estimado de economia por mês. Priorize por impacto. Nunca use travessões dentro de parágrafos. Seja direto e prático. Max 250 palavras. Português.",
       "GASTOS ATUAIS:\n" + getFinCtx()
-    ).then(function(r){setAiEcon(r);setAiLoading(false)});
+    ).then(function(r){setAiEcon(r);setAiLoad("active", false)});
   }
 
   function compareDebts() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("debtcmp")) return;
+    setAiLoad("debtcmp", true);
     var divs = (db.dividas||[]).filter(function(d){return !d.quitada}).map(function(d){
       var rest = d.total - d.pago;
       return d.nome + ": total " + f$(d.total) + ", pago " + f$(d.pago) + ", restante " + f$(rest) + ", parcela " + f$(d.parcela) + "/mês, juros " + (d.juros||"desconhecido");
@@ -1960,30 +2169,30 @@ export default function App() {
     callAI(
       "Você é um estrategista de quitação de dívidas. Compare método avalanche (juros altos primeiro) vs bola de neve (menores primeiro). Análise cada dívida/parcelamento e recomende a ordem ideal de quitação. Calcule quanto o usuário economizaria em juros. Nunca use travessões dentro de parágrafos. Seja específico. Max 300 palavras. Português.",
       "DÍVIDAS ATIVAS:\n" + (divs || "Nenhuma dívida formal") + "\n\nPARCELAMENTOS:\n" + (parcList || "Nenhum parcelamento") + "\n\nSobra mensal estimada: " + f$(getPrevisão(db, mes, ano).sobra) + "\n\nDADOS GERAIS:\n" + getFinCtx()
-    ).then(function(r){setAiDebtCmp(r);setAiLoading(false)});
+    ).then(function(r){setAiDebtCmp(r);setAiLoad("active", false)});
   }
 
   function generateBudget() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("budget")) return;
+    setAiLoad("budget", true);
     callAI(
       "Você é um orçamentista pessoal. Crie um orçamento mensal ideal baseado na renda real do usuario. Use a regra 50/30/20 adaptada a realidade do usuário (considerando dividas e metas). Para cada categoria de gasto, indique: valor ideal, valor atual, e ajuste necessário. Nunca use travessões dentro de parágrafos. Seja concreto com valores. Max 300 palavras. Português.",
       "DADOS FINANCEIROS:\n" + getFinCtx()
-    ).then(function(r){setAiBudget(r);setAiLoading(false)});
+    ).then(function(r){setAiBudget(r);setAiLoad("active", false)});
   }
 
   function generateDiagnosis() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("diag")) return;
+    setAiLoad("diag", true);
     callAI(
       "Você é um médico financeiro. Faça um diagnóstico completo da saúde financeira. Avalie de 0 a 100 cada pilar: 1) Liquidez (reserva de emergência), 2) Endividamento (relação dívida/renda), 3) Poupanca (taxa de poupança mensal), 4) Investimentos (diversificação e crescimento), 5) Proteção (seguros e previdência), 6) Planejamento (metas e organização). Dê uma NOTA GERAL de 0 a 100 e explique cada pilar em 1-2 frases. Nunca use travessões dentro de parágrafos. Português.",
       "DADOS:\n" + getFinCtx()
-    ).then(function(r){setAiDiag(r);setAiLoading(false)});
+    ).then(function(r){setAiDiag(r);setAiLoad("active", false)});
   }
 
   function generateWeekly() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("weekly")) return;
+    setAiLoad("weekly", true);
     var hoje = new Date();
     var diaHoje = hoje.getDate();
     var diaSemana = hoje.getDay();
@@ -2001,12 +2210,12 @@ export default function App() {
     callAI(
       "Você é um assistente financeiro fazendo o resumo semanal. Análise a semana e faça: 1) Resumo da semana (total gasto, total recebido), 2) Top gastos da semana, 3) Próximos vencimentos nos proximos 7 dias, 4) Alerta se ritmo de gasto está acima do ideal para fechar o mês, 5) Dica rapida para a próxima semana. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.",
       "SEMANA (ultimos " + (diaSemana+1) + " dias):\nGastos: " + f$(gastoSemana) + "\nReceitas: " + f$(recSemana) + "\nTop gastos: " + (topSemana||"nenhum") + "\nPróximos vencimentos (7 dias): " + (proxVenc||"nenhum") + "\nDia do mes: " + diaHoje + "/" + MSF[mes-1] + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
-    ).then(function(r){setAiWeekly(r);setAiLoading(false)});
+    ).then(function(r){setAiWeekly(r);setAiLoad("active", false)});
   }
 
   function generatePatrimonial() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("patrim")) return;
+    setAiLoad("patrim", true);
     var pv = getPrevisão(db, mes, ano);
     var divAtivas = (db.dividas||[]).filter(function(d){return !d.quitada});
     var divInfo = divAtivas.map(function(d){
@@ -2024,12 +2233,12 @@ export default function App() {
     callAI(
       "Você é um planejador patrimonial de longo prazo. Projete os próximos 12 meses, mês a mês, considerando: renda fixa, despesas fixas, parcelas que terminam (liberam orçamento), dívidas sendo pagas, investimentos acumulando, e metas em progresso. Para cada mês mostre: patrimônio líquido projetado (investimentos - dívidas restantes), sobra acumulada, dívidas que se encerram, parcelas que terminam. No final, de o panorama geral: quando ficará livre de dívidas, quando atingirá cada meta, patrimônio estimado em 12 meses. Nunca use travessões dentro de parágrafos. Use números concretos. Max 400 palavras. Português.",
       "SITUAÇÃO ATUAL:\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio atual (investimentos): " + f$(pat.inv) + "\n\nDÍVIDAS ATIVAS:\n" + (divInfo||"Nenhuma") + "\n\nPARCELAMENTOS ATIVOS:\n" + (parcList||"Nenhum") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)+" (aporte "+f$(m.aporte)+"/mês, prazo "+m.prazo+")"}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
-    ).then(function(r){setAiPatrim(r);setAiLoading(false)});
+    ).then(function(r){setAiPatrim(r);setAiLoad("active", false)});
   }
 
   function generateCarPlan() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("car")) return;
+    setAiLoad("car", true);
     var pv = getPrevisão(db, mes, ano);
     var divAtivas = (db.dividas||[]).filter(function(d){return !d.quitada});
     var totalDivRest = divAtivas.reduce(function(s,d){return s+(d.total-d.pago)},0);
@@ -2039,18 +2248,18 @@ export default function App() {
     callAI(
       "Você é um consultor especializado em compra de veículos no Brasil. O usuário quer comprar um carro. Com base nos dados financeiros reais, analise detalhadamente:\n\n1) VALOR IDEAL DO CARRO: Qual faixa de preço é compatível com a renda e patrimônio. Regra: parcela não deve ultrapassar 20% da renda líquida, e o carro não deve valer mais que 50% da renda anual.\n\n2) MELHOR MOMENTO: Considerando dividas ativas, parcelas terminando, e projeção de sobra, quando seria seguro comprar (mes/ano estimado).\n\n3) COMO COMPRAR: Compare financiamento bancário vs consórcio vs à vista. Calcule cenarios de entrada (20%, 30%, 50%) com parcelas em 36, 48 e 60 meses. Use taxa média de 1.5% a.m. para financiamento.\n\n4) PARCELA IDEAL: Valor máximo de parcela que nao compromete as metas e a saúde financeira, considerando as parcelas e dividas já existentes.\n\n5) SEGURO ESTIMADO: Calcule com base no valor do carro (media 5-8% do valor ao ano para perfil jovem).\n\n6) CUSTOS INDIRETOS MENSAIS: IPVA (parcele em 3x), licenciamento, combustível (estimativa 1.200km/mês), manutenção preventiva, estacionamento, lavagem, revisoes periodicas, depreciação anual estimada (15% no primeiro ano, 10% nos seguintes).\n\n7) IMPACTO TOTAL: Some parcela + seguro + custos indiretos e mostre o comprometimento real mensal. Compare com a sobra atual.\n\n8) RECOMENDAÇÃO FINAL: Comprar agora ou esperar? Qual estrategia seguir?\n\nNunca use travessões dentro de parágrafos. Seja extremamente específico com valores em reais. Max 500 palavras. Português.",
       "SITUAÇÃO FINANCEIRA:\nRenda mensal: " + f$(pv.recTotal) + "\nDespesas totais: " + f$(pv.despTotal) + "\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio (investimentos): " + f$(pat.inv) + "\nDívidas restantes: " + f$(totalDivRest) + " (parcelas: " + f$(totalParcMes) + "/mês)\nParcelamentos mensais: " + f$(totalParcLanc) + "\nComprometimento atual com parcelas+dívidas: " + f$(totalParcMes+totalParcLanc) + "/mês\n\nDÍVIDAS DETALHADAS:\n" + divAtivas.map(function(d){return d.nome+": restam "+f$(d.total-d.pago)+", "+f$(d.parcela)+"/mês"}).join("\n") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
-    ).then(function(r){setAiCar(r);setAiLoading(false)});
+    ).then(function(r){setAiCar(r);setAiLoad("active", false)});
   }
 
   function generateBankMeeting() {
-    if (aiLoading) return;
-    setAiLoading(true);
+    if (isAiLoading("bankmeet")) return;
+    setAiLoad("bankmeet", true);
     var pv = getPrevisão(db, mes, ano);
     var cartoes = (db.cartoes||[]).map(function(c){return c.nome+": limite "+f$(c.limite)+", fatura media "+f$(c.faturaMedia||0)}).join("\n");
     callAI(
       "Você é um assessor financeiro preparando o cliente para uma reunião com o gerente do banco. O objetivo é conseguir upgrade para Santander Unlimited e/ou Itaú The One. Crie um SCRIPT de reunião completo:\n\n1) ABERTURA: Como iniciar a conversa (frase exata para dizer ao gerente).\n2) ARGUMENTOS DE MOVIMENTACAO: Destaque valores reais de receita, saldo médio, volume de transações, tempo de relacionamento. Enfatize pontos fortes.\n3) PEDIDO ESPECÍFICO: O que pedir exatamente (cartao, limite, isenção de anuidade, benefícios). Frase exata.\n4) CONTRA-ARGUMENTOS: Se o gerente disser 'você não tem perfil ainda', como responder. Se pedir mais movimentação, o que prometer de concreto.\n5) NEGOCIAÇÃO DE ANUIDADE: Estratégia para pedir isenção ou desconto na anuidade. Mencionar concorrência.\n6) TIMING: Melhor dia e horário para ir ao banco. Melhor época do ano.\n7) PLANO B: Se negar, o que fazer nos próximos 3 meses para voltar e conseguir.\n\nNunca use travessões dentro de parágrafos. Seja prático com frases prontas para usar. Max 400 palavras. Português.",
       "PERFIL FINANCEIRO DO CLIENTE:\nRenda: " + f$(pv.recTotal) + "/mês\nSobra: " + f$(pv.sobra) + "/mês\nInvestimentos: " + f$(pat.inv) + "\nCartões atuais:\n" + cartoes + "\nScore rating: " + ratingScore + "/100\n\nDADOS COMPLETOS:\n" + getFinCtx()
-    ).then(function(r){setAiBankMeet(r);setAiLoading(false)});
+    ).then(function(r){setAiBankMeet(r);setAiLoad("active", false)});
   }
 
   function analyzeAll() {
@@ -2059,7 +2268,7 @@ export default function App() {
     var hoje = new Date();
     var diaHoje = hoje.getDate();
     setAiAllProg(1);
-    setAiLoading(true);
+    setAiLoad("active", true);
 
     callAI("Você é um assistente financeiro fazendo o resumo semanal. Análise gastos da semana, próximos vencimentos, ritmo de gasto vs orçamento, dica rápida. Nunca use travessões dentro de parágrafos. Max 200 palavras. Português.", "Dia do mes: "+diaHoje+"\n"+ctx)
     .then(function(r){ setAiWeekly(r); setAiAllProg(2);
@@ -2078,8 +2287,8 @@ export default function App() {
       return callAI("Você é um médico financeiro. Diagnostico completo: avalie de 0 a 100 cada pilar (liquidez, endividamento, poupanca, investimentos, protecao, planejamento). NOTA GERAL 0-100. Nunca use travessões dentro de parágrafos. Português.", "DADOS:\n"+ctx);
     }).then(function(r){ setAiDiag(r); setAiAllProg(9);
       return callAI("Você é um consultor financeiro gerando relatório mensal profissional. Estruture em: Resumo Executivo, Receitas e Despesas, Dívidas e Parcelas, Investimentos e Metas, Rating Bancário, Recomendações. Nunca use travessões dentro de parágrafos. Max 400 palavras. Português.", "Relatório de "+MSF[mes-1]+"/"+ano+":\n"+ctx);
-    }).then(function(r){ setAiReport(r); setAiAllProg(0); setAiLoading(false); flash("9 analises concluidas!"); })
-    ["catch"](function(e){ setAiAllProg(0); setAiLoading(false); flash("Erro na analise: "+e.message); });
+    }).then(function(r){ setAiReport(r); setAiAllProg(0); setAiLoad("active", false); flash("9 analises concluidas!"); })
+    ["catch"](function(e){ setAiAllProg(0); setAiLoad("active", false); flash("Erro na analise: "+e.message); });
   }
 
   function togglePago(l) {
@@ -2093,9 +2302,9 @@ export default function App() {
 
   function detectRecurring() {
     if (aiLoading) return;
-    setAiLoading(true);
+    setAiLoad("active", true);
     var last3 = [];
-    for (var off = -2; off <= 0; off++) {
+    for (let off = -2; off <= 0; off++) {
       var ref = addMesRef(mes, ano, off);
       var mLancs = (db.lancamentos||[]).filter(function(l){return l.mes===ref.mes && l.ano===ref.ano}).map(function(l){return l.desc+"|"+l.valor+"|"+l.tipo}).join("; ");
       last3.push(MSF[ref.mes-1] + ": " + mLancs);
@@ -2104,7 +2313,7 @@ export default function App() {
     callAI(
       "Você é um detector de padroes financeiros. Análise os lancamentos dos ultimos 3 meses e identifique despesas que se repetem (mesma descricao ou similar, valores iguais ou proximos) e que NAO estao nas despesas fixas. Liste cada despesa recorrente detectada com: nome, valor médio, frequencia, e sugira se deve ser adicionada como fixa. Nunca use travessões dentro de parágrafos. Max 250 palavras. Português.",
       "LANCAMENTOS 3 MESES:\n" + last3.join("\n") + "\n\nDESPESAS FIXAS JA CADASTRADAS:\n" + (fixasAtuais || "Nenhuma") + "\n\nDADOS:\n" + getFinCtx()
-    ).then(function(r){setAiRecur(r);setAiLoading(false)});
+    ).then(function(r){setAiRecur(r);setAiLoad("active", false)});
   }
 
   function getNotifications() {
@@ -2209,7 +2418,7 @@ export default function App() {
   function getCalendarData() {
     var days = [];
     var daysInMonth = new Date(ano, mes, 0).getDate();
-    for (var d = 1; d <= daysInMonth; d++) {
+    for (let d = 1; d <= daysInMonth; d++) {
       var ds = ano + "-" + String(mes).padStart(2,"0") + "-" + String(d).padStart(2,"0");
       var dayLancs = (db.lancamentos||[]).filter(function(l){return l.mes===mes && l.ano===ano && l.data && l.data.slice(8,10) === String(d).padStart(2,"0")});
       var rec = dayLancs.filter(function(l){return l.tipo==="receita"}).reduce(function(s,l){return s+l.valor},0);
@@ -2223,7 +2432,7 @@ export default function App() {
 
   function getComparativo3m() {
     var data = [];
-    for (var i = -2; i <= 0; i++) {
+    for (let i = -2; i <= 0; i++) {
       var ref = addMesRef(mes, ano, i);
       var pvi = getPrevisão(db, ref.mes, ref.ano);
       var divPagas = (db.dividas||[]).reduce(function(s,d){return s + (d.pago||0)},0);
@@ -2260,14 +2469,14 @@ export default function App() {
 
   function quickEntry() {
     if (!quickInput.trim() || aiLoading) return;
-    setAiLoading(true);
+    setAiLoad("active", true);
     var catList = (db.categorias||[]).map(function(c){return c.id+":"+c.nome+":"+c.tipo}).join(", ");
     var cardList = (db.cartoes||[]).map(function(c){return c.id+":"+c.nome}).join(", ");
     callAI(
       "Extraia dados de lançamento financeiro do texto. Responda APENAS com JSON puro (sem markdown). Formato: {\"desc\":\"...\",\"valor\":0,\"tipo\":\"despesa|receita\",\"cat\":\"ID\",\"data\":\"YYYY-MM-DD\",\"status\":\"pago\",\"pg\":\"pix|cartao\",\"cartaoId\":\"\"}. Categorias: " + catList + ". Cartoes: " + cardList + ". Hoje: " + hj() + ". Se não especificado: tipo=despesa, status=pago, pg=pix, data=hoje.",
       quickInput
     ).then(function(r){
-      setAiLoading(false);
+      setAiLoad("active", false);
       try {
         var clean = r.replace(/```json/g,"").replace(/```/g,"").trim();
         var parsed = JSON.parse(clean);
@@ -2291,7 +2500,24 @@ export default function App() {
   var comp3m = getComparativo3m();
   var calData = getCalendarData();
 
-  function handleExport() {
+  function handleExportCSV() {
+    try {
+      var header = "Data,Tipo,Categoria,Descricao,Valor,Status,Forma Pgto,Cartao,Recorrente,Parcela Atual,Parcela Total\n";
+      var rows = (db.lancamentos || []).map(function(l) {
+        return [l.data, l.tipo, catN(l.cat), '"' + (l.desc||"").replace(/"/g,"'") + '"', l.valor, l.status, l.pg || "pix", l.cartaoId || "", l.rec ? "Sim" : "Nao", l.pA || 0, l.pT || 0].join(",");
+      }).join("\n");
+      var csv = header + rows;
+      var blob = new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = "lancamentos-" + hj() + ".csv"; a.style.display = "none";
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){URL.revokeObjectURL(url);try{document.body.removeChild(a)}catch(e){}},300);
+      flash("CSV exportado!");
+    } catch(e) { flash("Erro ao exportar CSV"); }
+  }
+
+    function handleExport() {
     try {
       var json = JSON.stringify(db, null, 2);
       var blob = new Blob([json], {type: "application/json"});
@@ -2333,10 +2559,24 @@ export default function App() {
   var ratingMes = (db.ratingMensal && db.ratingMensal[ratingKey]) || {};
   var visAnual = useMemo(function(){return getVisaoAnual(dbEx,ano)}, [dbEx,ano]);
 
-  var notifs = getNotifications();
+  var faturaAlertCount = useMemo(function() {
+    var count = 0;
+    var hoje = new Date();
+    cardsResumo.forEach(function(c) {
+      if (c.faturas && c.faturas[0] && !c.faturas[0].paga) {
+        var venc = c.faturas[0].vencDate;
+        var diff = (venc - hoje) / (1000 * 60 * 60 * 24);
+        if (diff <= 3 && diff >= -7) count++;
+      }
+    });
+    return count;
+  }, [cardsResumo]);
+
+    var notifs = getNotifications();
+  // v14: Count faturas vencendo em 3 dias
   function getSparkData(prop) {
     var data = [];
-    for (var i = -2; i <= 0; i++) {
+    for (let i = -2; i <= 0; i++) {
       var ref = addMesRef(mes, ano, i);
       var pvi = getPrevisão(db, ref.mes, ref.ano);
       data.push({m:MS[ref.mes-1], v:pvi[prop]||0});
@@ -2368,6 +2608,7 @@ export default function App() {
   var totalAssin = assin.reduce(function(s,l){return s+l.valor},0);
   var totalFixas = fixas.reduce(function(s,l){return s+l.valor},0);
   var sobraFixas = res.rc - totalFixas;
+  var debtProjections = useMemo(function(){return getDebtPayoffProjection(db.dividas, parcelas)}, [db.dividas, parcelas]);
   var totalParcMes = parcelas.reduce(function(s,l){return s+l.valor},0);
   var rentTotal = (db.investimentos||[]).reduce(function(s,i){return s+i.valor*(i.rent/100)},0);
   var frase = FRASES[Math.floor(Date.now()/86400000) % FRASES.length];
@@ -2497,7 +2738,7 @@ export default function App() {
   var evolucao = useMemo(function() {
     var acum = 0;
     var data = [];
-    for (var m = 1; m <= 12; m++) {
+    for (let m = 1; m <= 12; m++) {
       var pvM = getPrevisão(dbEx, m, ano);
       var temD = pvM.receitaMes > 0 || pvM.despLancadas > 0;
       if (temD) {
@@ -2545,7 +2786,7 @@ export default function App() {
   var historicoRatingData = useMemo(function(){
     var tasks = getRatingTasks();
     var data = [];
-    for (var offset = -5; offset <= 0; offset++) {
+    for (let offset = -5; offset <= 0; offset++) {
       var ref = addMesRef(mes, ano, offset);
       var key = ref.ano + "-" + (ref.mes<10?"0":"") + ref.mes;
       var mesR = (db.ratingMensal && db.ratingMensal[key]) || {};
@@ -2564,7 +2805,7 @@ export default function App() {
 
   
   return (
-    <div onDragOver={function(e){e.preventDefault()}} onDrop={function(e){e.preventDefault();var ff=e.dataTransfer.files;if(ff&&ff[0])handleFile(ff[0])}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",paddingBottom:82,position:"relative",overflowX:"hidden"}}>
+    <div onDragOver={function(e){e.preventDefault()}} onDrop={function(e){e.preventDefault();var ff=e.dataTransfer.files;if(ff&&ff[0])handleFile(ff[0])}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} className="tab-content" key={tab} style={{minHeight:"100vh",background:T.bg,color:T.text,fontFamily:"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",paddingBottom:82,position:"relative",overflowX:"hidden"}}>
       <style>{"@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');@keyframes fi{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}@keyframes tabIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}@keyframes shimmerSlide{0%{transform:translateX(-120%) skewX(-18deg)}100%{transform:translateX(220%) skewX(-18deg)}}@keyframes neonPulse{0%,100%{box-shadow:0 0 12px rgba(0,229,255,0.18)}50%{box-shadow:0 0 24px rgba(0,229,255,0.28)}}@keyframes borderGlow{0%{border-color:rgba(0,255,136,0.15)}33%{border-color:rgba(0,229,255,0.15)}66%{border-color:rgba(184,77,255,0.15)}100%{border-color:rgba(0,255,136,0.15)}}@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}50%{opacity:0.8}100%{transform:translateY(60px) rotate(360deg);opacity:0}}@keyframes floatGlow{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:0.7;transform:scale(1.1)}}@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}@keyframes scanLine{0%{top:-2px}100%{top:100%}}*{box-sizing:border-box;transition:background-color 0.2s ease,border-color 0.2s ease,color 0.15s ease}body{margin:0;background:" + T.bg + ";font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;color:" + T.text + ";background-image:radial-gradient(circle at 1px 1px, rgba(0,229,255,0.03) 1px, transparent 0);background-size:32px 32px}::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.20);border-radius:999px}::-webkit-scrollbar-thumb:hover{background:rgba(0,229,255,0.40)}::-webkit-scrollbar-track{background:transparent}button{transition:all 0.15s cubic-bezier(0.22,0.61,0.36,1)}button:hover{filter:brightness(1.12);transform:translateY(-1px)}button:active{transform:scale(0.96) translateY(0)}input:focus,select:focus{border-color:" + T.cyan + "40 !important;box-shadow:0 0 0 3px " + T.cyan + "10,0 0 20px " + T.cyan + "06 !important;outline:none}select{appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237B8DA6' stroke-width='2' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>\");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px !important}.tab-content{animation:tabIn 0.25s cubic-bezier(0.22,0.61,0.36,1)}"}</style>
       <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 15% 0%, rgba(0,255,136,0.08), transparent 45%), radial-gradient(ellipse at 85% 5%, rgba(184,77,255,0.07), transparent 40%), radial-gradient(ellipse at 50% 95%, rgba(0,229,255,0.06), transparent 45%), radial-gradient(ellipse at 0% 50%, rgba(0,170,255,0.04), transparent 35%)"}} />
@@ -2609,7 +2850,8 @@ export default function App() {
             {st && <div style={{position:"fixed",top:12,right:12,display:"flex",alignItems:"center",gap:4,padding:"6px 14px",borderRadius:8,fontSize:12,fontWeight:700,background:T.green+"18",color:T.green,animation:"fi 0.3s",zIndex:950,boxShadow:"0 0 20px "+T.green+"30"}}><CheckCircle size={13} />{st}</div>}
             <button onClick={function(){setDarkMode(!darkMode)}} style={{padding:"6px 10px",borderRadius:8,background:darkMode?"rgba(0,229,255,0.06)":"rgba(0,0,0,0.06)",border:"1px solid "+(darkMode?"rgba(0,229,255,0.12)":"rgba(0,0,0,0.10)"),cursor:"pointer",display:"flex",alignItems:"center",gap:4,color:darkMode?T.gold:T.blue,fontSize:10,fontWeight:600}}>{darkMode ? <Sun size={12} /> : <Moon size={12} />}</button>
             <button onClick={function(){setPrivateMode(!privateMode)}} style={{padding:"6px 10px",borderRadius:8,background:privateMode?T.gold+"12":"rgba(0,229,255,0.06)",border:"1px solid "+(privateMode?T.gold+"25":"rgba(0,229,255,0.12)"),cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:privateMode?T.gold:T.cyan,fontSize:10,fontWeight:600}}><Shield size={12} />{privateMode?"ON":"OFF"}</button>
-            <button onClick={handleExport} style={{padding:"6px 10px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:T.cyan,fontSize:10,fontWeight:600}}><Download size={12} /></button>
+            <button onClick={handleExport} style={{padding:"6px 10px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:T.cyan,fontSize:10,fontWeight:600}} title="Exportar JSON"><Download size={12} /></button>
+            <button onClick={handleExportCSV} style={{padding:"6px 10px",borderRadius:8,background:"rgba(0,255,136,0.06)",border:"1px solid rgba(0,255,136,0.12)",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:T.green,fontSize:10,fontWeight:600}} title="Exportar CSV"><Download size={12} /></button>
             <button onClick={exportPDF} style={{padding:"6px 10px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:T.purple,fontSize:10,fontWeight:600}} title="Exportar PDF"><BarChart3 size={12} /></button>
             <button onClick={function(){if(fr.current)fr.current.click()}} style={{padding:"6px 10px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)",cursor:"pointer",display:"flex",alignItems:"center",gap:5,color:T.cyan,fontSize:10,fontWeight:600}}><Upload size={12} /></button>
             <div style={{display:"flex",alignItems:"center",gap:3,padding:"5px 8px",borderRadius:8,background:"rgba(0,229,255,0.06)",border:"1px solid rgba(0,229,255,0.12)"}}><span style={{fontSize:9,color:T.dim,fontWeight:600}}>Dia</span><input type="number" value={db.salarioDia||25} onChange={function(e){updSalarioDia(e.target.value)}} style={{width:24,background:"transparent",border:"none",color:T.cyan,fontSize:11,fontWeight:700,textAlign:"center",outline:"none",padding:0}} min="1" max="31" /></div>
@@ -2702,7 +2944,7 @@ export default function App() {
 
         <div>
         {}
-        {tab==="visao" && <div>
+        {tab==="visao" && <div style={{animation:"fadeIn 0.3s ease"}}>
           {}
           {(function() {
             var hoje = new Date();
@@ -3152,7 +3394,7 @@ export default function App() {
               {(function(){
                 var firstDay = new Date(ano, mes-1, 1).getDay();
                 var cells = [];
-                for (var e = 0; e < firstDay; e++) cells.push(<div key={"e"+e} />);
+                for (let e = 0; e < firstDay; e++) cells.push(<div key={"e"+e} />);
                 calData.forEach(function(day){
                   var hj2 = new Date();
                   var isToday = day.d === hj2.getDate() && mes === hj2.getMonth()+1 && ano === hj2.getFullYear();
@@ -3781,7 +4023,7 @@ export default function App() {
                   <div style={{fontSize:10,fontWeight:700,color:on?T.dim:path.cor,textDecoration:on?"line-through":"none"}}>{path.de}</div>
                   <span style={{fontSize:10,color:T.dim}}>→</span>
                   <div style={{fontSize:10,fontWeight:800,color:on?T.green:T.text}}>{path.para}</div>
-                  <select value={stVal} onChange={function(e){var rm2=Object.assign({},db.ratingMensal||{});var rk2=ano+"-"+String(mes).padStart(2,"0");rm2[rk2]=Object.assign({},rm2[rk2]||{});rm2[rk2][stKey]=e.target.value;sv(Object.assign({},db,{ratingMensal:rm2}))}} style={{marginLeft:"auto",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,padding:"2px 6px",color:stVal==="aprovado"?T.green:stVal==="negado"?T.red:stVal==="analise"?T.gold:T.dim,fontSize:7,fontWeight:700,outline:"none",fontFamily:"inherit"}}>
+                  <select value={stVal} onChange={function(e){var rm2=Object.assign({},db.ratingMensal||{});var rk2=ano+"-"+String(mes).padStart(2,"0");rm2[rk2]=Object.assign({},rm2[rk2]||{});rm2[rk2][stKey]=e.target.value;sv(Object.assign({}, db, {ratingMensal:rm2}))}} style={{marginLeft:"auto",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,padding:"2px 6px",color:stVal==="aprovado"?T.green:stVal==="negado"?T.red:stVal==="analise"?T.gold:T.dim,fontSize:7,fontWeight:700,outline:"none",fontFamily:"inherit"}}>
                     <option value="pendente">Pendente</option>
                     <option value="negado">Negado</option>
                     <option value="analise">Análise</option>
@@ -4141,7 +4383,7 @@ export default function App() {
                 <div style={{padding:"4px 12px 8px"}}>
                   {g.items.sort(function(a,b){return b.valor-a.valor}).map(function(l,li){
                     var cardObj = null;
-                    if (l.cartaoId) { for (var ci=0;ci<db.cartoes.length;ci++){if(db.cartoes[ci].id===l.cartaoId){cardObj=db.cartoes[ci];break;}} }
+                    if (l.cartaoId) { for (let ci =0;ci<db.cartoes.length;ci++){if(db.cartoes[ci].id===l.cartaoId){cardObj=db.cartoes[ci];break;}} }
                     return <div key={li} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 4px",borderBottom:li<g.items.length-1?"1px solid rgba(255,255,255,0.02)":"none"}}>
                       <div style={{width:3,height:20,borderRadius:2,background:l.status==="pago"?T.green:T.gold,flexShrink:0}} />
                       <div style={{flex:1,minWidth:0}}>
@@ -4243,7 +4485,7 @@ export default function App() {
           {}
           {(function() {
             var dados = [];
-            for (var off = 0; off < 6; off++) {
+            for (let off = 0; off < 6; off++) {
               var ref = addMesRef(mes, ano, off);
               var totalMes = 0;
               lancEx.forEach(function(l) {
@@ -4404,7 +4646,7 @@ export default function App() {
               {(function(){
                 var projData = [];
                 var acum = totalInvAtual;
-                for (var pm2 = 0; pm2 <= 18; pm2++) {
+                for (let pm2 = 0; pm2 <= 18; pm2++) {
                   var mIdx = (new Date().getMonth() + pm2) % 12;
                   projData.push({mes:pm2===0?"Hoje":MSF[mIdx].slice(0,3),valor:Math.round(acum)});
                   acum = acum * (1 + (rendMensal > 0 && totalInvAtual > 0 ? rendMensal/totalInvAtual : 0.0087)) + aporteFixo;
@@ -4509,7 +4751,7 @@ export default function App() {
           // Projeção 12 meses
           var proj = [];
           var acum = totalInv;
-          for (var pm = 0; pm <= 12; pm++) {
+          for (let pm = 0; pm <= 12; pm++) {
             proj.push({mes:pm===0?"Hoje":["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][(new Date().getMonth()+pm)%12],valor:Math.round(acum)});
             acum = acum * (1 + (rendMensal > 0 ? rendMensal/totalInv : cdiMensal/100)) + aporteFixo;
           }
@@ -4894,6 +5136,7 @@ export default function App() {
                 return <div key={i} style={{alignSelf:isUser?"flex-end":"flex-start",maxWidth:"85%",padding:"10px 14px",borderRadius:isUser?"14px 14px 4px 14px":"14px 14px 14px 4px",background:isUser?T.cyan+"12":"rgba(255,255,255,0.03)",border:"1px solid "+(isUser?T.cyan+"18":"rgba(255,255,255,0.05)"),fontSize:10,color:isUser?T.text:T.muted,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{m.content}</div>;
               })}
               {aiLoading && <div style={{alignSelf:"flex-start",padding:"10px 14px",borderRadius:14,background:"rgba(255,255,255,0.03)",fontSize:10,color:T.dim,animation:"pulse 1.5s infinite"}}>Pensando...</div>}
+              <div ref={chatEndRef} />
             </div>
             <div style={{display:"flex",gap:6}}>
               <input value={aiInput} onChange={function(e){setAiInput(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")sendAiMsg()}} placeholder="Pergunte algo..." style={Object.assign({},inp,{flex:1,fontSize:11})} />
@@ -4904,16 +5147,18 @@ export default function App() {
         </div>}
 
         </div>
-        <div style={{textAlign:"center",paddingTop:16,marginTop:24,borderTop:"1px solid rgba(255,255,255,0.04)",color:T.dim,fontSize:9,letterSpacing:0.3}}>COJUR Vault v{VER} • {db.lancamentos.length} lançamentos + {lancEx.length - db.lancamentos.length} projetados</div>
+        <div style={{textAlign:"center",paddingTop:16,marginTop:24,borderTop:"1px solid rgba(255,255,255,0.04)",color:T.dim,fontSize:9,letterSpacing:0.3}}>COJUR Vault v{VER} — Streaming · Multi-backup · IA paralela • {db.lancamentos.length} lançamentos + {lancEx.length - db.lancamentos.length} projetados</div>
       </div>
 
       <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(2,2,8,0.92)",borderTop:"1px solid rgba(0,229,255,0.10)",display:"flex",alignItems:"center",padding:"5px 4px",paddingBottom:"max(5px, env(safe-area-inset-bottom))",zIndex:900,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",overflowX:"auto",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",gap:1}}>
         {TABS.map(function(t) {
           var I = t.ic;
           var isAct = tab === t.id;
+          var badge = t.id === "cards" ? faturaAlertCount : 0;
           return <button key={t.id} onClick={function(){setTab(t.id)}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"4px 6px",border:"none",cursor:"pointer",background:"none",minWidth:46,flexShrink:0,transition:"all 0.2s",position:"relative"}}>
-            <div style={{padding:6,borderRadius:10,background:isAct?"rgba(0,229,255,0.10)":"transparent",boxShadow:isAct?"0 0 20px rgba(0,229,255,0.30), 0 0 6px rgba(0,229,255,0.15)":"none",transition:"all 0.25s"}}><I size={16} color={isAct?T.cyan:T.dim} style={{filter:isAct?"drop-shadow(0 0 4px "+T.cyan+"80)":"none"}} /></div>
+            <div style={{padding:6,borderRadius:10,background:isAct?"rgba(0,229,255,0.10)":"transparent",boxShadow:isAct?"0 0 20px rgba(0,229,255,0.30), 0 0 6px rgba(0,229,255,0.15)":"none",transition:"all 0.25s"}}><I size={16} color={isAct?T.cyan:T.dim} style={{filter:isAct?"drop-shadow(0 0 4px "+T.cyan+"80)":"none"}} />{badge > 0 && <div style={{position:"absolute",top:-2,right:-2,width:14,height:14,borderRadius:7,background:T.red,display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:900,color:"#fff"}}>{badge}</div>}</div>
             <span style={{fontSize:7,fontWeight:isAct?800:500,color:isAct?T.cyan:T.dim,whiteSpace:"nowrap",transition:"all 0.2s",fontFamily:isAct?"'Inter', sans-serif":"inherit",letterSpacing:isAct?0.5:0,textShadow:isAct?"0 0 8px "+T.cyan+"50":"none"}}>{t.lb}</span>
+            {t.badge && faturaAlertCount > 0 && <div style={{position:"absolute",top:2,right:4,width:14,height:14,borderRadius:7,background:T.red,display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:900,color:"#fff",boxShadow:"0 0 6px "+T.red+"60"}}>{faturaAlertCount}</div>}
             {isAct && <div style={{position:"absolute",bottom:0,left:"25%",right:"25%",height:2,borderRadius:1,background:T.cyan,boxShadow:"0 0 8px "+T.cyan+", 0 0 16px "+T.cyan+"60"}} />}
           </button>;
         })}
