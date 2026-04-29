@@ -1,41 +1,34 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line } from "recharts";
-import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle, PiggyBank, Wallet, BarChart3, ArrowUpRight, ArrowDownRight, Edit3, Check, Bell, Shield, Activity, Landmark, RotateCcw, CheckCircle, Download, Plus, Trash2, X, Search, Calendar, Filter, ChevronLeft, ChevronRight, ChevronDown, Copy, Upload, Sun, Moon, Heart, Repeat, Zap, Cloud, CloudOff, RefreshCw, LogIn, LogOut, User } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle, PiggyBank, Wallet, BarChart3, ArrowUpRight, ArrowDownRight, Edit3, Check, Bell, Shield, Activity, Landmark, RotateCcw, CheckCircle, Download, Plus, Trash2, X, Search, Calendar, Filter, ChevronLeft, ChevronRight, ChevronDown, Copy, Upload, Sun, Moon, Heart, Repeat, Zap, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 
 // =====================================================
-// CLOUD SYNC v18 — Supabase + Google OAuth + GitHub Pages cache fix
+// CLOUD SYNC v18 — Supabase findash_state, sem login (mesmo padrao do cojur-nexus)
 // =====================================================
+// Os dados sao salvos numa unica linha da tabela `finance_state` no Supabase,
+// com user_id fixo. Qualquer navegador que abrir o app puxa dessa linha e
+// salva nela, mantendo tudo sincronizado em tempo real via Realtime.
 //
-// PASSO 1, instale a dependencia no seu projeto:
-//   npm install @supabase/supabase-js
-//
-// PASSO 2, preencha as 2 constantes abaixo com as credenciais
-// do seu projeto Supabase (Settings > API).
-//
-// PASSO 3, rode supabase-setup.sql no SQL Editor do Supabase.
-//
-// PASSO 4, ative o provider Google em Authentication > Providers
-// (instrucoes detalhadas no README-CLOUD-SETUP.md).
+// Para mudar para um "perfil" diferente (ex: cofre da esposa), basta trocar
+// USER_ID abaixo. Cada user_id tem seus proprios dados isolados.
 // =====================================================
 
 const SUPABASE_URL = "https://xtndwkczzowmuarjjmzq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_KQVJEoQ6QBVYq6O78PQV_A_4zKmbY5R";
+const USER_ID = "default"; // unico identificador, igual ao cojur-nexus
+const CLOUD_TABLE = "finance_state";
 
-// Detecta se as credenciais foram configuradas (aceita anon JWT legado e sb_publishable novo)
-const CLOUD_ENABLED = SUPABASE_URL.indexOf("supabase.co") > -1 && SUPABASE_ANON_KEY.length > 20 && SUPABASE_ANON_KEY.indexOf("COLE_AQUI") === -1;
+const CLOUD_ENABLED = SUPABASE_URL.indexOf("supabase.co") > -1
+  && SUPABASE_ANON_KEY.length > 20
+  && SUPABASE_ANON_KEY.indexOf("COLE_AQUI") === -1;
 
-// Cliente unico
 let supabase = null;
 if (CLOUD_ENABLED) {
-  try {
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "vault_auth", flowType: "pkce" }
-    });
-  } catch (e) { console.warn("[cloud] supabase init falhou", e); }
+  try { supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } }); }
+  catch (e) { console.warn("[cloud] supabase init falhou", e); }
 }
 
-// Identificador unico do device (rastrear quem foi a ultima escrita)
 function getDeviceId() {
   try {
     var k = "vault_device_id";
@@ -50,162 +43,108 @@ function getDeviceId() {
 }
 const DEVICE_ID = (typeof window !== "undefined") ? getDeviceId() : "ssr";
 
-// Cloud helpers (todos retornam Promise)
 const cloud = {
   available: function() { return CLOUD_ENABLED && !!supabase; },
-
-  getSession: function() {
+  load: function() {
     if (!cloud.available()) return Promise.resolve(null);
-    return supabase.auth.getSession().then(function(r) { return r.data && r.data.session ? r.data.session : null; });
-  },
-
-  signInGoogle: function() {
-    if (!cloud.available()) return Promise.reject(new Error("Supabase nao configurado"));
-    var redirectTo = window.location.origin + window.location.pathname;
-    return supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirectTo } });
-  },
-
-  signOut: function() {
-    if (!cloud.available()) return Promise.resolve();
-    return supabase.auth.signOut();
-  },
-
-  load: function(userId) {
-    if (!cloud.available() || !userId) return Promise.resolve(null);
-    return supabase.from("vault_data").select("data, version, updated_at, device").eq("user_id", userId).maybeSingle()
+    return supabase.from(CLOUD_TABLE).select("data, updated_at").eq("user_id", USER_ID).maybeSingle()
       .then(function(r) {
         if (r.error) throw r.error;
-        return r.data || null;
+        if (!r.data) return null;
+        try { return { data: JSON.parse(r.data.data || "null"), updated_at: r.data.updated_at }; }
+        catch (e) { return null; }
       });
   },
-
-  save: function(userId, data) {
-    if (!cloud.available() || !userId) return Promise.reject(new Error("offline"));
-    var payload = {
-      user_id: userId,
-      data: data,
-      version: (data && data.v) || 1,
-      device: DEVICE_ID,
+  save: function(data) {
+    if (!cloud.available()) return Promise.reject(new Error("offline"));
+    return supabase.from(CLOUD_TABLE).upsert({
+      user_id: USER_ID,
+      data: JSON.stringify(data),
       updated_at: new Date().toISOString()
-    };
-    return supabase.from("vault_data").upsert(payload, { onConflict: "user_id" }).select().single();
+    }, { onConflict: "user_id" });
   },
-
-  subscribe: function(userId, onChange) {
-    if (!cloud.available() || !userId) return function() {};
-    var ch = supabase.channel("vault:" + userId)
+  subscribe: function(onChange) {
+    if (!cloud.available()) return function() {};
+    var lastSeen = null;
+    var ch = supabase.channel("finance:" + USER_ID)
       .on("postgres_changes",
-        { event: "*", schema: "public", table: "vault_data", filter: "user_id=eq." + userId },
+        { event: "*", schema: "public", table: CLOUD_TABLE, filter: "user_id=eq." + USER_ID },
         function(payload) {
           var newRow = payload["new"];
-          if (newRow && newRow.device !== DEVICE_ID) {
-            try { onChange(newRow); } catch (e) {}
+          if (newRow && newRow.updated_at !== lastSeen) {
+            lastSeen = newRow.updated_at;
+            try {
+              var parsed = JSON.parse(newRow.data || "null");
+              if (parsed) onChange(parsed, newRow.updated_at);
+            } catch (e) {}
           }
         })
       .subscribe();
     return function() { try { supabase.removeChannel(ch); } catch (e) {} };
-  },
-
-  audit: function(userId, action, kb) {
-    if (!cloud.available() || !userId) return Promise.resolve();
-    return supabase.from("vault_audit").insert({ user_id: userId, action: action, device: DEVICE_ID, payload_kb: kb || 0 })
-      .then(function() {})["catch"](function() {});
   }
 };
 
-// Hook React: gerencia sessao, status de sync, sync inicial e realtime
-function useCloudSync(localDb, applyRemoteDb, doLocalSave) {
-  var _user = useState(null); var user = _user[0]; var setUser = _user[1];
+function useCloudSync(localDb, applyRemoteDb) {
   var _status = useState(CLOUD_ENABLED ? "connecting" : "disabled");
   var status = _status[0]; var setStatus = _status[1];
-  // status: disabled | connecting | offline | signed_out | syncing | synced | error
+  // status: disabled | connecting | syncing | synced | offline | error
   var _lastSync = useState(null); var lastSync = _lastSync[0]; var setLastSync = _lastSync[1];
   var pendingTimer = useRef(null);
   var lastLocalRef = useRef(null);
   var unsubRef = useRef(null);
+  var initRef = useRef(false);
+  var lastRemoteTsRef = useRef(null);
 
-  // Inicializacao: pega sessao + listener
+  // Pull inicial + subscribe realtime
   useEffect(function() {
     if (!cloud.available()) { setStatus("disabled"); return; }
-    cloud.getSession().then(function(s) {
-      if (s && s.user) {
-        setUser(s.user);
-        setStatus("syncing");
-        // Pull inicial
-        cloud.load(s.user.id).then(function(remote) {
-          if (remote && remote.data) {
-            try { applyRemoteDb(remote.data, remote.updated_at); } catch (e) {}
-          } else {
-            // primeira vez no Supabase, sobe o localStorage atual
-            if (localDb) cloud.save(s.user.id, localDb)["catch"](function() {});
-          }
-          setStatus("synced");
-          setLastSync(new Date());
-        })["catch"](function() { setStatus("error"); });
-      } else {
-        setStatus("signed_out");
+    setStatus("connecting");
+    cloud.load().then(function(remote) {
+      if (remote && remote.data) {
+        lastRemoteTsRef.current = remote.updated_at;
+        try { applyRemoteDb(remote.data, remote.updated_at); } catch (e) {}
+      } else if (localDb) {
+        // Primeira vez: sobe o local atual
+        cloud.save(localDb)["catch"](function() {});
       }
+      setStatus("synced");
+      setLastSync(new Date());
+      initRef.current = true;
+    })["catch"](function(e) {
+      console.warn("[cloud] load fail", e);
+      setStatus("error");
     });
-    var listener = supabase.auth.onAuthStateChange(function(event, session) {
-      if (session && session.user) {
-        setUser(session.user);
-        setStatus("syncing");
-        cloud.load(session.user.id).then(function(remote) {
-          if (remote && remote.data) {
-            try { applyRemoteDb(remote.data, remote.updated_at); } catch (e) {}
-          }
-          setStatus("synced");
-          setLastSync(new Date());
-        });
-      } else {
-        setUser(null);
-        setStatus("signed_out");
-        if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; }
-      }
+    unsubRef.current = cloud.subscribe(function(remoteData, remoteTs) {
+      if (remoteTs === lastRemoteTsRef.current) return;
+      lastRemoteTsRef.current = remoteTs;
+      try { applyRemoteDb(remoteData, remoteTs); setLastSync(new Date()); setStatus("synced"); } catch (e) {}
     });
-    return function() {
-      try { listener.data.subscription.unsubscribe(); } catch (e) {}
-      if (unsubRef.current) unsubRef.current();
-    };
+    return function() { if (unsubRef.current) unsubRef.current(); };
   }, []);
-
-  // Realtime: escuta mudancas vindas de outros devices
-  useEffect(function() {
-    if (!user) return;
-    if (unsubRef.current) unsubRef.current();
-    unsubRef.current = cloud.subscribe(user.id, function(row) {
-      if (row && row.data) {
-        try { applyRemoteDb(row.data, row.updated_at); setLastSync(new Date()); } catch (e) {}
-      }
-    });
-    return function() { if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; } };
-  }, [user && user.id]);
 
   // Push debounced quando localDb muda
   useEffect(function() {
-    if (!user || status === "disabled" || !localDb) return;
+    if (!cloud.available()) return;
+    if (!initRef.current) return; // espera init terminar
+    if (!localDb) return;
     if (lastLocalRef.current === localDb) return;
     lastLocalRef.current = localDb;
     if (pendingTimer.current) clearTimeout(pendingTimer.current);
     setStatus("syncing");
     pendingTimer.current = setTimeout(function() {
-      cloud.save(user.id, localDb).then(function() {
+      cloud.save(localDb).then(function() {
         setStatus("synced");
         setLastSync(new Date());
-        try {
-          var kb = Math.round(JSON.stringify(localDb).length / 1024);
-          cloud.audit(user.id, "save", kb);
-        } catch (e) {}
       })["catch"](function() { setStatus("error"); });
     }, 800);
     return function() { if (pendingTimer.current) clearTimeout(pendingTimer.current); };
-  }, [localDb, user && user.id]);
+  }, [localDb]);
 
-  // Detecta online/offline
+  // Online/offline
   useEffect(function() {
     function onOff() {
-      if (!navigator.onLine) setStatus("offline");
-      else if (user) setStatus("synced");
+      if (typeof navigator !== "undefined" && !navigator.onLine) setStatus("offline");
+      else if (cloud.available()) setStatus("synced");
     }
     window.addEventListener("online", onOff);
     window.addEventListener("offline", onOff);
@@ -213,18 +152,15 @@ function useCloudSync(localDb, applyRemoteDb, doLocalSave) {
       window.removeEventListener("online", onOff);
       window.removeEventListener("offline", onOff);
     };
-  }, [user]);
+  }, []);
 
   return {
-    user: user,
     status: status,
     lastSync: lastSync,
-    signIn: function() { return cloud.signInGoogle(); },
-    signOut: function() { return cloud.signOut(); },
     forceSync: function() {
-      if (!user || !localDb) return Promise.resolve();
+      if (!cloud.available() || !localDb) return Promise.resolve();
       setStatus("syncing");
-      return cloud.save(user.id, localDb).then(function() {
+      return cloud.save(localDb).then(function() {
         setStatus("synced");
         setLastSync(new Date());
       });
@@ -2846,54 +2782,6 @@ export default function App() {
     if (r) { var n = norm(r); if (n) { setDB(n); flash("Dados restaurados!"); } }
   }, []);
 
-  // === v18: Cache buster — desregistra service workers antigos e limpa caches ===
-  useEffect(function(){
-    if (typeof window === "undefined") return;
-    // Versao atual da build, usada para detectar usuario com versao antiga em cache
-    var BUILD_TAG = "vault-v18-" + (new Date().toISOString().slice(0,10));
-    try {
-      var lastSeen = localStorage.getItem("vault_build_tag");
-      if (lastSeen && lastSeen !== BUILD_TAG) {
-        // detectou versao nova, limpa caches do navegador
-        if ("caches" in window) {
-          caches.keys().then(function(keys){
-            keys.forEach(function(k){ caches["delete"](k); });
-          });
-        }
-        // Recarga forcada uma vez
-        if (!sessionStorage.getItem("vault_force_reloaded")) {
-          sessionStorage.setItem("vault_force_reloaded", "1");
-          setTimeout(function(){ window.location.reload(); }, 300);
-        }
-      }
-      localStorage.setItem("vault_build_tag", BUILD_TAG);
-    } catch(e) {}
-    // Desregistra service workers antigos (PWA pode estar servindo HTML cacheado)
-    try {
-      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-        navigator.serviceWorker.getRegistrations().then(function(regs){
-          regs.forEach(function(r){
-            // mantem somente se for o sw-killer da raiz
-            try { r.unregister(); } catch(e){}
-          });
-        });
-      }
-    } catch(e){}
-    // Meta cache-control e pragma para tentar evitar cache HTML
-    try {
-      var head = document.head;
-      [{name:"cache-control",content:"no-cache, no-store, must-revalidate"},
-       {name:"pragma",content:"no-cache"},
-       {name:"expires",content:"0"}].forEach(function(m){
-        if (!document.querySelector('meta[http-equiv="'+m.name+'"]')) {
-          var el = document.createElement("meta");
-          el.httpEquiv = m.name; el.content = m.content;
-          head.appendChild(el);
-        }
-      });
-    } catch(e){}
-  }, []);
-
   useEffect(function() {
     // iOS PWA icon as SVG (nitid, escala infinitamente)
     var iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#020208"/><stop offset="100%" stop-color="#0A0A1A"/></linearGradient></defs><rect width="180" height="180" rx="40" fill="url(#g)"/><rect x="20" y="20" width="140" height="140" rx="28" fill="none" stroke="#00E5FF" stroke-width="1.5" opacity="0.3"/><text x="90" y="108" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Inter,sans-serif" font-size="58" font-weight="900" fill="#00E5FF" letter-spacing="-2">CV</text><text x="90" y="135" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#00E5FF" opacity="0.6" letter-spacing="3">VAULT</text></svg>';
@@ -3036,11 +2924,10 @@ export default function App() {
 
   function sv(nd) { setDB(nd); doSave(nd); setSt("Salvo \u2713"); setTimeout(function(){setSt(null)}, 1500); }
 
-  // === v18: Cloud Sync (Supabase + Google) ===
+  // === v18: Cloud Sync sem auth (igual cojur-nexus) ===
   var cloudRemoteTsRef = useRef(null);
   function applyRemoteDb(remoteData, remoteTs) {
     if (!remoteData) return;
-    // Skip se ja aplicamos esse timestamp
     if (remoteTs && cloudRemoteTsRef.current === remoteTs) return;
     cloudRemoteTsRef.current = remoteTs || null;
     var n = norm(remoteData);
@@ -3050,7 +2937,7 @@ export default function App() {
       setSt("Sincronizado \u2601"); setTimeout(function(){setSt(null)}, 1500);
     }
   }
-  var sync = useCloudSync(db, applyRemoteDb, doSave);
+  var sync = useCloudSync(db, applyRemoteDb);
 
   function ups(key, item) {
     var list = db[key] || [];
@@ -4250,46 +4137,6 @@ export default function App() {
           {modal.type==="conta" && <SForm fields={[{key:"nome",label:"Nome"},{key:"saldo",label:"Saldo (R$)"}]} data={modal.data} onSave={function(d){ups("contas",Object.assign({},d,{saldo:parseBR(d.saldo)}))}} onClose={function(){setModal(null)}} />}
           {modal.type==="card" && <SForm fields={[{key:"nome",label:"Nome do cartao"},{key:"bankKey",label:"Banco",type:"select",opts:BANK_OPTIONS},{key:"band",label:"Bandeira"},{key:"limite",label:"Limite (R$)"},{key:"fecha",label:"Fecha dia",type:"number"},{key:"venc",label:"Vence dia",type:"number"},{key:"cor",label:"Cor principal"},{key:"cor2",label:"Cor secundaria"},{key:"visual",label:"Estilo visual",type:"select",opts:[{v:"black",l:"Black"},{v:"metal",l:"Metal"},{v:"executive",l:"Executive"},{v:"classic",l:"Classic"},{v:"fintech",l:"Fintech"}]},{key:"statusEstr",label:"Status estrategico",type:"select",opts:[{v:"foco_mes",l:"Foco do mês"},{v:"usar_moderadamente",l:"Usar moderadamente"},{v:"concentrar_gastos",l:"Concentrar gastos"},{v:"manter_estável",l:"Manter estável"},{v:"evitar_uso_alto",l:"Evitar uso alto"},{v:"prioritario",l:"Cartao prioritario"}]},{key:"logoUrl",label:"Logo URL"},{key:"emoji",label:"Emoji"},{key:"obs",label:"Observacao estrategica"}]} data={modal.data} onSave={function(d){ups("cartoes",Object.assign({},d,{limite:parseBR(d.limite),fecha:parseInt(d.fecha)||1,venc:parseInt(d.venc)||1,cor:d.cor||T.blue,cor2:d.cor2||"",band:d.band||"Cartao",obs:d.obs||"",bankKey:d.bankKey||inferBankKey(d.nome||d.band),visual:d.visual||"black",statusEstr:d.statusEstr||"manter_estável",logoUrl:d.logoUrl||"",emoji:d.emoji||""}))}} onClose={function(){setModal(null)}} />}
           {modal.type==="cat" && <SForm fields={[{key:"nome",label:"Nome"},{key:"tipo",label:"Tipo",type:"select",opts:[{v:"despesa",l:"Despesa"},{v:"receita",l:"Receita"}]},{key:"orc",label:"Orçamento mensal (R$)"}]} data={modal.data} onSave={function(d){ups("categorias",Object.assign({},d,{orc:parseBR(d.orc)}))}} onClose={function(){setModal(null)}} />}
-          {modal.type==="cloud" && (function(){
-            var u = sync.user;
-            var statusLabel = {synced:"Sincronizado", syncing:"Sincronizando...", connecting:"Conectando", offline:"Offline", error:"Erro de sincronia", signed_out:"Não conectado"}[sync.status] || sync.status;
-            return <div style={{padding:4}}>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}>
-                {u && u.user_metadata && u.user_metadata.avatar_url
-                  ? <img src={u.user_metadata.avatar_url} alt="" style={{width:48,height:48,borderRadius:"50%",border:"1px solid "+T.cyan+"55"}}/>
-                  : <div style={{width:48,height:48,borderRadius:"50%",background:T.cyan+"15",border:"1px solid "+T.cyan+"55",display:"flex",alignItems:"center",justifyContent:"center"}}><User size={22} color={T.cyan}/></div>}
-                <div>
-                  <div style={{fontSize:14,fontWeight:600,color:T.text}}>{u && (u.user_metadata && u.user_metadata.full_name || u.email) || "Usuário"}</div>
-                  <div style={{fontSize:11,color:T.muted,fontFamily:FF.mono}}>{u && u.email}</div>
-                </div>
-              </div>
-              <div style={{padding:"12px 14px",borderRadius:12,background:T.cyan+"08",border:"1px solid "+T.cyan+"22",marginBottom:12}}>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:T.muted,marginBottom:4}}>
-                  <span>STATUS</span>
-                  <span style={{color:sync.status==="synced"?T.green:sync.status==="error"?T.red:T.cyan,fontFamily:FF.mono}}>{statusLabel}</span>
-                </div>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:T.muted,marginBottom:4}}>
-                  <span>ÚLTIMA SYNC</span>
-                  <span style={{color:T.text,fontFamily:FF.mono}}>{sync.lastSync ? sync.lastSync.toLocaleString("pt-BR") : "—"}</span>
-                </div>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:T.muted}}>
-                  <span>DEVICE</span>
-                  <span style={{color:T.text,fontFamily:FF.mono}}>{DEVICE_ID}</span>
-                </div>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                <button onClick={function(){sync.forceSync().then(function(){flash("Sincronizado!");});}} style={{padding:"10px 14px",borderRadius:10,background:T.cyan+"15",border:"1px solid "+T.cyan+"40",color:T.cyan,cursor:"pointer",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                  <RefreshCw size={14}/> Forçar sync
-                </button>
-                <button onClick={function(){sync.signOut().then(function(){setModal(null);flash("Desconectado");});}} style={{padding:"10px 14px",borderRadius:10,background:T.red+"12",border:"1px solid "+T.red+"30",color:T.red,cursor:"pointer",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                  <LogOut size={14}/> Sair
-                </button>
-              </div>
-              <div style={{marginTop:14,padding:"10px 12px",borderRadius:10,background:T.green+"08",border:"1px solid "+T.green+"22",fontSize:11,color:T.muted,lineHeight:1.6}}>
-                Seus dados ficam salvos no Supabase e sincronizam em tempo real entre todos os dispositivos onde você fizer login com este Google.
-              </div>
-            </div>;
-          })()}
         </div>
       </div>}
 
@@ -4319,18 +4166,13 @@ export default function App() {
             <div className="terminal-readout" title="Horário local"><span className="tl-dot" /><span>SYS {liveTime || "--:--:--"}</span></div>
             {(function(){
               if (sync.status === "disabled") return null;
-              var col = T.dim, lbl = "OFFLINE", Icon = CloudOff, spin = false;
-              if (sync.status === "synced") { col = T.green; lbl = "SYNC OK"; Icon = Cloud; }
-              else if (sync.status === "syncing") { col = T.cyan; lbl = "SYNC..."; Icon = RefreshCw; spin = true; }
-              else if (sync.status === "connecting") { col = T.cyan; lbl = "CONNECT"; Icon = RefreshCw; spin = true; }
-              else if (sync.status === "signed_out") { col = T.gold; lbl = "LOGIN"; Icon = LogIn; }
+              var col = T.dim, lbl = "...", Icon = Cloud, spin = false;
+              if (sync.status === "synced") { col = T.green; lbl = "SYNC"; Icon = Cloud; }
+              else if (sync.status === "syncing") { col = T.cyan; lbl = "SYNC.."; Icon = RefreshCw; spin = true; }
+              else if (sync.status === "connecting") { col = T.cyan; lbl = "CONN.."; Icon = RefreshCw; spin = true; }
+              else if (sync.status === "offline") { col = T.orange; lbl = "OFF"; Icon = CloudOff; }
               else if (sync.status === "error") { col = T.red; lbl = "ERR"; Icon = CloudOff; }
-              else if (sync.status === "offline") { col = T.orange; lbl = "OFFLINE"; Icon = CloudOff; }
-              return <button onClick={function(){
-                if (sync.status === "signed_out") sync.signIn()["catch"](function(e){flash("Erro login: "+e.message);});
-                else if (sync.user) setModal({type:"cloud", title:"Cloud Sync"});
-                else sync.forceSync();
-              }} className="ripple-host" title={"Cloud: "+sync.status+(sync.lastSync?" · "+sync.lastSync.toLocaleTimeString("pt-BR"):"")} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,background:"rgba(5,8,18,0.5)",border:"1px solid "+col+"33",color:col,fontFamily:"'Geist Mono',monospace",fontSize:11,letterSpacing:"0.14em",cursor:"pointer"}}>
+              return <button onClick={function(){ sync.forceSync().then(function(){flash("Sincronizado!");}); }} title={"Cloud "+sync.status+(sync.lastSync?" · "+sync.lastSync.toLocaleTimeString("pt-BR"):"")} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:8,background:"rgba(5,8,18,0.5)",border:"1px solid "+col+"33",color:col,fontFamily:"'Geist Mono',monospace",fontSize:11,letterSpacing:"0.14em",cursor:"pointer"}}>
                 <Icon size={12} style={spin?{animation:"rotSlow 1.4s linear infinite"}:{}} />
                 <span>{lbl}</span>
               </button>;
