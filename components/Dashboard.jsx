@@ -57,11 +57,17 @@ const cloud = {
   },
   save: function(data) {
     if (!cloud.available()) return Promise.reject(new Error("offline"));
+    var ts = new Date().toISOString();
     return supabase.from(CLOUD_TABLE).upsert({
       user_id: USER_ID,
       data: JSON.stringify(data),
-      updated_at: new Date().toISOString()
-    }, { onConflict: "user_id" });
+      updated_at: ts
+    }, { onConflict: "user_id" }).select("updated_at").single()
+    .then(function(r) {
+      if (r.error) throw r.error;
+      // retorna o updated_at REAL que o Postgres gravou (pode diferir do ts que mandamos)
+      return (r.data && r.data.updated_at) || ts;
+    });
   },
   subscribe: function(onChange) {
     if (!cloud.available()) return function() {};
@@ -90,10 +96,20 @@ function useCloudSync(localDb, applyRemoteDb) {
   // status: disabled | connecting | syncing | synced | offline | error
   var _lastSync = useState(null); var lastSync = _lastSync[0]; var setLastSync = _lastSync[1];
   var pendingTimer = useRef(null);
-  var lastLocalRef = useRef(null);
+  var lastSavedHashRef = useRef(null);
   var unsubRef = useRef(null);
   var initRef = useRef(false);
-  var lastRemoteTsRef = useRef(null);
+  var ownTimestampsRef = useRef({}); // { ts: true } para ignorar nossos próprios echoes
+
+  // Hash leve pra detectar se o conteúdo realmente mudou
+  function hashOf(obj) {
+    try {
+      var s = JSON.stringify(obj);
+      var h = 0;
+      for (var i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+      return h + ":" + s.length;
+    } catch (e) { return Math.random().toString(); }
+  }
 
   // Pull inicial + subscribe realtime
   useEffect(function() {
@@ -101,11 +117,15 @@ function useCloudSync(localDb, applyRemoteDb) {
     setStatus("connecting");
     cloud.load().then(function(remote) {
       if (remote && remote.data) {
-        lastRemoteTsRef.current = remote.updated_at;
+        lastSavedHashRef.current = hashOf(remote.data);
         try { applyRemoteDb(remote.data, remote.updated_at); } catch (e) {}
       } else if (localDb) {
-        // Primeira vez: sobe o local atual
-        cloud.save(localDb)["catch"](function() {});
+        // Primeira vez, sobe o local atual e marca como ja salvo
+        var h0 = hashOf(localDb);
+        cloud.save(localDb).then(function(ts){
+          if (ts) ownTimestampsRef.current[ts] = true;
+          lastSavedHashRef.current = h0;
+        })["catch"](function() {});
       }
       setStatus("synced");
       setLastSync(new Date());
@@ -115,8 +135,15 @@ function useCloudSync(localDb, applyRemoteDb) {
       setStatus("error");
     });
     unsubRef.current = cloud.subscribe(function(remoteData, remoteTs) {
-      if (remoteTs === lastRemoteTsRef.current) return;
-      lastRemoteTsRef.current = remoteTs;
+      // 1. Ignora ecos da nossa própria escrita
+      if (remoteTs && ownTimestampsRef.current[remoteTs]) {
+        delete ownTimestampsRef.current[remoteTs];
+        return;
+      }
+      // 2. Ignora se conteúdo é byte-identico ao que ja temos
+      var h = hashOf(remoteData);
+      if (h === lastSavedHashRef.current) return;
+      lastSavedHashRef.current = h;
       try { applyRemoteDb(remoteData, remoteTs); setLastSync(new Date()); setStatus("synced"); } catch (e) {}
     });
     return function() { if (unsubRef.current) unsubRef.current(); };
@@ -127,15 +154,22 @@ function useCloudSync(localDb, applyRemoteDb) {
     if (!cloud.available()) return;
     if (!initRef.current) return; // espera init terminar
     if (!localDb) return;
-    if (lastLocalRef.current === localDb) return;
-    lastLocalRef.current = localDb;
+    var h = hashOf(localDb);
+    if (h === lastSavedHashRef.current) return; // conteudo identico, nao salva
     if (pendingTimer.current) clearTimeout(pendingTimer.current);
     setStatus("syncing");
     pendingTimer.current = setTimeout(function() {
-      cloud.save(localDb).then(function() {
+      cloud.save(localDb).then(function(ts) {
+        // marca o ts pra ignorar o eco que vai chegar pelo realtime
+        if (ts) {
+          ownTimestampsRef.current[ts] = true;
+          // limpa apos 30s pra nao crescer infinitamente
+          setTimeout(function(){ delete ownTimestampsRef.current[ts]; }, 30000);
+        }
+        lastSavedHashRef.current = h;
         setStatus("synced");
         setLastSync(new Date());
-      })["catch"](function() { setStatus("error"); });
+      })["catch"](function(e) { console.warn("[cloud] save fail", e); setStatus("error"); });
     }, 800);
     return function() { if (pendingTimer.current) clearTimeout(pendingTimer.current); };
   }, [localDb]);
