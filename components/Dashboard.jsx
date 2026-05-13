@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+// FIX-LOW-01: import React default tambem (compatibilidade Webpack4 / CRAv4 / classic JSX runtime).
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle, PiggyBank, Wallet, BarChart3, ArrowUpRight, ArrowDownRight, Edit3, Check, Bell, Shield, Activity, Landmark, RotateCcw, CheckCircle, Download, Plus, Trash2, X, Search, Calendar, Filter, ChevronLeft, ChevronRight, ChevronDown, Copy, Upload, Sun, Moon, Heart, Repeat, Zap, Cloud, CloudOff, RefreshCw } from "lucide-react";
 // Supabase carregado dinamicamente via CDN no boot, ver loadSupabase() abaixo.
@@ -16,6 +17,15 @@ import { TrendingUp, TrendingDown, DollarSign, Target, CreditCard, AlertTriangle
 
 const SUPABASE_URL = "https://xtndwkczzowmuarjjmzq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_KQVJEoQ6QBVYq6O78PQV_A_4zKmbY5R";
+// FIX-CRIT-03: aviso de RLS no boot. Sem RLS na tabela finance_state, qualquer pessoa que
+// descobrir SUPABASE_URL pode ler/escrever cofres trocando o parametro ?u=. Confirme:
+//   create policy "owner only" on finance_state for all
+//     using (user_id = current_setting('app.user_id'))
+//     with check (user_id = current_setting('app.user_id'));
+// Para suprimir o aviso depois de confirmar, defina window.__COJUR_RLS_OK = true.
+if (typeof window !== "undefined" && !window.__COJUR_RLS_OK) {
+  try { console.warn("[cojur] Atencao: confirme RLS ativa em " + SUPABASE_URL.split("//")[1] + " antes de ir a producao."); } catch(e) {}
+}
 // SMELL-03: nome do titular padrao centralizado para evitar literais espalhados.
 const OWNER_NAME = "joao";
 // SMELL-04: ATENCAO de seguranca:
@@ -39,9 +49,21 @@ const USER_ID = (function(){
 })();
 const CLOUD_TABLE = "finance_state";
 
-const CLOUD_ENABLED = SUPABASE_URL.indexOf("supabase.co") > -1
-  && SUPABASE_ANON_KEY.length > 20
-  && SUPABASE_ANON_KEY.indexOf("COLE_AQUI") === -1;
+// FIX-LOW-02: logger condicional. Em producao, defina window.__COJUR_QUIET = true para silenciar.
+function _cwarn(){ try { if (typeof window === "undefined" || !window.__COJUR_QUIET) console.warn.apply(console, arguments); } catch(e){} }
+
+// FIX-MED-02: CLOUD_ENABLED nao depende mais de matching exato de "supabase.co".
+// Aceita qualquer host valido (supabase.co, supabase.in, self-hosted). A validacao agora e:
+// (1) URL https valida; (2) chave nao-vazia minimamente plausivel; (3) sem placeholder.
+const CLOUD_ENABLED = (function(){
+  try {
+    var u = new URL(SUPABASE_URL);
+    if (u.protocol !== "https:") return false;
+    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.length < 20) return false;
+    if (SUPABASE_ANON_KEY.indexOf("COLE_AQUI") !== -1) return false;
+    return true;
+  } catch(e) { return false; }
+})();
 
 // Carrega Supabase JS via CDN UMD em runtime.
 // Funciona tanto no Vercel (produção) quanto no preview do Claude.ai (artefato).
@@ -58,17 +80,24 @@ function loadSupabaseLib() {
       existing.addEventListener("error", function(){ resolve(null); });
       return;
     }
+    // FIX-CRIT-02: SRI (Subresource Integrity) para evitar comprometimento de CDN.
+    // O hash sha384 deve ser computado e definido em window.__SUPABASE_SRI antes de iniciar o app.
+    // Para gerar:  curl -sSL https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+    var SRI = (typeof window !== "undefined" && window.__SUPABASE_SRI) || "";
     var s = document.createElement("script");
     s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
     s.async = true;
     s.crossOrigin = "anonymous";
+    if (SRI) s.integrity = SRI;
     s.setAttribute("data-vault-supabase", "1");
     s.onload = function(){ resolve(window.supabase || null); };
     s.onerror = function(){
-      // fallback unpkg
+      // fallback unpkg (mesmo SRI, pois e o mesmo arquivo da mesma versao pinada)
       var s2 = document.createElement("script");
       s2.src = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
       s2.async = true;
+      s2.crossOrigin = "anonymous";
+      if (SRI) s2.integrity = SRI;
       s2.onload = function(){ resolve(window.supabase || null); };
       s2.onerror = function(){ resolve(null); };
       document.head.appendChild(s2);
@@ -77,19 +106,29 @@ function loadSupabaseLib() {
   });
   return supabaseLoadPromise;
 }
+// FIX-RUNTIME-V81-1: dedupe createClient via promise compartilhada.
+// Antes: duas chamadas concorrentes a ensureSupabase criavam DOIS clients
+// porque ambas passavam pelo "if (supabase) return" antes do createClient
+// rodar. Resultado: warning "Multiple GoTrueClient instances".
+var _supabaseInitPromise = null;
 function ensureSupabase() {
   if (!CLOUD_ENABLED) return Promise.resolve(null);
   if (supabase) return Promise.resolve(supabase);
-  return loadSupabaseLib().then(function(lib){
-    if (!lib || !lib.createClient) return null;
+  if (_supabaseInitPromise) return _supabaseInitPromise;
+  _supabaseInitPromise = loadSupabaseLib().then(function(lib){
+    if (!lib || !lib.createClient) { _supabaseInitPromise = null; return null; }
     try {
-      supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+      if (!supabase) {
+        supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+      }
       return supabase;
     } catch (e) {
-      console.warn("[cloud] init falhou", e);
+      console.warn("[cloud] init falhou", e && e.message ? e.message : e);
+      _supabaseInitPromise = null;
       return null;
     }
   });
+  return _supabaseInitPromise;
 }
 
 function getDeviceId() {
@@ -115,7 +154,13 @@ const cloud = {
         .then(function(r) {
           if (r.error) throw r.error;
           if (!r.data) return null;
-          try { return { data: JSON.parse(r.data.data || "null"), updated_at: r.data.updated_at }; }
+          try {
+            var parsed = JSON.parse(r.data.data || "null");
+            // FIX-CRIT-01: valida schema antes de devolver. Payload corrompido vira null/normalizado.
+            var validated = (typeof window !== "undefined" && typeof window.__cojur_norm === "function")
+              ? window.__cojur_norm(parsed) : parsed;
+            return { data: validated, updated_at: r.data.updated_at };
+          }
           catch (e) { return null; }
         });
     });
@@ -151,7 +196,10 @@ const cloud = {
               lastSeen = newRow.updated_at;
               try {
                 var parsed = JSON.parse(newRow.data || "null");
-                if (parsed) onChange(parsed, newRow.updated_at);
+                // FIX-CRIT-01: valida schema antes de aplicar payload remoto vindo do realtime.
+                var validated = (typeof window !== "undefined" && typeof window.__cojur_norm === "function")
+                  ? window.__cojur_norm(parsed) : parsed;
+                if (validated) onChange(validated, newRow.updated_at);
               } catch (e) {}
             }
           })
@@ -210,7 +258,10 @@ function useCloudSync(localDb, applyRemoteDb) {
       setLastSync(new Date());
       initRef.current = true;
     })["catch"](function(e) {
-      console.warn("[cloud] load fail", e);
+      // FIX-RUNTIME-V81-2: stringifica erro pra ficar legivel no console
+      var em = (e && (e.message || e.error_description || e.hint)) || (typeof e === "string" ? e : "");
+      try { em = em || JSON.stringify(e); } catch(_jse) {}
+      console.warn("[cloud] load fail:", em || e);
       setStatus("error");
     });
     unsubRef.current = cloud.subscribe(function(remoteData, remoteTs) {
@@ -248,9 +299,17 @@ function useCloudSync(localDb, applyRemoteDb) {
     if (pendingTimer.current) clearTimeout(pendingTimer.current);
     setStatus("syncing");
     pendingDbRef.current = localDb;
+    var retryCount = 0;
     pendingTimer.current = setTimeout(function trySave() {
+      // FIX-MED-03: limite de retries + alerta. Antes retentava ate o infinito silenciosamente.
       if (inFlightRef.current) {
-        // ainda tem save em voo: tenta de novo em 400ms
+        retryCount++;
+        if (retryCount > 30) { // ~12s limite (30 * 400ms)
+          inFlightRef.current = false;
+          setStatus("error");
+          try { console.warn("[cloud] save preso, reset apos 30 tentativas"); } catch(e){}
+          return;
+        }
         pendingTimer.current = setTimeout(trySave, 400);
         return;
       }
@@ -312,6 +371,7 @@ let PC = [T.green,T.blue,T.gold,T.purple,T.cyan,T.orange,T.orange,"#FF6B6B",T.gr
 const MS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 const MSF = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const VER = 15;
+const PATCH = "v8.1"; // FIX-CRIT-V8: aplicados 6 patches criticos (metas, theme race, PC, datas, divida match, idx)
 const SK = "findash8";
 const BACKUP_SLOTS = 3;
 // === DESIGN TOKENS v16 FUTURISTIC ===
@@ -724,8 +784,8 @@ var ACHIEVEMENTS = [
   { id:"first_lanc", name:"Primeiro Passo", desc:"Adicionou o primeiro lançamento", icon:"Zap", rarity:"common", check:function(d){return (d.lancamentos||[]).length >= 1;} },
   { id:"first_meta", name:"Visão de Futuro", desc:"Criou a primeira meta financeira", icon:"Target", rarity:"common", check:function(d){return (d.metas||[]).length >= 1;} },
   { id:"first_invest", name:"Investidor Iniciante", desc:"Primeiro investimento registrado", icon:"PiggyBank", rarity:"common", check:function(d){return (d.investimentos||[]).length >= 1;} },
-  { id:"meta_batida", name:"Mestre da Meta", desc:"Bateu a primeira meta financeira", icon:"CheckCircle", rarity:"rare", check:function(d){return (d.metas||[]).some(function(m){return (m.atual||0) >= (m.valor||0) && (m.valor||0) > 0;});} },
-  { id:"trio_metas", name:"Trio Vencedor", desc:"Bateu três metas financeiras", icon:"Heart", rarity:"epic", check:function(d){return (d.metas||[]).filter(function(m){return (m.atual||0) >= (m.valor||0) && (m.valor||0) > 0;}).length >= 3;} },
+  { id:"meta_batida", name:"Mestre da Meta", desc:"Bateu a primeira meta financeira", icon:"CheckCircle", rarity:"rare", check:function(d){return (d.metas||[]).some(function(m){return getAtualMeta(m, d) >= (m.valor||0) && (m.valor||0) > 0;});} },
+  { id:"trio_metas", name:"Trio Vencedor", desc:"Bateu três metas financeiras", icon:"Heart", rarity:"epic", check:function(d){return (d.metas||[]).filter(function(m){return getAtualMeta(m, d) >= (m.valor||0) && (m.valor||0) > 0;}).length >= 3;} },
   { id:"investido_5k", name:"Cinco Mil", desc:"Acumulou R$ 5.000 em investimentos", icon:"Landmark", rarity:"rare", check:function(d){var t=0;(d.investimentos||[]).forEach(function(i){t+=(i.valor||0);});return t >= 5000;} },
   { id:"investido_25k", name:"Vinte e Cinco K", desc:"Acumulou R$ 25.000 em investimentos", icon:"Landmark", rarity:"epic", check:function(d){var t=0;(d.investimentos||[]).forEach(function(i){t+=(i.valor||0);});return t >= 25000;} },
   { id:"investido_100k", name:"Patrimônio Sólido", desc:"Acumulou R$ 100.000 em investimentos", icon:"Shield", rarity:"legendary", check:function(d){var t=0;(d.investimentos||[]).forEach(function(i){t+=(i.valor||0);});return t >= 100000;} },
@@ -1029,14 +1089,22 @@ function mkL() {
   a("2026-04-01","despesa","c1","Aluguel",2800,"pendente",true);
   a("2026-04-01","despesa","c1","Luz",149.90,"pendente",true);
   a("2026-04-01","despesa","c1","Internet",129.90,"pendente",true);
-  a("2026-04-01","despesa","c1","Água",80,"pendente",true);
+  // DATA-01: Agua 80 so em Abril/2026 (rec=false). Maio em diante: 100 (rec=true).
+  a("2026-04-01","despesa","c1","Água",80,"pago",false);
+  a("2026-05-01","despesa","c1","Água",100,"pendente",true);
   a("2026-04-01","despesa","c9","Supermercado",1400,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c9","Café Cápsulas",60,"pendente",true,0,0,"cartao","cd1");
+  // DATA-02: Cafe Capsulas descontinuado (so Abril). Maio em diante: "Cafe" R$ 100/mes.
+  a("2026-04-01","despesa","c9","Café Cápsulas",60,"pago",false,0,0,"cartao","cd1");
+  a("2026-05-01","despesa","c9","Café",100,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c2","Gastos Saídas",700,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c7","Gasolina",620,"pendente",true,0,0,"cartao","cd1");
+  // DATA-03: Gasolina 620 so em Abril (rec=false). Maio em diante: 310 (metade, rec=true).
+  a("2026-04-01","despesa","c7","Gasolina",620,"pago",false,0,0,"cartao","cd1");
+  a("2026-05-01","despesa","c7","Gasolina",310,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c13","Plano Pós",66,"pendente",true);
   a("2026-04-01","despesa","c13","Plano Pos Barbara",66,"pendente",true);
-  a("2026-04-01","despesa","c6","Barbeiro",55,"pendente",true,0,0,"cartao","cd1");
+  // DATA-04: Barbeiro 55 so em Abril (rec=false). Maio em diante: 50 (rec=true).
+  a("2026-04-01","despesa","c6","Barbeiro",55,"pago",false,0,0,"cartao","cd1");
+  a("2026-05-01","despesa","c6","Barbeiro",50,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c7","Lavagem Carro",50,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c16","Clube Curtai",44.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Pós-Graduação",98,"pendente",true);
@@ -1051,7 +1119,8 @@ function mkL() {
   a("2026-04-01","despesa","c4","Tec Concursos",44.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","ChatGPT",100,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","iCloud+",19.90,"pendente",true,0,0,"cartao","cd1");
-  a("2026-04-01","despesa","c3","Spotify",17.66,"pendente",true,0,0,"cartao","cd1");
+  // DATA-09a: Spotify atualizado de R$ 17,66 para R$ 23,90 (novo plano).
+  a("2026-04-01","despesa","c3","Spotify",23.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","Claude",689,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c3","Santander Select",50,"pendente",true);
   a("2026-04-01","despesa","c3","Revolut Ultra",199.99,"pendente",true);
@@ -1059,6 +1128,10 @@ function mkL() {
   a("2026-04-01","despesa","c16","Revpoints 500",46.90,"pendente",true,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c15","Anuidade BRB",91,"pendente",false,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c4","Faculdade Barbara",764,"pendente",true,0,0,"cartao","cd1");
+  // DATA-09b: novas assinaturas. Clube Ifood (maio), Shopee (junho), Seguro YOUSE (junho).
+  a("2026-05-01","despesa","c3","Clube Ifood",7.95,"pendente",true,0,0,"cartao","cd1");
+  a("2026-06-01","despesa","c3","Shopee",9.90,"pendente",true,0,0,"cartao","cd1");
+  a("2026-06-01","despesa","c7","Seguro YOUSE",369.53,"pendente",true,0,0,"cartao","cd1");
   // === DIVIDAS E PARCELAMENTOS (31 itens = R$ 4.776,81) ===
   // pT=total meses, pA=1 (primeiro mes)
   a("2026-04-01","parcela","c8","Acordo Serasa",96.36,"pendente",false,9,1,"pix","");
@@ -1097,6 +1170,8 @@ function mkL() {
   a("2026-05-01","parcela","c8","Cafeteira",444.00,"pendente",false,12,1,"cartao","cd1");
   a("2026-05-01","parcela","c8","Pneu",73.00,"pendente",false,12,1,"cartao","cd1");
   a("2026-06-01","parcela","c8","Mecânico",450.00,"pendente",false,6,1,"cartao","cd1");
+  // DATA-09c: IPTU 6x R$ 157,87 PIX a partir de junho/2026.
+  a("2026-06-01","parcela","c1","IPTU",157.87,"pendente",false,6,1,"pix","");
   // === DESPESAS VARIAVEIS ABRIL (8 itens = R$ 826,31) ===
   a("2026-04-01","despesa","c14","Amazon",28.79,"pendente",false,0,0,"cartao","cd1");
   a("2026-04-01","despesa","c14","Amazon",73.56,"pendente",false,0,0,"cartao","cd1");
@@ -1115,8 +1190,7 @@ const DEF = {
   contas: [{id:"ct1",nome:"Itaú Conta Corrente",saldo:0},{id:"ct2",nome:"Santander Conta Corrente",saldo:0},{id:"ct3",nome:"Bradesco Conta Corrente",saldo:0},{id:"ct4",nome:"Revolut Ultra",saldo:0}],
   lancamentos: mkL(),
   cartoes: [
-    {id:"cd1",nome:"Santander AAdvantage Platinum",band:"Mastercard Platinum",bankKey:"santander",emoji:"✈️",limite:20800,venc:27,fecha:3,cor:"#E11931",cor2:"#8B0000",visual:"executive",statusEstr:"concentrar_gastos",logoUrl:"",obs:"Cartao principal Santander",titular:OWNER_NAME},
-    {id:"cd2",nome:"Revolut Ultra",band:"Visa Infinite",bankKey:"revolut",emoji:"⚡",limite:999999,venc:0,fecha:0,cor:"#0075EB",cor2:"#001A3A",visual:"fintech",statusEstr:"manter_estável",logoUrl:"",obs:"Sem limite definido",titular:OWNER_NAME},
+    {id:"cd1",nome:"Santander AAdvantage Platinum",band:"Mastercard Platinum",bankKey:"santander",emoji:"✈️",limite:36267,venc:27,fecha:3,cor:"#E11931",cor2:"#8B0000",visual:"executive",statusEstr:"concentrar_gastos",logoUrl:"",obs:"Cartao principal Santander",titular:OWNER_NAME},
     {id:"cd3",nome:"Itau Visa Platinum",band:"Visa Platinum",bankKey:"itau",emoji:"🟧",limite:18500,venc:27,fecha:3,cor:"#FF7A00",cor2:"#1D2A7A",visual:"executive",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:OWNER_NAME},
     {id:"cd4",nome:"Bradesco Elo Nanquim",band:"Elo Nanquim",bankKey:"bradesco",emoji:"🔺",limite:5000,venc:27,fecha:3,cor:"#CC092F",cor2:"#4C0A17",visual:"black",statusEstr:"manter_estável",logoUrl:"",obs:"",titular:OWNER_NAME},
     {id:"cd13",nome:"Santander Unique Visa Infinite",band:"Visa Infinite",bankKey:"santander",emoji:"♦️",limite:10000,venc:27,fecha:3,cor:"#E11931",cor2:"#1A0006",visual:"black",statusEstr:"manter_estável",logoUrl:"",obs:"Visa Infinite Santander",titular:OWNER_NAME},
@@ -1138,7 +1212,7 @@ const DEF = {
     {id:"d4",nome:"Acordo Serasa 2",total:621,pago:0,parcela:51.76,pRest:12,vDia:1,taxa:0}
   ],
   investimentos: [
-    {id:"i1",nome:"Renda Fixa Santander",valor:30000,rent:1.0,tipo:"cdb",banco:"santander",liquidez:"diaria",dataAplicacao:"2026-03-01",vencimento:""}
+    {id:"i1",nome:"Renda Fixa Santander",valor:0,rent:1.0,tipo:"cdb",banco:"santander",liquidez:"diaria",dataAplicacao:"2026-03-01",vencimento:""}
   ],
   metas: [
     {id:"m1",nome:"Meta R$ 35 mil",valor:35000,prazo:"2026-03-25",vinc:"invest"},
@@ -1178,19 +1252,21 @@ function expandLançamentos(db) {
     var l = base[j];
 
     
-    if (l.rec && l.tipo !== "receita") {
+    // DATA-05a: parcelamentos com rec=true (ex: financiamento) sao expandidos APENAS pela
+    // branch de parcela (pT/pA), evitando duplicar a mesma desc em meses futuros.
+    if (l.rec && l.tipo !== "receita" && !(l.pT > 0)) {
       for (let offset =1; offset<=12; offset++) {
         var nm = l.mes + offset;
         var na = l.ano;
         while (nm > 12) { nm -= 12; na++; }
         var chave = l.desc + "|" + nm + "|" + na;
         if (!existeChave[chave]) {
-          var diaOrig = parseInt(l.data.slice(8,10),10) || 1;
+          var diaOrig = parseInt((l.data||"").slice(8,10),10) || 1;
           var diaMax = dimMes(nm, na);
           var diaSafe = Math.min(diaOrig, diaMax);
           var dt = na + "-" + (nm<10?"0":"") + nm + "-" + (diaSafe<10?"0":"") + diaSafe;
           extras.push({id:"vr_"+l.id+"_"+offset, data:dt, mes:nm, ano:na, tipo:l.tipo, cat:l.cat, desc:l.desc, valor:l.valor, status:"pendente", cartaoId:l.cartaoId||"", pg:l.pg||(l.cartaoId?"cartao":"pix"), rec:true, pT:l.pT, pA:l.pA, virtual:true});
-          existeChave[chave] = true;
+          // FIX-HIGH-04: NAO adiciona ao existeChave - permite duas fontes rec com mesma desc.
         }
       }
     }
@@ -1203,12 +1279,12 @@ function expandLançamentos(db) {
         while (rm > 12) { rm -= 12; ra++; }
         var rchave = l.desc + "|" + rm + "|" + ra;
         if (!existeChave[rchave]) {
-          var rDiaOrig = parseInt(l.data.slice(8,10),10) || 1;
+          var rDiaOrig = parseInt((l.data||"").slice(8,10),10) || 1;
           var rDiaMax = dimMes(rm, ra);
           var rDiaSafe = Math.min(rDiaOrig, rDiaMax);
           var rdt = ra + "-" + (rm<10?"0":"") + rm + "-" + (rDiaSafe<10?"0":"") + rDiaSafe;
           extras.push({id:"vr_"+l.id+"_"+ro, data:rdt, mes:rm, ano:ra, tipo:"receita", cat:l.cat, desc:l.desc, valor:l.valor, status:"pendente", cartaoId:"", pg:"pix", rec:true, pT:0, pA:0, virtual:true});
-          existeChave[rchave] = true;
+          // FIX-HIGH-04: NAO adiciona ao existeChave (mesma logica do bloco rec acima).
         }
       }
     }
@@ -1221,12 +1297,13 @@ function expandLançamentos(db) {
         while (pm > 12) { pm -= 12; pa++; }
         var pchave = l.desc + "|" + pm + "|" + pa;
         if (!existeChave[pchave]) {
-          var pDiaOrig = parseInt(l.data.slice(8,10),10) || 1;
+          var pDiaOrig = parseInt((l.data||"").slice(8,10),10) || 1;
           var pDiaMax = dimMes(pm, pa);
           var pDiaSafe = Math.min(pDiaOrig, pDiaMax);
           var pdt = pa + "-" + (pm<10?"0":"") + pm + "-" + (pDiaSafe<10?"0":"") + pDiaSafe;
-          extras.push({id:"vp_"+l.id+"_"+pk, data:pdt, mes:pm, ano:pa, tipo:l.tipo, cat:l.cat, desc:l.desc+" "+pk+"/"+l.pT, valor:l.valor, status:"pendente", cartaoId:l.cartaoId||"", pg:l.pg||(l.cartaoId?"cartao":"pix"), rec:false, pT:l.pT, pA:pk, virtual:true});
-          existeChave[pchave] = true;
+          // DATA-05b: virtuais herdam rec do source. Permite financiamento aparecer em fixas em todos os meses.
+          extras.push({id:"vp_"+l.id+"_"+pk, data:pdt, mes:pm, ano:pa, tipo:l.tipo, cat:l.cat, desc:l.desc+" "+pk+"/"+l.pT, valor:l.valor, status:"pendente", cartaoId:l.cartaoId||"", pg:l.pg||(l.cartaoId?"cartao":"pix"), rec:!!l.rec, pT:l.pT, pA:pk, virtual:true});
+          // FIX-HIGH-04: NAO adiciona ao existeChave - parcelas de fontes diferentes podem coexistir.
         }
       }
     }
@@ -1309,9 +1386,34 @@ function getVisaoAnual(db, anoRef) {
   return result;
 }
 
+// FIX-CRIT-V8-1: helper unificado para "quanto ja foi alcancado de uma meta".
+// O app tinha dois sistemas paralelos (m.atual no objeto + m.at calculado via investimentos)
+// que nao se falavam. Esta funcao centraliza a verdade: prefere investimentos vinculados
+// (sistema novo via m.vinc / investimento.metaId), com fallback para m.atual legado.
+function getAtualMeta(m, db) {
+  if (!m || !db) return 0;
+  var at = 0;
+  var temVinculo = false;
+  var invs = (db.investimentos)||[];
+  for (let _gi = 0; _gi < invs.length; _gi++) {
+    var _x = invs[_gi];
+    if ((m.vinc && _x.id === m.vinc) || (_x.metaId && _x.metaId === m.id)) {
+      at += Number(_x.valor) || 0;
+      temVinculo = true;
+    }
+  }
+  if (!temVinculo) {
+    // Backward-compat: usa m.atual se foi setado por distribuirAporte ou imports legados
+    at = Number(m.atual) || 0;
+    // Fallback adicional: se ha 1 unica meta sem vinculo, soma tudo (igual getMetP linha 1392)
+    if (at === 0 && (db.metas||[]).length === 1) {
+      for (let _gj = 0; _gj < invs.length; _gj++) at += Number(invs[_gj].valor) || 0;
+    }
+  }
+  return at;
+}
+
 function getMetP(db) {
-  // FIX MOD-09: cada meta usa apenas o investimento vinculado (m.vinc) ou os marcados via metaId.
-  // Se nenhuma vinculacao for definida, mostra 0 para nao contar o mesmo dinheiro varias vezes.
   var invTotal = 0;
   for (let i =0; i<db.investimentos.length; i++) invTotal += Number(db.investimentos[i].valor) || 0;
   return (db.metas||[]).map(function(m) {
@@ -1940,6 +2042,11 @@ function doSave(d) {
     if (s) s.setItem(SK, j);
     return true;
   } catch (e) {
+    // FIX-MED-04: detecta quota cheia e expoe via flag global. UI pode mostrar aviso.
+    if (e && (e.name === "QuotaExceededError" || (e.code && e.code === 22) || /quota/i.test(String(e.message||"")))) {
+      try { if (typeof window !== "undefined") window.__cojur_quota_full = true; } catch(_){}
+      try { console.warn("[storage] localStorage cheio. Considere exportar e limpar."); } catch(_){}
+    }
     return false;
   }
 }
@@ -2015,6 +2122,14 @@ function norm(r) {
     if (typeof r.investimentoFixo !== "number") { d.investimentoFixo = DEF.investimentoFixo; }
     d._migrationLog.push({from: oldVer, to: 13, at: new Date().toISOString(), preservedUser: true});
   }
+  // FIX-MED-05: migracao 13 -> 15 documentada (campos novos sem dado destrutivo).
+  if (oldVer >= 13 && oldVer < VER) {
+    // v14: garantia de salarioDia presente.
+    if (typeof d.salarioDia !== "number") d.salarioDia = 25;
+    // v15: garantia de faturasManuais como objeto.
+    if (!d.faturasManuais || typeof d.faturasManuais !== "object") d.faturasManuais = {};
+    d._migrationLog.push({from: oldVer, to: VER, at: new Date().toISOString(), additive: true});
+  }
 
   var savedCats = r.categorias || [];
   d.categorias = CATS.map(function(cat) {
@@ -2034,7 +2149,7 @@ function norm(r) {
     for (let pf = 0; pf < pixForce.length; pf++) { if (descL.indexOf(pixForce[pf]) >= 0) { isPix = true; break; } }
     if (isPix) { out.pg = "pix"; out.cartaoId = ""; }
     else if ((out.tipo === "parcela" || out.cat === "c14") && !out.cartaoId) { out.pg = "cartao"; out.cartaoId = "cd1"; }
-    var brbFixas = ["anuidade brb","faculdade barbara","faculdade bárbara","claude","spotify","icloud","chatgpt","tec concursos","legis","medicamentos","ritalina","venvanse","cinemark","streaming","totalpass barbara","totalpass","total pass","spike","clube curtai","curtai","supermercado","cafe capsulas","café cápsulas","gastos saidas","gastos saídas","gasolina","barbeiro","lavagem carro","pós-graduação","pos graduacao","estratégia concursos","estrategia concursos","boticário","boticario","dock robô","dock robo","aspirador robô","aspirador robo","revpoints"];
+    var brbFixas = ["anuidade brb","faculdade barbara","faculdade bárbara","claude","spotify","icloud","chatgpt","tec concursos","legis","medicamentos","ritalina","venvanse","cinemark","streaming","totalpass barbara","totalpass","total pass","spike","clube curtai","curtai","supermercado","cafe capsulas","café cápsulas","cafe","café","gastos saidas","gastos saídas","gasolina","barbeiro","lavagem carro","pós-graduação","pos graduacao","estratégia concursos","estrategia concursos","boticário","boticario","dock robô","dock robo","aspirador robô","aspirador robo","revpoints","shopee","clube ifood","seguro youse","youse"];
     if (!isPix && (!out.cartaoId || out.pg !== "cartao")) {
       for (let bf = 0; bf < brbFixas.length; bf++) {
         if (descL.indexOf(brbFixas[bf]) >= 0) { out.pg = "cartao"; out.cartaoId = "cd1"; break; }
@@ -2093,7 +2208,9 @@ function norm(r) {
     // 1) Atualiza saldo do investimento i1 se ainda estiver no valor antigo
     if (Array.isArray(d.investimentos)) {
       var invI1 = d.investimentos.find(function(x){return x.id === "i1";});
-      if (invI1 && invI1.valor === 25000) invI1.valor = 30000;
+      // DATA-06c: neutralizado. Nao mais reativa o ajuste 25000->30000 porque
+      // o usuario reportou que o saldo investido atual e 0.
+      // if (invI1 && invI1.valor === 25000) invI1.valor = 30000;
     }
     // 2) Cria a divida do financiamento (taxa estimada de 1,2% am tipica de CDC veicular;
     //    ajuste em db.dividas se a taxa real do contrato for diferente)
@@ -2126,7 +2243,7 @@ function norm(r) {
         status: "pendente",
         cartaoId: "",
         pg: "pix",
-        rec: false,
+        rec: true,
         pT: 60,
         pA: 1,
         totalCompra: 60 * 3046.84
@@ -2170,6 +2287,68 @@ function norm(r) {
     }
     d._carroV2 = true;
   }
+  // DATA-05c: CARRO V3 — Financiamento Carro vira parcela COM rec=true para aparecer
+  // tambem em despesas fixas, alem de continuar listado em parcelamentos.
+  // Combinado com DATA-05a/b em expandLançamentos, nao duplica nos meses seguintes.
+  // DATA-09d: injecao das mudancas V9 (IPTU, Spotify ajuste, Shopee, Clube Ifood, Seguro YOUSE).
+  if (!d._dataV9) {
+    if (!Array.isArray(d.lancamentos)) d.lancamentos = [];
+    // Helper: garante existencia de um lancamento por descricao (case-insensitive).
+    function _addIfMissing(o) {
+      var dL = (o.desc||"").toLowerCase();
+      var existe = d.lancamentos.some(function(l){ return (l.desc||"").toLowerCase() === dL; });
+      if (!existe) { d.lancamentos.push(Object.assign({id: uid(), totalCompra:0}, o)); }
+    }
+    // Spotify: atualiza valor do existente para 23.90 (todos os meses, virtual ou nao)
+    d.lancamentos.forEach(function(l){
+      if ((l.desc||"").toLowerCase() === "spotify" && l.valor !== 23.90) { l.valor = 23.90; }
+    });
+    // Clube Ifood: nova assinatura recorrente a partir de 2026-05-01
+    _addIfMissing({data:"2026-05-01", mes:5, ano:2026, tipo:"despesa", cat:"c3", desc:"Clube Ifood", valor:7.95, status:"pendente", cartaoId:"cd1", pg:"cartao", rec:true, pT:0, pA:0});
+    // Shopee: nova assinatura recorrente a partir de 2026-06-01
+    _addIfMissing({data:"2026-06-01", mes:6, ano:2026, tipo:"despesa", cat:"c3", desc:"Shopee", valor:9.90, status:"pendente", cartaoId:"cd1", pg:"cartao", rec:true, pT:0, pA:0});
+    // Seguro YOUSE: despesa fixa mensal recorrente a partir de 2026-06-01 no cd1
+    _addIfMissing({data:"2026-06-01", mes:6, ano:2026, tipo:"despesa", cat:"c7", desc:"Seguro YOUSE", valor:369.53, status:"pendente", cartaoId:"cd1", pg:"cartao", rec:true, pT:0, pA:0});
+    // IPTU: parcela 6x R$ 157,87 PIX a partir de 2026-06-01
+    _addIfMissing({data:"2026-06-01", mes:6, ano:2026, tipo:"parcela", cat:"c1", desc:"IPTU", valor:157.87, status:"pendente", cartaoId:"", pg:"pix", rec:false, pT:6, pA:1});
+    d._migrationLog.push({event: "dataV9", at: new Date().toISOString(), detail: "Spotify 23.90; Clube Ifood, Shopee, Seguro YOUSE e IPTU inseridos."});
+    d._dataV9 = true;
+  }
+  // DATA-08b: Revolut Ultra (cd2) nao liberou limite, remover do conjunto de cartoes. One-shot.
+  // OBS: a conta corrente Revolut (ct4) e a assinatura "Revolut Ultra" como despesa fixa nao sao tocadas.
+  if (!d._cd2RevolutRemoved) {
+    if (Array.isArray(d.cartoes)) {
+      d.cartoes = d.cartoes.filter(function(c){ return c.id !== "cd2"; });
+    }
+    d._migrationLog.push({event: "cd2RevolutRemoved", at: new Date().toISOString(), detail: "Revolut Ultra (cd2) removido — sem limite de credito liberado."});
+    d._cd2RevolutRemoved = true;
+  }
+  // DATA-07b: AAdvantage Platinum (cd1) teve aumento de limite para R$ 36.267. One-shot.
+  if (!d._cd1LimiteV2) {
+    if (Array.isArray(d.cartoes)) {
+      var aad = d.cartoes.find(function(c){ return c.id === "cd1"; });
+      if (aad && aad.limite < 36267) { aad.limite = 36267; }
+    }
+    d._migrationLog.push({event: "cd1LimiteV2", at: new Date().toISOString(), detail: "AAdvantage cd1.limite atualizado para 36267"});
+    d._cd1LimiteV2 = true;
+  }
+  // DATA-06b: zera valor investido (usuario informou que esta em 0). Migracao one-shot.
+  if (!d._investV1Zero) {
+    if (Array.isArray(d.investimentos)) {
+      var iZ = d.investimentos.find(function(x){return x.id === "i1";});
+      if (iZ) { iZ.valor = 0; }
+    }
+    d._migrationLog.push({event: "investV1Zero", at: new Date().toISOString(), detail: "i1.valor zerado conforme estado atual"});
+    d._investV1Zero = true;
+  }
+  if (!d._carroV3) {
+    var finLanc = d.lancamentos.find(function(l){ return (l.desc||"").toLowerCase() === "financiamento carro"; });
+    if (finLanc && !finLanc.rec) {
+      finLanc.rec = true;
+      d._migrationLog.push({event: "carroV3_rec_true", at: new Date().toISOString(), detail: "Financiamento Carro agora aparece em parcelamentos E despesas fixas."});
+    }
+    d._carroV3 = true;
+  }
   if (!Array.isArray(d.contas) || !d.contas.length) d.contas = DEF.contas;
   if (!Array.isArray(d.cartoes)) d.cartoes = DEF.cartoes;
   d.cartoes = d.cartoes.map(function(c){ return Object.assign({obs:"", bankKey: inferBankKey(c.nome), logoUrl:"", emoji:"", cor2:"", visual:"black", statusEstr:"manter_estável", titular:OWNER_NAME}, c, { bankKey:(c.bankKey||inferBankKey(c.nome||c.band)), logoUrl:c.logoUrl||"", emoji:c.emoji||"", cor2:c.cor2||"", visual:c.visual||"black", statusEstr:c.statusEstr||"manter_estável", titular:c.titular||OWNER_NAME }); });
@@ -2182,6 +2361,9 @@ function norm(r) {
   });
   return d;
 }
+
+// FIX-CRIT-01: expoe norm para que cloud.load/subscribe validem schema antes de aplicar.
+if (typeof window !== "undefined") { window.__cojur_norm = norm; }
 
 
 // FIX CRIT-01: estilos compartilhados sao recomputados a cada troca de tema (ver applyThemeToStyles)
@@ -2934,7 +3116,7 @@ function calcScoreCOJUR(db, mes, ano) {
   // Fator 2: % de metas batidas (peso 25%)
   var metasCalc = (typeof getMetP === "function") ? getMetP(db) : (db.metas || []).map(function(m){ return Object.assign({at:0}, m); });
   var batidas = metasCalc.filter(function(m){
-    var atual = Number(m.at !== undefined ? m.at : (m.atual || 0)) || 0;
+    var atual = getAtualMeta(m, db);
     var valor = Number(m.valor) || 0;
     return atual >= valor && valor > 0;
   }).length;
@@ -2997,7 +3179,7 @@ function calcStreaks(db) {
     if (pendVencidoNoDia && i > 0) break;
     streakDisciplina++;
   }
-  var metasBatidas = (db.metas||[]).filter(function(m){ return (m.atual||0) >= (m.valor||0) && (m.valor||0) > 0; }).length;
+  var metasBatidas = (db.metas||[]).filter(function(m){ return getAtualMeta(m, db) >= (m.valor||0) && (m.valor||0) > 0; }).length;
   var diasSemDivida = (db.dividas||[]).length === 0 ? streakDisciplina : 0;
   return {
     disciplina: streakDisciplina,
@@ -3046,6 +3228,11 @@ function calcPredictRating(db, mes, ano) {
 // (recomendado para nao expor a chave). Localmente, defina window.__ANTHROPIC_KEY
 // ou substitua o endpoint para apontar para seu proxy.
 const ANTHROPIC_ENDPOINT = (typeof window !== "undefined" && window.__ANTHROPIC_PROXY) || "https://api.anthropic.com/v1/messages";
+// FIX-HIGH-05: aviso de chave em browser. Em producao SEMPRE use window.__ANTHROPIC_PROXY apontando
+// para um backend que injete x-api-key server-side. Browser-direct vaza chave a qualquer extensao maliciosa.
+if (typeof window !== "undefined" && window.__ANTHROPIC_KEY && !window.__ANTHROPIC_PROXY) {
+  try { console.warn("[ai] AVISO: x-api-key sendo enviado direto do browser. Configure window.__ANTHROPIC_PROXY para proxy backend."); } catch(e) {}
+}
 function aiHeaders() {
   var h = {"Content-Type": "application/json"};
   var key = (typeof window !== "undefined" && window.__ANTHROPIC_KEY) || "";
@@ -3423,6 +3610,21 @@ function HeroNarrative(props) {
 }
 
 
+// FIX-HIGH-01: componente isolado evita re-render do App inteiro a cada segundo.
+function LiveClock(props) {
+  var _v = useState(""); var v = _v[0]; var setV = _v[1];
+  useEffect(function(){
+    function tick(){
+      var d = new Date();
+      setV(String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0"));
+    }
+    tick();
+    var iv = setInterval(tick, 1000);
+    return function(){ clearInterval(iv); };
+  }, []);
+  return <span style={props.style||null}>{v}</span>;
+}
+
 export default function App() {
   var _db = useState(DEF); var db = _db[0]; var setDB = _db[1];
   var _mes = useState(4); var mes = _mes[0]; var setMes = _mes[1];
@@ -3532,8 +3734,10 @@ export default function App() {
       sv(Object.assign({}, db, { achievements: nextUnlocked }));
       setAchQueue(function(prev){ return prev.concat(newly); });
     }
-  }, [db.lancamentos, db.metas, db.investimentos, db.cartoes, db.contas, db.dividas, booting]);
+  // FIX-MED-01: setDB substitui o objeto inteiro, entao deps individuais nao adicionavam precisao.
+  }, [db, booting]);
   useEffect(function(){
+    // FIX-HIGH-02: trocou setInterval(700ms) por MutationObserver — sem polling continuo.
     if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(en){
@@ -3548,19 +3752,12 @@ export default function App() {
       nodes.forEach(function(n){ io.observe(n); });
     }
     attach();
-    var iv = setInterval(attach, 700);
-    return function(){ clearInterval(iv); io.disconnect(); };
+    var mo = (typeof MutationObserver !== "undefined") ? new MutationObserver(attach) : null;
+    if (mo) mo.observe(document.body, { childList: true, subtree: true });
+    return function(){ if (mo) mo.disconnect(); io.disconnect(); };
   }, [tab, mes, ano]);
-  var _liveTime = useState(""); var liveTime = _liveTime[0]; var setLiveTime = _liveTime[1];
-  useEffect(function() {
-    function updateTime() {
-      var d = new Date();
-      setLiveTime(String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0") + ":" + String(d.getSeconds()).padStart(2,"0"));
-    }
-    updateTime();
-    var iv = setInterval(updateTime, 1000);
-    return function(){ clearInterval(iv); };
-  }, []);
+  // FIX-HIGH-01: LiveClock virou componente isolado (ver definicao acima de App).
+  // Antes: setLiveTime no App raiz causava re-render de TODO o dashboard a cada 1s.
   useEffect(function() {
     if (typeof window === "undefined") return;
     function handleMove(e) {
@@ -3686,8 +3883,25 @@ export default function App() {
   var _patrimInput = useState(25000); var patrimInput = _patrimInput[0]; var setPatrimInput = _patrimInput[1];
   var _cardSpend = useState({sant:0,itau:0,brad:0}); var cardSpend = _cardSpend[0]; var setCardSpend = _cardSpend[1];
   var _cardLimits = useState({sant:11343,itau:18500,brad:5000}); var cardLimits = _cardLimits[0]; var setCardLimits = _cardLimits[1];
-  T = darkMode ? T_DARK : T_LIGHT;
-  applyThemeToStyles(); // FIX CRIT-01: re-popula bx/inp/mc/mc2/lb com cores do tema atual
+  // FIX-CRIT-V8-2/V8-3: mutacao de T, PC e styles agora em useLayoutEffect.
+  // Antes: T = ... ; applyThemeToStyles() eram side effects DURANTE o render,
+  // o que viola as regras do React (especialmente em Strict Mode / Concurrent).
+  // Alem disso, PC ficava capturado uma vez no load do modulo e nunca atualizava.
+  // Agora: useLayoutEffect roda antes do paint, sincroniza T, repopula PC in-place
+  // (preserva referencias capturadas em closures) e refaz applyThemeToStyles.
+  if (typeof React !== "undefined" && React.useLayoutEffect) {
+    React.useLayoutEffect(function(){
+      T = darkMode ? T_DARK : T_LIGHT;
+      var nextPC = [T.green,T.blue,T.gold,T.purple,T.cyan,T.orange,T.orange,"#FF6B6B",T.greenL,"#00AAFF"];
+      PC.length = 0;
+      for (var _pcI = 0; _pcI < nextPC.length; _pcI++) PC.push(nextPC[_pcI]);
+      applyThemeToStyles();
+    }, [darkMode]);
+  } else {
+    // fallback (ambiente sem useLayoutEffect): mantem o comportamento legado
+    T = darkMode ? T_DARK : T_LIGHT;
+    applyThemeToStyles();
+  }
   var fr = useRef(null);
   var touchStart = useRef(null);
   var touchEnd = useRef(null);
@@ -3698,7 +3912,7 @@ export default function App() {
     if (!touchStart.current || !touchEnd.current) return;
     var diff = touchStart.current - touchEnd.current;
     if (Math.abs(diff) > 60) {
-      var idx = -1;
+      // FIX-CRIT-V8-7: remove duplicacao de `var idx = -1`
       var idx = -1;
       for (let ti = 0; ti < TABS.length; ti++) { if (TABS[ti].id === tab) { idx = ti; break; } }
       if (diff > 0 && idx < TABS.length - 1) setTab(TABS[idx + 1].id);
@@ -3898,7 +4112,8 @@ export default function App() {
     function onMove(e){
       glow.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px) translate(-50%,-50%)";
       var now = Date.now();
-      if (now - lastTrail > 60) {
+      // FIX-HIGH-03: throttle subiu de 60ms para 140ms — corta a churn de DOM em mais da metade.
+      if (now - lastTrail > 140) {
         lastTrail = now;
         var t = document.createElement("div"); t.className = "vv-cursor-trail";
         t.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px) translate(-50%,-50%)";
@@ -3996,7 +4211,10 @@ export default function App() {
           var nm = r.mes + (k - pA);
           var na = r.ano;
           while (nm > 12) { nm -= 12; na++; }
-          var dt = na + "-" + (nm<10?"0":"") + nm + "-" + base.data.slice(8);
+          // FIX-CRIT-V8-4: clampar dia ao último dia do mes destino. Antes: data "2026-02-31" para compra dia 31.
+          var diaOrigSL = parseInt((base.data||"").slice(8,10), 10) || 1;
+          var diaSafeSL = Math.min(diaOrigSL, dimMes(nm, na));
+          var dt = na + "-" + (nm<10?"0":"") + nm + "-" + (diaSafeSL<10?"0":"") + diaSafeSL;
           nL.push(Object.assign({}, base, {id:uid(), data:dt, mes:nm, ano:na, pA:k, status:"pendente"}));
         }
       }
@@ -4016,8 +4234,23 @@ export default function App() {
     
     if ((lanc.tipo === "parcela" || lanc.pT > 0) && lanc.cat === "c8") {
       var descBase = String(lanc.desc||"").replace(/\s*\d+\/\d+$/, "").replace(/\s*\(copia\)$/, "").trim().toLowerCase();
+      // FIX-CRIT-V8-5: matching restritivo. Antes: substring bidirecional causava double-counting
+      // quando duas dividas tinham nomes similares (ex: "Acordo Serasa" e "Acordo Serasa 2").
+      // Agora: prefere match exato; em fallback, pega APENAS o melhor (mais especifico) por dividaId
+      // ou pelo nome mais longo. Tambem da preferencia ao lanc.dividaId se existir.
+      var dividaIdAlvo = lanc.dividaId || null;
+      var alvoBest = null;
+      var alvoBestScore = -1;
+      (ndb.dividas||[]).forEach(function(d) {
+        var divNome = String(d.nome||"").toLowerCase().trim();
+        var score = -1;
+        if (dividaIdAlvo && d.id === dividaIdAlvo) score = 1000; // vinculo explicito vence tudo
+        else if (divNome && divNome === descBase) score = 500;   // match exato
+        else if (divNome && (divNome.indexOf(descBase) >= 0 || descBase.indexOf(divNome) >= 0)) score = divNome.length; // mais especifico ganha
+        if (score > alvoBestScore) { alvoBestScore = score; alvoBest = d; }
+      });
       ndb.dividas = (ndb.dividas||[]).map(function(d) {
-        if (String(d.nome||"").toLowerCase().indexOf(descBase) >= 0 || descBase.indexOf(String(d.nome||"").toLowerCase()) >= 0) {
+        if (alvoBest && d.id === alvoBest.id) {
           var delta = novoStatus === "pago" ? (lanc.valor||0) : -(lanc.valor||0);
           return Object.assign({}, d, {pago: Math.max(0, (d.pago||0) + delta)});
         }
@@ -4499,7 +4732,7 @@ export default function App() {
     var parcList = Object.keys(parcInfo).map(function(k){var p=parcInfo[k]; return p.desc+": "+f$(p.valor)+"/mês, faltam "+(p.pT-p.pA)+" parcelas (~"+(p.pT-p.pA)+" meses)";}).join("\n");
     callAI(
       "Você é um planejador patrimonial de longo prazo. Projete os próximos 12 meses, mês a mês, considerando: renda fixa, despesas fixas, parcelas que terminam (liberam orçamento), dívidas sendo pagas, investimentos acumulando, e metas em progresso. Para cada mês mostre: patrimônio líquido projetado (investimentos - dívidas restantes), sobra acumulada, dívidas que se encerram, parcelas que terminam. No final, de o panorama geral: quando ficará livre de dívidas, quando atingirá cada meta, patrimônio estimado em 12 meses. Nunca use travessões dentro de parágrafos. Use números concretos. Max 400 palavras. Português.",
-      "SITUAÇÃO ATUAL:\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio atual (investimentos): " + f$(pat.inv) + "\n\nDÍVIDAS ATIVAS:\n" + (divInfo||"Nenhuma") + "\n\nPARCELAMENTOS ATIVOS:\n" + (parcList||"Nenhum") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)+" (aporte "+f$(m.aporte)+"/mês, prazo "+m.prazo+")"}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
+      "SITUAÇÃO ATUAL:\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio atual (investimentos): " + f$(pat.inv) + "\n\nDÍVIDAS ATIVAS:\n" + (divInfo||"Nenhuma") + "\n\nPARCELAMENTOS ATIVOS:\n" + (parcList||"Nenhum") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(getAtualMeta(m, db))+"/"+f$(m.valor)+" (aporte "+f$(m.aporte)+"/mês, prazo "+m.prazo+")"}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
     ).then(function(r){setAiPatrim(r);setAiLoad("active", false)});
   }
 
@@ -4514,7 +4747,7 @@ export default function App() {
     var totalParcLanc = parcAtivas.reduce(function(s,l){return s+(Number(l.valor)||0)},0);
     callAI(
       "Você é um consultor especializado em compra de veículos no Brasil. O usuário quer comprar um carro. Com base nos dados financeiros reais, analise detalhadamente:\n\n1) VALOR IDEAL DO CARRO: Qual faixa de preço é compatível com a renda e patrimônio. Regra: parcela não deve ultrapassar 20% da renda líquida, e o carro não deve valer mais que 50% da renda anual.\n\n2) MELHOR MOMENTO: Considerando dividas ativas, parcelas terminando, e projeção de sobra, quando seria seguro comprar (mes/ano estimado).\n\n3) COMO COMPRAR: Compare financiamento bancário vs consórcio vs à vista. Calcule cenarios de entrada (20%, 30%, 50%) com parcelas em 36, 48 e 60 meses. Use taxa média de 1.5% a.m. para financiamento.\n\n4) PARCELA IDEAL: Valor máximo de parcela que nao compromete as metas e a saúde financeira, considerando as parcelas e dividas já existentes.\n\n5) SEGURO ESTIMADO: Calcule com base no valor do carro (media 5-8% do valor ao ano para perfil jovem).\n\n6) CUSTOS INDIRETOS MENSAIS: IPVA (parcele em 3x), licenciamento, combustível (estimativa 1.200km/mês), manutenção preventiva, estacionamento, lavagem, revisoes periodicas, depreciação anual estimada (15% no primeiro ano, 10% nos seguintes).\n\n7) IMPACTO TOTAL: Some parcela + seguro + custos indiretos e mostre o comprometimento real mensal. Compare com a sobra atual.\n\n8) RECOMENDAÇÃO FINAL: Comprar agora ou esperar? Qual estrategia seguir?\n\nNunca use travessões dentro de parágrafos. Seja extremamente específico com valores em reais. Max 500 palavras. Português.",
-      "SITUAÇÃO FINANCEIRA:\nRenda mensal: " + f$(pv.recTotal) + "\nDespesas totais: " + f$(pv.despTotal) + "\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio (investimentos): " + f$(pat.inv) + "\nDívidas restantes: " + f$(totalDivRest) + " (parcelas: " + f$(totalParcMes) + "/mês)\nParcelamentos mensais: " + f$(totalParcLanc) + "\nComprometimento atual com parcelas+dívidas: " + f$(totalParcMes+totalParcLanc) + "/mês\n\nDÍVIDAS DETALHADAS:\n" + divAtivas.map(function(d){return d.nome+": restam "+f$(d.total-d.pago)+", "+f$(d.parcela)+"/mês"}).join("\n") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(m.atual)+"/"+f$(m.valor)}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
+      "SITUAÇÃO FINANCEIRA:\nRenda mensal: " + f$(pv.recTotal) + "\nDespesas totais: " + f$(pv.despTotal) + "\nSobra mensal: " + f$(pv.sobra) + "\nInvestimento fixo: " + f$(db.investimentoFixo||0) + "/mês\nPatrimônio (investimentos): " + f$(pat.inv) + "\nDívidas restantes: " + f$(totalDivRest) + " (parcelas: " + f$(totalParcMes) + "/mês)\nParcelamentos mensais: " + f$(totalParcLanc) + "\nComprometimento atual com parcelas+dívidas: " + f$(totalParcMes+totalParcLanc) + "/mês\n\nDÍVIDAS DETALHADAS:\n" + divAtivas.map(function(d){return d.nome+": restam "+f$(d.total-d.pago)+", "+f$(d.parcela)+"/mês"}).join("\n") + "\n\nMETAS:\n" + (db.metas||[]).map(function(m){return m.nome+": "+f$(getAtualMeta(m, db))+"/"+f$(m.valor)}).join("\n") + "\n\nDADOS COMPLETOS:\n" + getFinCtx()
     ).then(function(r){setAiCar(r);setAiLoad("active", false)});
   }
 
@@ -4634,14 +4867,16 @@ export default function App() {
   }
 
   function distribuirAporte() {
-    var metasAtivas = (db.metas||[]).filter(function(m){return (m.atual||0)<m.valor});
+    // FIX-CRIT-V8-1: filtros e checagens agora usam getAtualMeta para somar investimentos vinculados
+    // e o m.atual legado num so numero. Assim a funcao funciona em metas vinculadas tambem.
+    var metasAtivas = (db.metas||[]).filter(function(m){return getAtualMeta(m, db) < m.valor});
     var totalAp = metasAtivas.reduce(function(s,x){return s+(x.aporte||0)},0);
     var disp = Math.max(0, (getPrevisão(db,mes,ano).sobra||0) - (db.investimentoFixo||0));
     if (disp <= 0 || totalAp <= 0) { flash("Sem sobra disponivel para aportes"); setShowAporteModal(false); return; }
     var novasMetas = (db.metas||[]).map(function(m) {
-      if ((m.atual||0) >= m.valor) return m;
+      if (getAtualMeta(m, db) >= m.valor) return m;
       var val = Math.round(disp * (m.aporte||0) / totalAp * 100) / 100;
-      var novoAtual = Math.min(m.valor, (m.atual||0) + val);
+      var novoAtual = Math.min(m.valor, (Number(m.atual)||0) + val);
       return Object.assign({}, m, {atual: novoAtual});
     });
     sv(Object.assign({}, db, {metas: novasMetas}));
@@ -4668,7 +4903,7 @@ export default function App() {
     html += '</table>';
     if (db.metas && db.metas.length > 0) {
       html += '<h2>Metas</h2><table><tr><th>Meta</th><th>Atual</th><th>Alvo</th><th>Progresso</th></tr>';
-      (db.metas||[]).forEach(function(m){var pr=m.valor>0?Math.round(m.atual/m.valor*100):0;html+='<tr><td>'+m.nome+'</td><td class="num">'+f$(m.atual)+'</td><td class="num">'+f$(m.valor)+'</td><td class="num '+(pr>=100?'green':'gold')+'">'+pr+'%</td></tr>';});
+      (db.metas||[]).forEach(function(m){var atM=getAtualMeta(m, db);var pr=m.valor>0?Math.round(atM/m.valor*100):0;html+='<tr><td>'+m.nome+'</td><td class="num">'+f$(atM)+'</td><td class="num">'+f$(m.valor)+'</td><td class="num '+(pr>=100?'green':'gold')+'">'+pr+'%</td></tr>';});
       html += '</table>';
     }
     html += '<h2>Rating Bancário</h2><table><tr><td>Score geral</td><td class="num"><strong>'+ratingScore+'/100</strong></td></tr><tr><td>Saúde financeira</td><td class="num">'+healthScore+'/100</td></tr></table>';
@@ -4828,7 +5063,7 @@ export default function App() {
 
   // === v15: Signature moment - celebra quando bater meta ===
   useEffect(function(){
-    var metasAtingidas = (db.metas||[]).filter(function(m){ return m.valor > 0 && (m.atual||0) >= m.valor; });
+    var metasAtingidas = (db.metas||[]).filter(function(m){ return m.valor > 0 && getAtualMeta(m, db) >= m.valor; });
     if (metasAtingidas.length > 0) {
       var chave = metasAtingidas.map(function(m){ return m.id; }).join(",");
       if (chave && chave !== lastCelebrated) {
@@ -5227,7 +5462,7 @@ export default function App() {
                 {privateMode?"private · secured":"command deck · live"}
               </div>
             </div>
-            <div className="terminal-readout" title="Horário local"><span className="tl-dot" /><span>SYS {liveTime || "--:--:--"}</span></div>
+            <div className="terminal-readout" title="Horário local"><span className="tl-dot" /><span>SYS <LiveClock /></span></div>
             {(function(){
               if (sync.status === "disabled") return null;
               var col = T.dim, lbl = "...", Icon = Cloud, spin = false;
@@ -5353,7 +5588,7 @@ export default function App() {
           <div onClick={function(e){e.stopPropagation()}} style={{background:T.card,border:"1px solid "+T.border,borderRadius:20,padding:24,maxWidth:400,width:"100%"}}>
             <div style={{fontSize:15,fontWeight:900,marginBottom:14,color:T.green}}>Distribuir aportes nas metas</div>
             <div style={{fontSize:12,color:T.muted,marginBottom:14,lineHeight:1.6}}>A sobra do mês ({f$(getPrevisão(db,mes,ano).sobra)}) menos investimento fixo ({f$(db.investimentoFixo||0)}) sera distribuida proporcionalmente entre as metas ativas, conforme o aporte definido em cada uma.</div>
-            {(db.metas||[]).filter(function(m){return (m.atual||0)<m.valor}).map(function(m){
+            {(db.metas||[]).filter(function(m){return getAtualMeta(m, db)<m.valor}).map(function(m){
               var totalAp = (db.metas||[]).filter(function(x){return (x.atual||0)<x.valor}).reduce(function(s,x){return s+(x.aporte||0)},0);
               var disp = Math.max(0, (getPrevisão(db,mes,ano).sobra||0) - (db.investimentoFixo||0));
               var val = totalAp > 0 ? Math.round(disp * (m.aporte||0) / totalAp * 100)/100 : 0;
@@ -7382,7 +7617,7 @@ export default function App() {
           var totalPago = allAssin.filter(function(l){return l.status==="pago"}).reduce(function(s,l){return s+(Number(l.valor)||0)},0);
           var totalPend = totalAssin - totalPago;
 
-          // Sub-categories
+          // Sub-categories — DATA-10a: adicionada "Compras & Delivery" para Shopee/Clube Ifood ficarem visiveis em subcategoria propria.
           var SUB_CATS = [
             {id:"ia",nome:"Inteligência Artificial",emoji:"🤖",cor:"#8B5CF6",keys:["claude","chatgpt"]},
             {id:"stream",nome:"Streaming & Entretenimento",emoji:"🎬",cor:"#EC4899",keys:["streaming","cinemark","spotify"]},
@@ -7390,6 +7625,7 @@ export default function App() {
             {id:"tech",nome:"Tecnologia",emoji:"📱",cor:"#06B6D4",keys:["icloud"]},
             {id:"finance",nome:"Serviços Financeiros",emoji:"🏦",cor:"#FFD000",keys:["santander select","revolut ultra","revolut","serasa"]},
             {id:"milhas",nome:"Milhas",emoji:"✈️",cor:"#0EA5E9",keys:["livelo","smiles","curtai","clube curtai","revpoints"]},
+            {id:"compras",nome:"Compras & Delivery",emoji:"🛍️",cor:"#F472B6",keys:["shopee","ifood","clube ifood","amazon prime"]},
             {id:"anuidades",nome:"Anuidades",emoji:"💳",cor:"#F59E0B",keys:["anuidade"]},
           ];
 
@@ -8323,7 +8559,7 @@ export default function App() {
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <Wallet size={14} color={T.cyan} className="vv-glow-float" />
               <span className="vv-text-gradient" style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:14,fontWeight:700,letterSpacing:"0.22em"}}>COJUR VAULT</span>
-              <span style={{fontFamily:FF.mono,fontSize:10,color:T.dim,padding:"2px 8px",borderRadius:999,background:"rgba(0,245,212,0.06)",border:"1px solid "+T.cyan+"22",letterSpacing:"0.15em"}}>v{VER}</span>
+              <span style={{fontFamily:FF.mono,fontSize:10,color:T.dim,padding:"2px 8px",borderRadius:999,background:"rgba(0,245,212,0.06)",border:"1px solid "+T.cyan+"22",letterSpacing:"0.15em"}}>v{VER} · {PATCH}</span>
             </div>
             <div style={{display:"flex",gap:20,flexWrap:"wrap",justifyContent:"center",fontFamily:FF.mono,fontSize:10,color:T.dim,letterSpacing:"0.1em"}}>
               <span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:5,height:5,borderRadius:"50%",background:T.green,boxShadow:"0 0 6px "+T.green,animation:"pulse 1.8s ease-in-out infinite"}}/><NumberTicker value={db.lancamentos.length} duration={900}/> LANC</span>
@@ -8425,8 +8661,9 @@ export default function App() {
         onPick={function(a){
           if (a._kind === "tab") { setTab(a._tabId); return; }
           if (a._kind === "modal") { setModal({tipo:a._modal}); return; }
-          if (a._kind === "mes-prev") { var nm=mes-1;var na=ano;if(nm<1){nm=12;na--;}setMes(nm);setAno(na); return; }
-          if (a._kind === "mes-next") { var nm2=mes+1;var na2=ano;if(nm2>12){nm2=1;na2++;}setMes(nm2);setAno(na2); return; }
+          // FIX-MED-06: var->let dentro do bloco evita hoisting confuso.
+          if (a._kind === "mes-prev") { let nm=mes-1, na=ano; if(nm<1){nm=12;na--;} setMes(nm); setAno(na); return; }
+          if (a._kind === "mes-next") { let nm=mes+1, na=ano; if(nm>12){nm=1;na++;} setMes(nm); setAno(na); return; }
           if (a._kind === "hoje") { var hd=new Date();setMes(hd.getMonth()+1);setAno(hd.getFullYear()); return; }
           if (a._kind === "tema") { setDarkMode(!darkMode); return; }
           if (a._kind === "priv") { setPrivateMode(!privateMode); return; }
